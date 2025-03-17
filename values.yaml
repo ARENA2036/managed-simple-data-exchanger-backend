@@ -1,0 +1,141 @@
+#################################################################################
+# Copyright (c) 2023,2024 T-Systems International GmbH
+# SPDX-License-Identifier: Apache-2.0
+################################################################################
+---
+replicaCount: 1
+
+sdepostgresql:
+  enabled: true
+  fullnameOverride: "product-sde-postgres"
+  auth:
+    postgresPassword: ""
+    username: "sdeuser"
+    password: "password"
+    database: "sdedb"
+    port: 5432
+    existingSecret: ""
+
+backend:
+  image:
+    repository: tractusx/managed-simple-data-exchanger-frontend
+    pullPolicy: Always
+    tag: "latest"  # Provide a default tag
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+  portContainer: 8080
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    runAsNonRoot: true
+    runAsUser: 1001
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  backend:
+    endpoints:
+      default:
+        port: "8080"
+        path: /
+  ingress:
+    enabled: true
+    className: ""
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      kubernetes.io/ingress.class: addon-http-application-routing
+    hostname: "test.7b9747845fca418d84c2.germanywestcentral.aksapp.io"
+    endpoints:
+      - default
+    tls:
+      enabled: true
+      secretName: "sde-backend.tx.test-tls"
+    certManager:
+      issuer: "letsencrypt-prod"
+      clusterIssuer: "letsencrypt-prod"
+    hosts:
+      - test.7b9747845fca418d84c2.germanywestcentral.aksapp.io
+  resources:
+    limits:
+      cpu: 600m
+      memory: 2Gi
+    requests:
+      cpu: 600m
+      memory: 2Gi
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+frontend:
+  image:
+    repository: tractusx/managed-simple-data-exchanger-frontend
+    pullPolicy: Always
+    tag: "latest"  # Provide a default tag
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+  portContainer: 8080
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    runAsNonRoot: true
+    runAsUser: 101
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  sde:
+    endpoints:
+      default:
+        port: "80"
+        path: /
+  ingress:
+    enabled: true
+    className: ""
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      kubernetes.io/ingress.class: addon-http-application-routing
+    hostname: "sde-frontend.7b9747845fca418d84c2.germanywestcentral.aksapp.io"
+    endpoints:
+      - default
+    tls:
+      enabled: true
+      secretName: "sde-frontend.tx.test-tls"
+    certManager:
+      issuer: "letsencrypt-prod"
+      clusterIssuer: "letsencrypt-prod"
+    hosts:
+      - sde-frontend.7b9747845fca418d84c2.germanywestcentral.aksapp.io
+  resources:
+    limits:
+      cpu: 600m
+      memory: 2Gi
+    requests:
+      cpu: 600m
+      memory: 2Gi
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+serviceAccount:
+  create: true
+  annotations: {}

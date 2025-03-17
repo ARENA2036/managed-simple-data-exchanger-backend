@@ -1,0 +1,304 @@
+#################################################################################
+# Copyright (c) 2023,2024 T-Systems International GmbH
+# Copyright (c) 2023,2024 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License, Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0.
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+################################################################################
+# backend for SDE
+replicaCount: 1
+ 
+sdepostgresql:
+# -- PostgreSQL chart configuration
+  # Switch to enable or disable the PostgreSQL helm chart
+  enabled: true
+  fullnameOverride: "product-sde-postgres"
+  auth:
+    postgresPassword: ""
+    username: "sdeuser"
+    password: "password"
+    database: "sdedb"
+    port: 5432
+    existingSecret: ""
+  env:
+    name: SPRING_DATASOURCE_URL
+    value: "jdbc:postgresql://postgres-service:5432/sdedb"
+    name: SPRING_DATASOURCE_USERNAME
+    value: "sdeuser"
+    name: SPRING_DATASOURCE_PASSWORD
+    value: "sdepassword"
+ 
+backend:
+  image:
+    repository: tractusx/managed-simple-data-exchanger-backend
+    pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+ 
+  imagePullSecrets: []
+ 
+  nameOverride: ""
+ 
+  fullnameOverride: ""
+  portContainer: 8080
+ 
+  podAnnotations: {}
+ 
+  podSecurityContext: {}
+ 
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    runAsNonRoot: true
+    runAsUser: 1001
+ 
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+ 
+  backend:
+    endpoints:
+    ## Default api exposing health checks etc
+      default:
+    # -- The network port, which the "default" api is going to be exposed by the container, pod and service
+        port: "8080"
+    # -- The path mapping the "default" api is going to be exposed at
+        path: /
+      # api:
+      #   port: "8080"
+      #   path: /api
+  ingresses:
+    - enabled: true
+      className:
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        kubernetes.io/ingress.class: addon-http-application-routing
+      hostname: "test.7b9747845fca418d84c2.germanywestcentral.aksapp.io"
+      endpoints:
+        - default
+      tls:
+        enabled: true
+        secretName: "sde-backend.tx.test-tls"
+      # -- If present overwrites the default secret name
+      certManager:
+      # -- If preset enables certificate generation via cert-manager namespace scoped issuer
+        issuer: "letsencrypt-prod"
+      # -- If preset enables certificate generation via cert-manager cluster-wide issuer
+        clusterIssuer: "letsencrypt-prod"
+      hosts:
+        - test.7b9747845fca418d84c2.germanywestcentral.aksapp.io
+ 
+  resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    limits:
+      cpu: 600m
+      memory: 2Gi
+    requests:
+      cpu: 600m
+      memory: 2Gi
+ 
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+ 
+  nodeSelector: {}
+ 
+  tolerations: []
+ 
+  affinity: {}
+ 
+  configuration:
+    properties: |-
+      keycloak.clientid=CX-SDE
+      spring.security.oauth2.resourceserver.jwt.issuer-uri=https://centralidp.e34eabb8a136438fafe9.germanywestcentral.aksapp.io/auth/realms/CX-Central
+      management.endpoint.health.probes.enabled=true
+      management.health.readinessstate.enabled=true
+      management.health.livenessstate.enabled=true
+      management.endpoints.web.exposure.include=*
+      spring.lifecycle.timeout-per-shutdown-phase=30s
+      logging.level.org.springframework.security.web.csrf=DEBUG
+      spring.servlet.multipart.enabled=true
+      spring.main.allow-bean-definition-overriding=true
+      spring.servlet.multipart.file-size-threshold=2KB
+      spring.servlet.multipart.max-file-size=200MB
+      spring.servlet.multipart.max-request-size=215MB
+      server.servlet.context-path=/api
+      spring.flyway.baseline-on-migrate=true
+      spring.flyway.locations=classpath:/flyway
+      spring.datasource.driver-class-name=org.postgresql.Driver
+      spring.jpa.hibernate.ddl-auto=update
+      spring.jpa.open-in-view=false
+      file.upload-dir=./temp/
+      logging.level.org.apache.http=debug
+      logging.level.root=debug
+      digital-twins.hostname=https://dataprovider-dtr.7b9747845fca418d84c2.germanywestcentral.aksapp.io
+      digital-twins.authentication.url=https://centralidp.e34eabb8a136438fafe9.germanywestcentral.aksapp.io/auth
+      digital-twins.authentication.clientId=default
+      digital-twins.authentication.clientSecret=default
+      digital-twins.authentication.grantType=client_credentials
+      edc.hostname=https://dataprovider-controlplane.7b9747845fca418d84c2.germanywestcentral.aksapp.io
+      edc.apiKeyHeader=X-Api-Key
+      edc.apiKey=TEST2
+      edc.consumer.hostname=https://dataconsumer-1-controlplane.7b9747845fca418d84c2.germanywestcentral.aksapp.io
+      edc.consumer.apikeyheader=X-Api-Key
+      edc.consumer.apikey=TEST1
+      edc.consumer.datauri=/api/v1/dsp
+      dft.hostname=http://localhost:8080
+      dft.apiKeyHeader=default
+      dft.apiKey=default
+      manufacturerId=BPNL00000003AYRE
+      partner.pool.hostname=http://localhost:8080
+      connector.discovery.token-url=https://centralidp.e34eabb8a136438fafe9.germanywestcentral.aksapp.io/auth/realms/CX-Central/protocol/openid-connect/token
+      connector.discovery.clientId=default
+      connector.discovery.clientSecret=default
+      portal.backend.hostname=https://portal-backend.e34eabb8a136438fafe9.germanywestcentral.aksapp.io
+      springdoc.api-docs.path=/api-docs
+      bpndiscovery.hostname=http://localhost:8080
+      discovery.authentication.url=https://centralidp.e34eabb8a136438fafe9.germanywestcentral.aksapp.io/auth
+      discovery.clientId=default
+      discovery.clientSecret=default
+      discovery.grantType=default
+      edc.consumer.protocol.path=/api/v1/dsp
+      edc.consumer.managementpath=/management
+      edc.managementpath=/management
+      partner.pool.hostname=http://localhost:8080
+      partner.pool.authentication.url=https://centralidp.e34eabb8a136438fafe9.germanywestcentral.aksapp.io/auth
+      partner.pool.clientId=default
+      partner.pool.clientSecret=default
+      partner.pool.grantType=default
+      portal.backend.hostname=https://portal.e34eabb8a136438fafe9.germanywestcentral.aksapp.io
+      portal.backend.authentication.url=https://centralidp.e34eabb8a136438fafe9.germanywestcentral.aksapp.io/auth
+      portal.backend.clientId=Cl2-CX-Portal
+      portal.backend.clientSecret=default
+      portal.backend.grantType=client_credentials
+      policy.hub.hostname=http://localhost:8080
+      policy.hub.authentication.url=https://centralidp.e34eabb8a136438fafe9.germanywestcentral.aksapp.io/auth
+      policy.hub.clientId=default
+      policy.hub.clientSecret=default
+      policy.hub.grantType=client_credentials
+      bpdm.provider.edc.dataspace.api=default
+      bpdm.provider.bpnl=default
+      bpdm.provider.edc.public.api=default
+      bpdm.provider.edc.dsp.api=test
+ 
+frontend:
+  image:
+    repository: tractusx/managed-simple-data-exchanger-frontend
+    pullPolicy: Always
+      # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+  portContainer: 8080
+  podAnnotations: {}
+ 
+  podSecurityContext: {}
+ 
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    runAsNonRoot: true
+    runAsUser: 101
+ 
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+ 
+  sde:
+    endpoints:
+        ## Default api exposing health checks etc
+      default:
+          # -- The network port, which the "default" api is going to be exposed by the container, pod and service
+        port: "80"
+          # -- The path mapping the "default" api is going to be exposed at
+        path: /
+  ingresses:
+    - enabled: true
+      className:
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        kubernetes.io/ingress.class: addon-http-application-routing
+      hostname: "sde-frontend.7b9747845fca418d84c2.germanywestcentral.aksapp.io"
+      endpoints:
+        - default
+ 
+      tls:
+        enabled: true
+        secretName: "sde-frontend.tx.test-tls"
+          # -- If present overwrites the default secret name
+      certManager:
+          # -- If preset enables certificate generation via cert-manager namespace scoped issuer
+        issuer: "letsencrypt-prod"
+          # -- If preset enables certificate generation via cert-manager cluster-wide issuer
+        clusterIssuer: "letsencrypt-prod"
+      hosts:
+        - sde-frontend.7b9747845fca418d84c2.germanywestcentral.aksapp.io
+ 
+  resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    limits:
+      cpu: 600m
+      memory: 2Gi
+    requests:
+      cpu: 600m
+      memory: 2Gi
+ 
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+ 
+  nodeSelector: {}
+ 
+  tolerations: []
+ 
+  affinity: {}
+ 
+  configuration:
+    properties: |-
+      REACT_APP_API_URL=https://sde-backend.7b9747845fca418d84c2.germanywestcentral.aksapp.io
+      REACT_APP_KEYCLOAK_URL=https://centralidp.e34eabb8a136438fafe9.germanywestcentral.aksapp.io/auth
+      REACT_APP_KEYCLOAK_REALM=CX-Central
+      REACT_APP_CLIENT_ID=CX-SDE
+      REACT_APP_FILESIZE=100MiB
+      REACT_APP_DEFAULT_COMPANY_BPN=BPNL00000003CRHK
+ 
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+    # Annotations to add to the service account
+  annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+  name: ""
+ 

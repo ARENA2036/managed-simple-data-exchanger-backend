@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sdebackend
+  namespace: sde-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sdebackend
+  template:
+    metadata:
+      labels:
+        app: sdebackend
+    spec:
+      containers:
+      - name: sdebackend
+        image: tractusx/managed-simple-data-exchanger-backend:latest
+        ports:
+        - containerPort: 8080

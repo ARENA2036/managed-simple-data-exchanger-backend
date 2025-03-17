@@ -48,3 +48,12 @@ public class SdeApplication {
         SpringApplication.run(SdeApplication.class, args);
     }
 }
+
+
+@SpringBootApplication
+public class Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+@ComponentScan(basePackages = {"org.eclipse.tractusx.sde", "org.eclipse.tractusx.sde.edc"})
+}
