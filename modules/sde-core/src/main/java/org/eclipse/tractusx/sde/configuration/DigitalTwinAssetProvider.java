@@ -67,7 +67,7 @@ public class DigitalTwinAssetProvider {
 				.equals(digitalTwinConfigurationProperties.getDigitalTwinsLookupPath())) {
 			create("registry", digitalTwinConfigurationProperties.getDigitalTwinsRegistryPath());
 		} else {
-			create("regisry-api", digitalTwinConfigurationProperties.getDigitalTwinsRegistryPath());
+			create("registry-api", digitalTwinConfigurationProperties.getDigitalTwinsRegistryPath());
 			create("discovery-api", digitalTwinConfigurationProperties.getDigitalTwinsLookupPath());
 		}
 	}
