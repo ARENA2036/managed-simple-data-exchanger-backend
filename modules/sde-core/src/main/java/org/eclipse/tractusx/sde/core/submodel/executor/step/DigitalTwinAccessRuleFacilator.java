@@ -70,6 +70,7 @@ public class DigitalTwinAccessRuleFacilator extends Step {
 			    "validTo": "4999-01-02T03:04:05Z",
 			    "description": "ACME policy within set validity period",
 			    "policyType": "AAS",
+			    "profiles": "[]",
 			    "policy": {
 			        "accessRules": [
 			            {
