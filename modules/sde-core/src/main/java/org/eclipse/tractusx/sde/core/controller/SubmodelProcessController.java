@@ -62,23 +62,20 @@ public class SubmodelProcessController {
 	@PostMapping(value = "/{submodel}/upload")
 	@PreAuthorize("hasPermission(#submodel,'provider_create_contract_offer@provider_update_contract_offer')")
 	public ResponseEntity<Object> upload(@PathVariable("submodel") String submodel,
-			@RequestParam("file") MultipartFile file,
-			@RequestParam("meta_data") @Valid @ValidatePolicyTemplate String metaData) {
-
+										 @RequestParam("file") MultipartFile file,
+										 @RequestParam("meta_data") @Valid @ValidatePolicyTemplate String metaData)
+	{
 		String processId = csvHandlerService.storeFile(file);
-
 		PolicyTemplateRequest policyTemplateRequest = mapper.strToObject(metaData);
-
 		submodelOrchestartorService.processSubmodelCsv(policyTemplateRequest, processId, submodel);
-
 		return prepareAndReturnResponse(processId);
 	}
 
 	@PostMapping(value = "/{submodel}/manualentry", consumes = APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasPermission(#submodel,'provider_create_contract_offer@provider_update_contract_offer')")
 	public ResponseEntity<Object> manualentry(@PathVariable("submodel") String submodel,
-			@RequestBody @Valid @ValidatePolicyTemplate SubmodelJsonRequest body) {
-
+											  @RequestBody @Valid @ValidatePolicyTemplate SubmodelJsonRequest body)
+	{
 		String processId = UUID.randomUUID().toString();
 
 		submodelOrchestartorService.processSubmodel(body, processId, submodel);
@@ -88,19 +85,19 @@ public class SubmodelProcessController {
 
 	@GetMapping(value = "/{submodel}/public/{uuid}")
 	public ResponseEntity<Map<Object, Object>> readCreatedTwinsDetails(@PathVariable("submodel") String submodel,
-			@PathVariable("uuid") String uuid,
-			@RequestParam(value = "type", defaultValue = "json", required = false) String type) {
+																	   @PathVariable("uuid") String uuid,
+																	   @RequestParam(value = "type", defaultValue = "json", required = false) String type)
+	{
 		return ok().body(submodelOrchestartorService.readCreatedTwinsDetails(submodel, uuid, type));
 	}
 
 	@DeleteMapping(value = "/{submodel}/delete/{processId}", produces = APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasPermission(#submodel,'provider_delete_contract_offer')")
 	public ResponseEntity<Object> deleteRecordsWithDigitalTwinAndEDC(
-			@PathVariable("processId") String processId, @PathVariable("submodel") String submodel) {
+			@PathVariable("processId") String processId, @PathVariable("submodel") String submodel)
+	{
 		String delProcessId = UUID.randomUUID().toString();
-
 		submodelOrchestartorService.deleteSubmodelDigitalTwinsAndEDC(processId, delProcessId, submodel);
-		
 		return prepareAndReturnResponse(delProcessId);
 	}
 	
