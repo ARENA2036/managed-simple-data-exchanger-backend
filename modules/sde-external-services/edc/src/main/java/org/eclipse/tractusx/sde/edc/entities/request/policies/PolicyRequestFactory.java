@@ -44,31 +44,40 @@ public class PolicyRequestFactory {
 
 		List<PermissionRequest> permissions = getPermissions(assetId, action);
 
-		Map<String,String> contextMap = Map.of(
+		/* Map<String,String> contextMap = Map.of(
 				"@vocab", "https://w3id.org/edc/v0.0.1/ns/"
 				);
-		
+
 		Map<String,String> contextMapPolicy= Map.of(
 		        "cx-policy", "https://w3id.org/catenax/policy/",
 				"tx", "https://w3id.org/tractusx/v0.0.1/ns/"
-				);
-		
+				); */
+		List<Object> contextList = List.of(
+				"https://w3id.org/tractusx/edc/v0.0.1",
+				"http://www.w3.org/ns/odrl.jsonld",
+				Map.of(
+						"edc", "https://w3id.org/edc/v0.0.1/ns/",
+						"cx-policy", "https://w3id.org/catenax/policy/"
+				)
+		);
+
 		PolicyRequest policyRequest = PolicyRequest.builder()
-				.context(List.of("http://www.w3.org/ns/odrl.jsonld", contextMapPolicy))
+				//	.context(List.of("http://www.w3.org/ns/odrl.jsonld", contextMapPolicy))
+			//	.context(contextList)
+				.type("Set")
 				.permissions(permissions)
-				.profile(edcAssetConfigurableConstant.getCxPolicyPrefix()
-						+ edcAssetConfigurableConstant.getCxPolicyProfile())
 				.obligations(new ArrayList<>())
 				.prohibitions(new ArrayList<>())
+				.profile("cx-policy:" + edcAssetConfigurableConstant.getCxPolicyProfile())
 				.target(Map.of("@id", assetId))
 				.build();
-		
+		System.out.println("$$$ " + policyRequest);
 		//Use submodel id to generate unique policy id for asset use policy type as prefix asset/usage
 		policyId = getGeneratedPolicyId(policyId, type);
 				
 		return PolicyDefinitionRequest.builder()
 				.id(policyId)
-				.context(contextMap)
+				.context(contextList)
 				.policyRequest(policyRequest)
 				.build();
 	}
@@ -111,7 +120,7 @@ public class PolicyRequestFactory {
 			actions.forEach(action -> {
 				PermissionRequest permissionRequest = PermissionRequest
 						.builder()
-						.action(LinkJsonLDId.builder().id("odrl:use").build())
+						.action(LinkJsonLDId.builder().id("use").build())
 //						.target(assetId)
 						.constraint(action.getAction())
 						.build();

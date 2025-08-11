@@ -30,6 +30,8 @@ import org.eclipse.tractusx.sde.digitaltwins.entities.response.ShellDescriptorRe
 import org.eclipse.tractusx.sde.digitaltwins.entities.response.ShellLookupResponse;
 import org.eclipse.tractusx.sde.digitaltwins.entities.response.SubModelListResponse;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -44,8 +46,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(value = "DigitalTwinsFeignClient", url = "${digital-twins.hostname:default}", configuration = DigitalTwinsFeignClientConfiguration.class)
 public interface DigitalTwinsFeignClient {
 
-	@PostMapping
-	KeycloakJWTTokenResponse readAuthToken(URI url, @RequestBody MultiValueMap<String, Object> body);
+	//@PostMapping
+	//KeycloakJWTTokenResponse readAuthToken(URI url, @RequestBody MultiValueMap<String, Object> body);
+
+	@PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+	KeycloakJWTTokenResponse readAuthToken(URI url,
+										   @RequestParam("grant_type") String grantType,
+										   @RequestParam("client_id") String clientId,
+										   @RequestParam("client_secret") String clientSecret);
+
+
 
 	@PostMapping(path = "${digital-twins.registry.uri:/api/v3}/shell-descriptors")
 	ResponseEntity<ShellDescriptorResponse> createShellDescriptor(@RequestBody ShellDescriptorRequest request);

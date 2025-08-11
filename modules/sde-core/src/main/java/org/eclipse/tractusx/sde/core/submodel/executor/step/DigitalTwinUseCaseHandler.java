@@ -90,7 +90,8 @@ public class DigitalTwinUseCaseHandler extends Step implements DigitalTwinUsecas
 			String identifier = getIdentifier(jsonObject, getIdentifierOfModel());
 
 			String shortIdForShell = generateShortId(jsonObject, getShortIdSpecsOfModel());
-
+			System.out.println("shortId %%%"+ shortIdForShell );
+			System.out.println("shortId identifier %%%"+  identifier);
 			Map<String, String> specificAssetIds = generateSpecificAssetIds(jsonObject,
 					getSpecificAssetIdsSpecsOfModel());
 
@@ -167,6 +168,7 @@ public class DigitalTwinUseCaseHandler extends Step implements DigitalTwinUsecas
 		}
 
 		return shellId;
+
 
 	}
 

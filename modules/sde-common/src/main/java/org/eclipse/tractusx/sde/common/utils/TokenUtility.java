@@ -91,7 +91,7 @@ public class TokenUtility {
 						"Unable to get auth token because auth response resultBody is: " + resultBody);
 		} catch (FeignException e) {
 			log.error("FeignException RequestBody : " + e.request());
-			String errorMsg = "Error in DT twin lookup " + e.request().url() + ", because: " + body+ "," + e.contentUTF8();
+			String errorMsg = "Error in DT twin lookup " + e.request().url() + ", because: " + body+ "," + e.toString();
 			log.error("FeignException : " + errorMsg);
 			throw new ServiceException(errorMsg);
 		} catch (Exception e) {

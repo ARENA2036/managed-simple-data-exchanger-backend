@@ -205,6 +205,8 @@ public class LookUpDTTwin {
 			ProtocolInformation protocolInformation = subModelResponse.getEndpoints().get(0).getProtocolInformation();
 			
 			String subprotocolBody = protocolInformation.getSubprotocolBody();
+			System.out.println("subprotocolBody: " + subprotocolBody);
+
 			
 			String submodelIdShort = subModelResponse.getIdShort();
 			
