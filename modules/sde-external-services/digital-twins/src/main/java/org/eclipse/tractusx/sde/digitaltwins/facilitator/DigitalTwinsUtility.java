@@ -129,13 +129,18 @@ public class DigitalTwinsUtility {
 						.endpointProtocol(CommonConstants.HTTP)
 						.endpointProtocolVersion(List.of(CommonConstants.ENDPOINT_PROTOCOL_VERSION))
 						.subprotocol(CommonConstants.SUB_PROTOCOL)
-						.subprotocolBody("id=" + edcAssetId + ";dspEndpoint=" + digitalTwinEdcDspEndpoint)
+					//	.subprotocolBody("id=" + edcAssetId + ";dspEndpoint=" + digitalTwinEdcDspEndpoint)
+						.subprotocolBody(truncateToMaxLength("id=" + edcAssetId + ";dspEndpoint=" + digitalTwinEdcDspEndpoint, 128))
 						.subprotocolBodyEncoding(CommonConstants.BODY_ENCODING)
 						.securityAttributes(List.of(new SecurityAttributes("NONE", "NONE", "NONE"))).build())
 				.build());
 		return endpoints;
 	}
-	
+
+	//check
+	private String truncateToMaxLength(String input, int maxLength) {
+		return input.length() <= maxLength ? input : input.substring(0, maxLength);
+	}
 	public String createAccessRuleMandatorySpecificAssetIds(Map<String, String> specificAssetIds) {
 		StringBuilder sb= new StringBuilder();
 		specificAssetIds.entrySet().stream().forEach(ele->{
@@ -215,6 +220,9 @@ public class DigitalTwinsUtility {
 
 	private List<Keys> bpnKeyRefrence(List<String> bpns) {
 		if (bpns != null && !(bpns.size() == 1 && bpns.contains(manufacturerId))) {
+			System.out.println("bpns: " + bpns);
+			System.out.println("manufacturerId: " + manufacturerId);
+
 			return bpns.stream().map(bpn -> Keys.builder().type("GlobalReference").value(bpn).build()).toList();
 		}
 		return Collections.emptyList();

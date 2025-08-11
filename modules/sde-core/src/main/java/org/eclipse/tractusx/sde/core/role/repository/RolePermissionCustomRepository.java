@@ -45,6 +45,7 @@ public class RolePermissionCustomRepository {
 				"SELECT p FROM RolePermissionEntity p Where p.sdeRole IN :role and p.sdePermission IN :permission ");
 		query.setParameter("role", role);
 		query.setParameter("permission", permission);
+
 		return query.getResultList();
 	}
 

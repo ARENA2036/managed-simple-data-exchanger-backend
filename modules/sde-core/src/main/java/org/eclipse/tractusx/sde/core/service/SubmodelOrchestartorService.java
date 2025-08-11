@@ -93,7 +93,8 @@ public class SubmodelOrchestartorService {
 
 	ObjectMapper mapper = new ObjectMapper();
 
-	public void processSubmodelCsv(PolicyTemplateRequest policyTemplateRequest, String processId, String submodel) {
+	public void
+	processSubmodelCsv(PolicyTemplateRequest policyTemplateRequest, String processId, String submodel) {
 
 		Submodel submodelSchemaObject = submodelService.findSubmodelByNameAsSubmdelObject(submodel);
 
@@ -130,6 +131,7 @@ public class SubmodelOrchestartorService {
 					newjObject.put(ROW_NUMBER, rowjObj.position());
 					newjObject.put(PROCESS_ID, processId);
 					executor.executeCsvRecord(rowjObj, newjObject, processId, submodelPolicyRequest);
+					System.out.println("2");
 					// fetch by ID and check it if it is success then its updated.
 					successCount.incrementAndGet();
 

@@ -34,6 +34,7 @@ import org.eclipse.tractusx.sde.digitaltwins.entities.response.ShellLookupRespon
 import org.eclipse.tractusx.sde.digitaltwins.entities.response.SubModelListResponse;
 import org.eclipse.tractusx.sde.digitaltwins.gateways.external.DigitalTwinsFeignClient;
 import org.eclipse.tractusx.sde.digitaltwins.gateways.external.IAccessRuleManagementApi;
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
