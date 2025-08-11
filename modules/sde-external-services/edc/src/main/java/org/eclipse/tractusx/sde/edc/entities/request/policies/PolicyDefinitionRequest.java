@@ -46,10 +46,14 @@ public class PolicyDefinitionRequest {
 	@Builder.Default
 	private String polityRootType = "PolicyDefinition";
 
+    // @JsonProperty("profile")
+    // @Builder.Default
+//   private String profile = "default";
+
 	@JsonProperty("@id")
     private String id;
 	
-    @JsonProperty("policy")
+    @JsonProperty("edc:policy")
     private Object policyRequest;
 
     @SneakyThrows

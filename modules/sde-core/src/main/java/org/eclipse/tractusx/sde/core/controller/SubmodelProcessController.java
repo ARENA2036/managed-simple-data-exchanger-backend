@@ -68,6 +68,7 @@ public class SubmodelProcessController {
 		String processId = csvHandlerService.storeFile(file);
 		PolicyTemplateRequest policyTemplateRequest = mapper.strToObject(metaData);
 		submodelOrchestartorService.processSubmodelCsv(policyTemplateRequest, processId, submodel);
+		System.out.println("1");
 		return prepareAndReturnResponse(processId);
 	}
 
