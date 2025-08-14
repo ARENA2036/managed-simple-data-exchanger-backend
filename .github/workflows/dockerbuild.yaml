@@ -24,6 +24,7 @@ on:
     branches:
       - 'main'
       - 'dockerbuild-workflow'
+      - 'sde-bugfix'
     tags:
       - 'v*.*.*'
       - 'v*.*.*-*'
