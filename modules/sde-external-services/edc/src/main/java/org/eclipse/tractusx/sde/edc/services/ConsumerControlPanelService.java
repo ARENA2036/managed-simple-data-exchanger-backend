@@ -48,6 +48,7 @@ import org.eclipse.tractusx.sde.edc.entities.request.policies.PolicyConstraintBu
 import org.eclipse.tractusx.sde.edc.facilitator.ContractNegotiateManagementHelper;
 import org.eclipse.tractusx.sde.edc.facilitator.EDRRequestHelper;
 import org.eclipse.tractusx.sde.edc.gateways.database.ContractNegotiationInfoRepository;
+import org.eclipse.tractusx.sde.edc.model.contractnegotiation.AcknowledgementId;
 import org.eclipse.tractusx.sde.edc.model.contractnegotiation.ContractNegotiationDto;
 import org.eclipse.tractusx.sde.edc.model.edr.EDRCachedByIdResponse;
 import org.eclipse.tractusx.sde.edc.model.edr.EDRCachedResponse;
@@ -140,8 +141,9 @@ public class ConsumerControlPanelService {
 
 		consumerRequest.getOffers().parallelStream().forEach(offer -> {
 			try {
-				negotiateContractId.set(contractNegotiateManagement.negotiateContract(offer.getConnectorOfferUrl(),
-						offer.getConnectorId(), offer.getOfferId(), offer.getAssetId(), action, extensibleProperty));
+				AcknowledgementId acknowledgementId = contractNegotiateManagement.negotiateContract(offer.getConnectorOfferUrl(),
+						offer.getConnectorId(), offer.getOfferId(), offer.getAssetId(), action, extensibleProperty);
+				negotiateContractId.set(acknowledgementId.getId());
 				int retry = 3;
 				int counter = 1;
 
@@ -154,12 +156,20 @@ public class ConsumerControlPanelService {
 						&& !checkContractNegotiationStatus.get().getState().equals("FINALIZED")
 						&& !checkContractNegotiationStatus.get().getState().equals("TERMINATED") && counter <= retry);
 
-			} catch (InterruptedException ie) {
+			}
+			catch(FeignException fe){
+				log.error("Exception Request " + fe.request());
+				log.error("Exception Message " + fe.getMessage());
+				log.error("Exception Message " + fe.responseBody());
+			}
+			catch (InterruptedException ie) {
 				log.error("Exception in subscribeDataOffers" + ie.getMessage());
 				Thread.currentThread().interrupt();
 			} catch (Exception e) {
 				log.error("Exception in subscribeDataOffers" + e.getMessage());
-			} finally {
+
+			}
+			finally {
 				ContractNegotiationInfoEntity contractNegotiationInfoEntity = ContractNegotiationInfoEntity.builder()
 						.id(UUID.randomUUID().toString()).processId(processId).connectorId(offer.getConnectorId())
 						.offerId(offer.getOfferId())

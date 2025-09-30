@@ -21,6 +21,7 @@
 package org.eclipse.tractusx.sde.edc.facilitator;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,8 +60,8 @@ public class ContractNegotiateManagementHelper extends AbstractEDCStepsHelper {
 
 	ObjectMapper mapper = new ObjectMapper();
 
-	@SneakyThrows
-	public String negotiateContract(String providerUrl, String providerId, String offerId, String assetId,
+	//@SneakyThrows
+	public AcknowledgementId negotiateContract(String providerUrl, String providerId, String offerId, String assetId,
 			List<ActionRequest> action, Map<String, String> extensibleProperty) {
 
 		var recipientURL = UtilityFunctions.removeLastSlashOfUrl(providerUrl);
@@ -70,9 +71,14 @@ public class ContractNegotiateManagementHelper extends AbstractEDCStepsHelper {
 		ContractNegotiations contractNegotiations = contractMapper.prepareContractNegotiations(recipientURL, offerId,
 				assetId, providerId, action);
 
-		AcknowledgementId acknowledgementId = contractApi.contractnegotiations(new URI(consumerHost),
-				contractNegotiations, getAuthHeader());
-		return acknowledgementId.getId();
+        AcknowledgementId acknowledgementId = null;
+        try {
+            acknowledgementId = contractApi.contractnegotiations(new URI(consumerHost),
+                    contractNegotiations, getAuthHeader());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        return acknowledgementId;
 	}
 
 	@SneakyThrows

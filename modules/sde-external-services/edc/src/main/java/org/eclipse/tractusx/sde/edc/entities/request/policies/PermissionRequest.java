@@ -22,6 +22,8 @@ package org.eclipse.tractusx.sde.edc.entities.request.policies;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -38,15 +40,18 @@ import lombok.SneakyThrows;
 @Data
 @Builder
 @JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PermissionRequest {
 
 //	@JsonProperty("odrl:target")
 //	private String target;
 
 	@JsonProperty("action") //odrl
+	@JsonAlias({"odrl:action"})
 	private LinkJsonLDId action;
 
 	@JsonProperty("constraint") //odrl
+	@JsonAlias({"odrl:constraint"})
 	private Map<String, Object> constraint;
 
 	@SneakyThrows

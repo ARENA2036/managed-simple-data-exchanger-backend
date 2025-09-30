@@ -129,8 +129,8 @@ public class DigitalTwinsUtility {
 						.endpointProtocol(CommonConstants.HTTP)
 						.endpointProtocolVersion(List.of(CommonConstants.ENDPOINT_PROTOCOL_VERSION))
 						.subprotocol(CommonConstants.SUB_PROTOCOL)
-					//	.subprotocolBody("id=" + edcAssetId + ";dspEndpoint=" + digitalTwinEdcDspEndpoint)
-						.subprotocolBody(truncateToMaxLength("id=" + edcAssetId + ";dspEndpoint=" + digitalTwinEdcDspEndpoint, 128))
+						.subprotocolBody("id=" + edcAssetId + ";dspEndpoint=" + digitalTwinEdcDspEndpoint)
+					//	.subprotocolBody(truncateToMaxLength("id=" + edcAssetId + ";dspEndpoint=" + digitalTwinEdcDspEndpoint, 128))
 						.subprotocolBodyEncoding(CommonConstants.BODY_ENCODING)
 						.securityAttributes(List.of(new SecurityAttributes("NONE", "NONE", "NONE"))).build())
 				.build());
