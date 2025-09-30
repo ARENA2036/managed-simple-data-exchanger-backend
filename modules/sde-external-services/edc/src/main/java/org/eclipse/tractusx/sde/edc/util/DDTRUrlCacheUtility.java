@@ -20,6 +20,7 @@
 
 package org.eclipse.tractusx.sde.edc.util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.tractusx.sde.common.utils.LogUtil;
@@ -45,6 +46,7 @@ public class DDTRUrlCacheUtility {
 	@Cacheable(value = "bpn-ddtr", key = "#bpnNumber")
 	public List<QueryDataOfferModel> getDDTRUrl(String bpnNumber) {
 		return edcAssetLookUp.getEDCAssetsByType(bpnNumber, getFilterCriteria());
+
 	}
 
 	@CacheEvict(value = "bpn-ddtr", key = "#bpnNumber")
@@ -61,9 +63,9 @@ public class DDTRUrlCacheUtility {
 
 		return List.of(
 				Criterion.builder()
-				.operandLeft("'http://purl.org/dc/terms/type'.'@id'")
+				.operandLeft("https://w3id.org/edc/v0.0.1/ns/type")
 				.operator("=")
-				.operandRight("https://w3id.org/catenax/taxonomy#" + edcAssetConfigurableConstant.getAssetPropTypeDigitalTwin())
+				.operandRight("DigitalTwinRegistry")
 				.build());
 	}
 }

@@ -22,14 +22,20 @@ package org.eclipse.tractusx.sde.portal.api;
 
 import java.util.List;
 
+import feign.Logger;
 import org.eclipse.tractusx.sde.portal.model.ConnectorInfo;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(value = "IPortalExternalServiceApi", url = "${portal.backend.hostname}" , configuration = PortalExternalServiceApi.class)
 public interface IPortalExternalServiceApi {
+	@Bean
+    default Logger.Level feignLoggerLevel() {
+		return Logger.Level.FULL; // logs request & response completely
+	}
 
 	@PostMapping(path = "/api/administration/Connectors/discovery")
 	List<ConnectorInfo> fetchConnectorInfo(@RequestBody List<String> bpns);

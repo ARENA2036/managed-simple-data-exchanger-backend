@@ -171,6 +171,7 @@ public class EDCAssetUrlCacheService {
 			cacheExpTime = currDate.plusHours(12);
 		}
 		bpdmMap.put(edcAssetConfigurableConstant.getBpdmProviderBpnl(), cacheExpTime);
+
 		List<QueryDataOfferModel> bpdmUrls = bpdmEdcAssetUtility.getBpdmUrl(edcAssetConfigurableConstant.getBpdmProviderBpnl());
 		if (bpdmUrls.isEmpty()) {
 			log.info("Found connector list empty so removing existing cache and retry to fetch");

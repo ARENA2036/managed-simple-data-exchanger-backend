@@ -29,6 +29,7 @@ import org.eclipse.tractusx.sde.common.exception.ValidationException;
 import org.eclipse.tractusx.sde.core.service.ConsumerService;
 import org.eclipse.tractusx.sde.edc.model.request.ConsumerRequest;
 import org.eclipse.tractusx.sde.edc.model.request.QueryDataOfferRequest;
+import org.eclipse.tractusx.sde.edc.model.response.QueryDataOfferModel;
 import org.eclipse.tractusx.sde.edc.services.ConsumerControlPanelService;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
@@ -85,8 +86,10 @@ public class ConsumerController {
 	public ResponseEntity<Object> getEDCPolicy(@RequestBody List<QueryDataOfferRequest> queryDataOfferRequest)
 			throws Exception {
 		log.info("Request received : /api/offer-policy-details");
-		return ok().body(consumerControlPanelService.getEDCPolicy(queryDataOfferRequest));
+		List<QueryDataOfferModel> edcPolicy = consumerControlPanelService.getEDCPolicy(queryDataOfferRequest);
+		return ok().body(edcPolicy);
 	}
+
 	
 	@PostMapping(value = "/subscribe-data-offers")
 	@PreAuthorize("hasPermission('','consumer_establish_contract_agreement')")
