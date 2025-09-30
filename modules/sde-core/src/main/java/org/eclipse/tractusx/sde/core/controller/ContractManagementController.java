@@ -102,5 +102,6 @@ public class ContractManagementController {
 	public ResponseEntity<Object> cancelContractConsumer(@PathVariable("negotiationId") String negotiationId) {
 		contractNegotiateManagement.cancelContract(Type.CONSUMER.name(), negotiationId);
 		return new ResponseEntity<>(HttpStatus.CREATED);
+		
 	}
 }

@@ -20,7 +20,7 @@
 package org.eclipse.tractusx.sde.portal.handler;
 
 import java.util.List;
-
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.sde.portal.api.IPortalExternalServiceApi;
 import org.eclipse.tractusx.sde.portal.model.ConnectorInfo;
 import org.eclipse.tractusx.sde.portal.model.response.UnifiedBPNValidationStatusEnum;
@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PortalProxyService {
@@ -41,7 +42,12 @@ public class PortalProxyService {
 
 	@SneakyThrows
 	public List<ConnectorInfo> fetchConnectorInfo(List<String> bpns) {
-		return portalExternalServiceApi.fetchConnectorInfo(bpns);
+		log.info("➡️ Calling portalExternalServiceApi.fetchConnectorInfo with: {}", bpns);
+		List<ConnectorInfo> response = portalExternalServiceApi.fetchConnectorInfo(bpns);
+
+		log.info("⬅️ Received ConnectorInfo from portalExternalServiceApi for {} : {}", bpns, response);
+
+		return response;
 	}
 
 	@SneakyThrows
