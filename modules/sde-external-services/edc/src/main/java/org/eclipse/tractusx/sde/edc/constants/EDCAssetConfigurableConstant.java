@@ -67,7 +67,7 @@ public class EDCAssetConfigurableConstant {
 	@Value("${bpdm.provider.edc.dsp.api}")
 	private String bpdmProviderEdcDataspaceApi;
 	
-	@Value("${bpdm.provider.bpnl}")
+	@Value("${bpdm.provider.bpnl:BPN_NOT_FOUND}")
 	private String bpdmProviderBpnl;
 
 }

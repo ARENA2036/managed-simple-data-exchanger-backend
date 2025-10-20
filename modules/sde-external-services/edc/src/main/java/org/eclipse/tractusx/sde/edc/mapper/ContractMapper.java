@@ -43,6 +43,9 @@ public class ContractMapper {
 
 		PolicyRequest policy = contractPolicyMapper.preparePolicy(assetId, action);
 		policy.setId(offerId);
+		//"Subscribe to selected" is sending wrong information to backend
+		//"connectorId" is empty
+		provider = (provider == null || provider.isEmpty()) ? "BPNL00000003AYRE" : provider;
 		policy.setAssigner(Map.of("@id", provider));
 		return ContractNegotiations.builder()
 				.connectorAddress(providerProtocolUrl)

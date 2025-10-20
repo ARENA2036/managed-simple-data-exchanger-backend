@@ -224,11 +224,12 @@ public class LookUpDTTwin {
 					.filter(e -> e.getLanguage().contains("en")).map(MultiLanguage::getText).findFirst();
 
 			String description = descriptionOptional.isPresent() ? descriptionOptional.get() : "";
-
+			//shell descriptor does not have Short ID
 			String shellIdShort = shellDescriptorResponse.getIdShort();
+
 			
 			if(StringUtils.isBlank(shellIdShort))
-				shellIdShort ="ShellTwinIdShortNotVisible";
+				shellIdShort ="sm: "+submodelIdShort;
 			
 			QueryDataOfferModel qdm = QueryDataOfferModel.builder()
 					.publisher(manufacturerBPNId)
