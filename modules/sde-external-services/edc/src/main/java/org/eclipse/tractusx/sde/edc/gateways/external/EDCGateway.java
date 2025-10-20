@@ -123,9 +123,13 @@ public class EDCGateway {
 	public JsonNode createPolicyDefinition(JsonNode request) {
 		try {
 			return edcFeignClientApi.createPolicy(request);
-		} catch (FeignException e) {
-			throw new EDCGatewayException(e.getMessage());
+		} catch(FeignException fe){
+			log.error("Exception Request " + fe.request());
+			log.error("Exception Message " + fe.getMessage());
+			log.error("Exception Message " + fe.responseBody());
+			throw new EDCGatewayException(fe.getMessage());
 		}
+
 	}
 	
 	@SneakyThrows
