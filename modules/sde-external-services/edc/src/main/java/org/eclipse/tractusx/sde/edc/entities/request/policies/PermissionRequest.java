@@ -46,12 +46,12 @@ public class PermissionRequest {
 //	@JsonProperty("odrl:target")
 //	private String target;
 
-	@JsonProperty("action") //odrl
-	@JsonAlias({"odrl:action"})
+	@JsonProperty("odrl:action") //odrl
+//	@JsonAlias({"odrl:action"})
 	private LinkJsonLDId action;
 
-	@JsonProperty("constraint") //odrl
-	@JsonAlias({"odrl:constraint"})
+	@JsonProperty("odrl:constraint") //odrl
+//	@JsonAlias({"odrl:constraint"})
 	private Map<String, Object> constraint;
 
 	@SneakyThrows

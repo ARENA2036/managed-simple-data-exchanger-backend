@@ -139,7 +139,7 @@ public class PolicyConstraintBuilderService {
 
 		List<ActionRequest> actionList = new ArrayList<>();
 		if (!constraintList.isEmpty()) {
-			actionList.add(prepareActionRequest("and", constraintList));
+			actionList.add(prepareActionRequest("odrl:and", constraintList));
 		}
 
 		if (!bpnConstraintList.isEmpty()) {

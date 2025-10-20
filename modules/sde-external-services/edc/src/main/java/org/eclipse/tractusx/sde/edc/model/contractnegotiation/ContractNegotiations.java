@@ -44,7 +44,9 @@ public class ContractNegotiations {
 
 	@JsonProperty("@context")
 	@Builder.Default
-	private Map<String, String> context = Map.of("odrl", "http://www.w3.org/ns/odrl/2/",  
+	private Map<String, String> context = Map.of(
+		"odrl", "http://www.w3.org/ns/odrl/2/",
+			"cx-policy", "https://w3id.org/catenax/policy/",
 			"edc", "https://w3id.org/edc/v0.0.1/ns/");
 
 	@JsonProperty("@type")

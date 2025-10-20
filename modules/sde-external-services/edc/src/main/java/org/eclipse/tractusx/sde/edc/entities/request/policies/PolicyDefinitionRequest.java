@@ -46,9 +46,8 @@ public class PolicyDefinitionRequest {
 	@Builder.Default
 	private String polityRootType = "PolicyDefinition";
 
-    // @JsonProperty("profile")
-    // @Builder.Default
-//   private String profile = "default";
+    @JsonProperty("odrl:profile") //odrl
+    private String profile;
 
 	@JsonProperty("@id")
     private String id;
