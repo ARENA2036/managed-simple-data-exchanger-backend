@@ -24,6 +24,7 @@ package org.eclipse.tractusx.sde.edc.entities.request.asset;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.edc.constants.EDCAssetConfigurableConstant;
 import org.eclipse.tractusx.sde.edc.constants.EDCAssetConstant;
@@ -38,7 +39,8 @@ import lombok.SneakyThrows;
 @RequiredArgsConstructor
 public class AssetEntryRequestFactory {
 
-	@Value(value = "${dft.hostname}")
+	@Getter
+    @Value(value = "${dft.hostname}")
 	private String dftHostname;
 
 	@Value(value = "${manufacturerId}")
@@ -67,7 +69,7 @@ public class AssetEntryRequestFactory {
 
 		HashMap<String, Object> assetProperties = getAssetProperties(assetId, assetName, sematicId, dctType);
 
-		String uriString = subModelPayloadUrl(submodel, submoduleUriPath, uuid);
+		String uriString = subModelPayloadUrl(assetId);
 
 		HashMap<String, String> dataAddressProperties = getDataAddressProperties(shellId, subModelId, uriString);
 		DataAddressRequest dataAddressRequest = DataAddressRequest.builder().properties(dataAddressProperties).build();
@@ -76,9 +78,11 @@ public class AssetEntryRequestFactory {
 				.build();
 	}
 
-	private String subModelPayloadUrl(String submodel, String submoduleUriPath, String uuid) {
-		return UriComponentsBuilder.fromHttpUrl(dftHostname).path("/" + submodel + "/" + submoduleUriPath)
-				.path("/" + uuid).toUriString();
+	private String subModelPayloadUrl(String uuid) {
+//		return UriComponentsBuilder.fromHttpUrl(dftHostname)
+//                .path("/" + submodel + "/" + submoduleUriPath)
+//				.path("/" + uuid).toUriString();
+		return UriComponentsBuilder.fromHttpUrl(dftHostname).path("/" + uuid).toUriString();
 	}
 
 	private HashMap<String, Object> getAssetProperties(String assetId, String assetName, String sematicId,

@@ -30,6 +30,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.common.entities.Policies;
 import org.eclipse.tractusx.sde.edc.api.ContractApi;
+import org.eclipse.tractusx.sde.edc.api.EDRApiProxy;
 import org.eclipse.tractusx.sde.edc.entities.request.policies.ActionRequest;
 import org.eclipse.tractusx.sde.edc.entities.request.policies.ConstraintRequest;
 import org.eclipse.tractusx.sde.edc.entities.request.policies.PermissionRequest;
@@ -56,13 +57,14 @@ import lombok.SneakyThrows;
 public class ContractNegotiateManagementHelper extends AbstractEDCStepsHelper {
 
 	private final ContractApi contractApi;
+	private final EDRApiProxy edrApiProxy;
 	private final ContractMapper contractMapper;
 
 	ObjectMapper mapper = new ObjectMapper();
 
 	//@SneakyThrows
 	public AcknowledgementId negotiateContract(String providerUrl, String providerId, String offerId, String assetId,
-			List<ActionRequest> action, Map<String, String> extensibleProperty) {
+											   List<ActionRequest> action, Map<String, String> extensibleProperty) {
 
 		var recipientURL = UtilityFunctions.removeLastSlashOfUrl(providerUrl);
 		if (!recipientURL.endsWith(protocolPath))
@@ -71,14 +73,38 @@ public class ContractNegotiateManagementHelper extends AbstractEDCStepsHelper {
 		ContractNegotiations contractNegotiations = contractMapper.prepareContractNegotiations(recipientURL, offerId,
 				assetId, providerId, action);
 
-        AcknowledgementId acknowledgementId = null;
-        try {
-            acknowledgementId = contractApi.contractnegotiations(new URI(consumerHost),
-                    contractNegotiations, getAuthHeader());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        return acknowledgementId;
+		AcknowledgementId acknowledgementId = null;
+		try {
+			acknowledgementId = contractApi.contractnegotiations(new URI(consumerHost),
+					contractNegotiations, getAuthHeader());
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+		return acknowledgementId;
+	}
+
+	//@SneakyThrows
+	public AcknowledgementId negotiateContractEDR(String providerUrl, String providerId, String offerId, String assetId,
+											   List<ActionRequest> action, Map<String, String> extensibleProperty) {
+
+		var recipientURL = UtilityFunctions.removeLastSlashOfUrl(providerUrl);
+		if (!recipientURL.endsWith(protocolPath))
+			recipientURL = recipientURL + protocolPath;
+
+		ContractNegotiations contractNegotiations = contractMapper.prepareContractNegotiations(recipientURL, offerId,
+				assetId, providerId, action);
+
+		AcknowledgementId acknowledgementId = null;
+
+		try {
+			JsonNode jsonNode = mapper.convertValue(contractNegotiations, JsonNode.class);
+			acknowledgementId = edrApiProxy.edrCacheCreate(new URI(consumerHost), jsonNode, getAuthHeader());
+
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+
+		return acknowledgementId;
 	}
 
 	@SneakyThrows

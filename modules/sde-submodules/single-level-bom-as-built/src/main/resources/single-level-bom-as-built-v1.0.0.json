@@ -224,7 +224,7 @@
 			]
 		},
 		"shortIdSpecs": [],
-		"createShellIfNotExist": false,
+		"createShellIfNotExist": true,
 		"autoPopulatedfields": [
 			{
 				"key": "${parent_uuid}",
