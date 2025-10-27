@@ -136,7 +136,7 @@
 			"manufacturerPartId": "${parent_manufacturer_part_id}",
 			"assetLifecyclePhase": "AsPlanned"
 		},
-		"createShellIfNotExist": false,
+		"createShellIfNotExist": true,
 		"createShellSpecificAssetIdsSpecs":{
 			"manufacturerPartId": "${manufacturer_part_id}",
 			"assetLifecyclePhase": "AsPlanned"

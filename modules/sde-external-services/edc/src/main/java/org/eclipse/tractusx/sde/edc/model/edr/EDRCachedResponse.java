@@ -20,6 +20,7 @@
 
 package org.eclipse.tractusx.sde.edc.model.edr;
 
+import lombok.*;
 import org.eclipse.tractusx.sde.edc.constants.EDCAssetConstant;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -27,15 +28,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class EDRCachedResponse {

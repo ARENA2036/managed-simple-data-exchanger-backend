@@ -44,6 +44,7 @@ import org.eclipse.tractusx.sde.digitaltwins.entities.response.ShellDescriptorRe
 import org.eclipse.tractusx.sde.digitaltwins.entities.response.SubModelResponse;
 import org.eclipse.tractusx.sde.digitaltwins.facilitator.DigitalTwinsFacilitator;
 import org.eclipse.tractusx.sde.digitaltwins.facilitator.DigitalTwinsUtility;
+import org.eclipse.tractusx.sde.digitaltwins.gateways.external.SubmodelServerClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -64,7 +65,9 @@ public class DigitalTwinUseCaseHandler extends Step implements DigitalTwinUsecas
 
 	private final DigitalTwinsFacilitator digitalTwinFacilitator;
 
-	private final DigitalTwinsUtility digitalTwinsUtility;
+    private final DigitalTwinsUtility digitalTwinsUtility;
+
+    private final SubmodelServerClient submodelServerClient;
 
 	private final SDEConfigurationProperties sdeConfigProperties;
 
@@ -119,6 +122,12 @@ public class DigitalTwinUseCaseHandler extends Step implements DigitalTwinUsecas
 			
 			digitalTwinAccessRuleFacilator.init(getSubmodelSchema());
 			digitalTwinAccessRuleFacilator.createAccessRule(rowIndex, jsonObject, specificAssetIds, policy, getsemanticIdOfModel());
+
+            // Upload to submodel server
+            // TODO POTENTIALLY HANDLE MORE THAN ONE SUBMODELDESCRIPTOR
+            String assetId = shellId + "-" + aasDescriptorRequest.getSubmodelDescriptors().get(0).getId();
+            submodelServerClient.createSubModel(assetId, jsonObject);
+            logDebug("%%% SubmodelServer Upload: AssetId: " + assetId + ", Submodel-Content: " + jsonObject);
 
 		} catch (Exception e) {
 			throw new CsvHandlerUseCaseException(rowIndex, ": DigitalTwins: " + e.getMessage());

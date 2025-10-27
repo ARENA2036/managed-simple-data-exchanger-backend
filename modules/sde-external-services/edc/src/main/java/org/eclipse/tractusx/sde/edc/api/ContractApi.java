@@ -44,7 +44,7 @@ public interface ContractApi {
 
 	@PostMapping(path = "/contractnegotiations", consumes = MediaType.APPLICATION_JSON_VALUE)
 	AcknowledgementId contractnegotiations(URI url, @RequestBody ContractNegotiations requestBody,
-			@RequestHeader Map<String, String> requestHeader);
+										   @RequestHeader Map<String, String> requestHeader);
 
 	@GetMapping(path = "/contractnegotiations/{contractnegotiationsId}")
 	ContractNegotiationDto getContractDetails(URI url,
@@ -81,5 +81,4 @@ public interface ContractApi {
 	@PostMapping(path = "/transferprocesses/request", consumes = MediaType.APPLICATION_JSON_VALUE)
 	List<JsonNode> getAllTransfer(URI uri, @RequestHeader Map<String, String> providerAuthHeader,
 			@RequestBody JsonNode body);
-
 }

@@ -62,26 +62,32 @@ public class ContractNegotiationService extends AbstractEDCStepsHelper {
 		if (!offer.getConnectorOfferUrl().endsWith(protocolPath))
 			recipientURL = recipientURL + protocolPath;
 
-		// Verify if there already EDR process initiated then skip it for again download
+		// Verify if there are already EDR process initiated then skip it for again download
 		String assetId = offer.getAssetId();
 		List<EDRCachedResponse> eDRCachedResponseList = edrRequestHelper.getEDRCachedByAsset(assetId);
 		EDRCachedResponse checkContractNegotiationStatus = verifyEDRResponse(eDRCachedResponseList);
 
 		if (checkContractNegotiationStatus == null) {
-			String contractAgreementId = checkandGetContractAgreementId(assetId);
-			if (StringUtils.isBlank(contractAgreementId) || !eDRCachedResponseList.isEmpty()) {
-				log.info(LogUtil.encode("The EDR process was not completed, no EDR status found "
-						+ "and not valid contract agreementId for " + recipientURL + ", " + assetId
-						+ ", so initiating EDR process"));
-				edrRequestHelper.edrRequestInitiate(recipientURL, connectorId, offer, assetId, action,
-						extensibleProperty);
-				checkContractNegotiationStatus = verifyEDRRequestStatus(assetId);
-			} else {
-				log.info(LogUtil.encode("There is valid contract agreement exist for " + recipientURL + ", " + assetId
-						+ ", so ignoring EDR process initiation"));
-				checkContractNegotiationStatus = EDRCachedResponse.builder().agreementId(contractAgreementId)
-						.assetId(assetId).build();
-			}
+
+			// TODO THIS USES CONTRACTNEGOTIATION INSTEAD OF EDRCACHE SO NOT NEEDED ANYMORE
+//			String contractAgreementId = checkandGetContractAgreementId(assetId);
+//
+//			if (StringUtils.isBlank(contractAgreementId) || !eDRCachedResponseList.isEmpty()) {
+//				log.info(LogUtil.encode("The EDR process was not completed, no EDR status found "
+//						+ "and not valid contract agreementId for " + recipientURL + ", " + assetId
+//						+ ", so initiating EDR process"));
+//				edrRequestHelper.edrRequestInitiate(recipientURL, connectorId, offer, assetId, action,
+//						extensibleProperty);
+//				checkContractNegotiationStatus = verifyEDRRequestStatus(assetId);
+//			} else {
+//				log.info(LogUtil.encode("There is valid contract agreement exist for " + recipientURL + ", " + assetId
+//						+ ", so ignoring EDR process initiation"));
+//				checkContractNegotiationStatus = EDRCachedResponse.builder().agreementId(contractAgreementId)
+//						.assetId(assetId).build();
+//			}
+
+			edrRequestHelper.edrRequestInitiate(recipientURL, connectorId, offer, assetId, action, extensibleProperty);
+			checkContractNegotiationStatus = verifyEDRRequestStatus(assetId);
 		} 
 		return checkContractNegotiationStatus;
 	}
@@ -110,11 +116,13 @@ public class ContractNegotiationService extends AbstractEDCStepsHelper {
 		if (eDRCachedResponseList != null && !eDRCachedResponseList.isEmpty()) {
 			for (EDRCachedResponse edrCachedResponseObj : eDRCachedResponseList) {
 				try {
+                    // TODO FIX BAD REQUEST AND LOG SPAMMING
 					getAuthorizationTokenForDataDownload(edrCachedResponseObj.getTransferProcessId());
 					eDRCachedResponse = edrCachedResponseObj;
 					break;
 				} catch (Exception e) {
 					log.error(LogUtil.encode("The EDR token has expired for " + edrCachedResponseObj.getTransferProcessId()));
+                    log.error(e.getMessage());
 				}
 			}
 		}
