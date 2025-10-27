@@ -28,25 +28,24 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.tractusx.sde.common.entities.Policies;
 import org.eclipse.tractusx.sde.common.enums.ProgressStatusEnum;
 import org.eclipse.tractusx.sde.common.exception.NoDataFoundException;
+import org.eclipse.tractusx.sde.common.exception.ServiceException;
 import org.eclipse.tractusx.sde.common.model.Acknowledgement;
 import org.eclipse.tractusx.sde.common.model.PagingResponse;
 import org.eclipse.tractusx.sde.common.model.Submodel;
+
 import org.eclipse.tractusx.sde.core.processreport.entity.ConsumerDownloadHistoryEntity;
 import org.eclipse.tractusx.sde.core.processreport.mapper.ConsumerDownloadHistoryMapper;
 import org.eclipse.tractusx.sde.core.processreport.model.ConsumerDownloadHistory;
@@ -54,9 +53,13 @@ import org.eclipse.tractusx.sde.core.processreport.repository.ConsumerDownloadHi
 import org.eclipse.tractusx.sde.edc.constants.EDCAssetConstant;
 import org.eclipse.tractusx.sde.edc.entities.request.policies.ActionRequest;
 import org.eclipse.tractusx.sde.edc.entities.request.policies.PolicyConstraintBuilderService;
+import org.eclipse.tractusx.sde.edc.facilitator.EDRRequestHelper;
+import org.eclipse.tractusx.sde.edc.model.edr.EDRCachedResponse;
 import org.eclipse.tractusx.sde.edc.model.request.ConsumerRequest;
 import org.eclipse.tractusx.sde.edc.model.request.Offer;
 import org.eclipse.tractusx.sde.edc.services.ConsumerControlPanelService;
+import org.eclipse.tractusx.sde.edc.services.ContractNegotiationService;
+import org.eclipse.tractusx.sde.edc.util.UtilityFunctions;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -73,7 +76,9 @@ import com.opencsv.ICSVWriter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.web.client.HttpClientErrorException;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class ConsumerService {
@@ -87,6 +92,11 @@ public class ConsumerService {
 	private final ConsumerDownloadHistoryMapper consumerDownloadHistoryMapper;
 
 	private final PolicyConstraintBuilderService policyConstraintBuilderService;
+
+	private final ContractNegotiationService contractNegotiationService;
+	private final EDRRequestHelper edrRequestHelper;
+//	private EdrTokenCacheService edrCache;
+
 
 	ObjectMapper mapper = new ObjectMapper();
 
@@ -358,10 +368,11 @@ public class ConsumerService {
 		response.setContentType("application/zip");
 		response.setHeader("Content-Disposition", "attachment;filename=" + processId + "-download.zip");
 		response.setStatus(HttpServletResponse.SC_OK);
-		if ("csv".equalsIgnoreCase(downloadDataAs))
-			writeCSVFiles(response, csvWithValue);
-		else
-			writeJsonFiles(response, csvWithValue);
+        // TODO FIX IT IF THE DATA IS CSV
+//		if ("csv".equalsIgnoreCase(downloadDataAs))
+//			writeCSVFiles(response, csvWithValue);
+//		else
+        writeJsonFiles(response, csvWithValue);
 	}
 
 	@SneakyThrows
@@ -438,4 +449,116 @@ public class ConsumerService {
 		return consumerDownloadHistoryMapper.mapFromCustom(entity);
 	}
 
-}
+
+
+
+
+//	public Map<String, Object> resolveAssetEdr(String assetId, AssetEdrResolveRequest req) {
+//		try {
+//			List<Policies> usagePolicies = req.getUsagePolicies() == null ? List.of() :
+//					req.getUsagePolicies().stream()
+//							.flatMap(entity -> entity.getUsagePolicies().stream())
+//							.toList();
+//
+//			List<ActionRequest> policyActions =
+//					policyConstraintBuilderService.getUsagePoliciesConstraints(usagePolicies);
+//
+//			var recipientURL = UtilityFunctions.removeLastSlashOfUrl(req.getConnectorOfferUrl());
+//			var offer = new Offer();
+//			offer.setAssetId(req.getAssetId());
+//			offer.setOfferId(req.getOfferId());
+//			offer.setConnectorId(req.getConnectorId());
+//			offer.setConnectorOfferUrl(recipientURL);
+//
+//			// Step 1: Negotiate or reuse existing contract & EDR
+//			EDRCachedResponse edr = contractNegotiationService.verifyOrCreateContractNegotiation(
+//					req.getConnectorId(), Map.of(), recipientURL, policyActions, offer
+//			);
+//
+//			if (edr == null || edr.getTransferProcessId() == null) {
+//				throw new ServiceException("Failed to resolve EDR — no valid transfer process returned.");
+//			}
+//
+//			// Step 2: Cache resolved EDR for reuse
+//			edrCache.save(
+//					assetId,
+//					edr.getEndpoint(),
+//					edr.getAuthKey(),
+//					edr.getAuthCode(),
+//					edr.getTransferProcessId()
+//			);
+//
+//			// Step 3: Optional direct data fetch
+//			Map<String, Object> out = new LinkedHashMap<>();
+//			out.put("edr", edr);
+//
+//			if (req.getDownloadAs() != null) {
+//				var token = contractNegotiationService.getAuthorizationTokenForDataDownload(edr.getTransferProcessId());
+//				String endpoint = token.getEndpoint() + "?type=" + req.getDownloadAs();
+//
+//				Object data = edrRequestHelper.getDataFromProvider(token, endpoint);
+//				out.put("data", data);
+//			}
+//
+//			return out;
+//		} catch (Exception e) {
+//			throw new ServiceException("Error resolving EDR for assetId=" + assetId + ": " + e.getMessage(), e);
+//		}
+//	}
+
+	/**
+	 * Streams content from an active or auto-refreshed EDR.
+	 */
+//	public void streamAssetContent(String assetId, String type, HttpServletResponse response)
+//			throws ServiceException {
+//		try {
+//			// Step 1: Check cached EDR first
+//			Optional<EdrTokenCacheEntry> cachedEdrOpt = edrCache.getValid(assetId);
+//			EdrTokenCacheEntry edrEntry;
+//
+//			if (cachedEdrOpt.isPresent()) {
+//				edrEntry = cachedEdrOpt.get();
+//			} else {
+//				// Step 2: Auto-refresh if missing/expired
+//				log.info("EDR expired or missing for assetId={} — attempting re-resolution", assetId);
+//				var req = new AssetEdrResolveRequest();
+//				req.setAssetId(assetId);
+//				Map<String, Object> newEdrResponse = resolveAssetEdr(assetId, req);
+//				EDRCachedResponse newEdr = (EDRCachedResponse) newEdrResponse.get("edr");
+//
+//				edrCache.save(
+//						assetId,
+//						newEdr.getEndpoint(),
+//						newEdr.getAuthKey(),
+//						newEdr.getAuthCode(),
+//						newEdr.getTransferProcessId()
+//				);
+//
+//				edrEntry = edrCache.getValid(assetId)
+//						.orElseThrow(() -> new ServiceException("EDR refresh failed for assetId=" + assetId));
+//			}
+//
+//			// Step 3: Download data using valid token
+//			var token = contractNegotiationService.getAuthorizationTokenForDataDownload(
+//					edrEntry.getTransferProcessId()
+//			);
+//			String endpoint = token.getEndpoint() + "?type=" + type;
+//
+//			Object data = edrRequestHelper.getDataFromProvider(token, endpoint);
+//
+//			// Step 4: Stream data
+//			response.setContentType("application/json"); // adjust if CSV or binary
+//			mapper.writeValue(response.getOutputStream(), data);
+//
+//		} catch (HttpClientErrorException.Unauthorized ex) {
+//			log.warn("EDR token unauthorized — retrying auto-refresh once for assetId={}", assetId);
+//			edrCache.invalidate(assetId);  // 🧹 ensure old token removed
+//			streamAssetContent(assetId, type, response); // retry once
+//		} catch (IOException ioe) {
+//			throw new ServiceException("Failed to stream content for assetId=" + assetId + ": " + ioe.getMessage());
+//		} catch (Exception e) {
+//			throw new ServiceException("Unexpected error while streaming EDR content for assetId=" + assetId + ": " + e.getMessage(), e);
+//		}
+//	}
+	}
+

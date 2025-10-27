@@ -143,6 +143,7 @@ public class ConsumerControlPanelService {
 			try {
 				AcknowledgementId acknowledgementId = contractNegotiateManagement.negotiateContract(offer.getConnectorOfferUrl(),
 						offer.getConnectorId(), offer.getOfferId(), offer.getAssetId(), action, extensibleProperty);
+
 				negotiateContractId.set(acknowledgementId.getId());
 				int retry = 3;
 				int counter = 1;

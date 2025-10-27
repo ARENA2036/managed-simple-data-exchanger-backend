@@ -73,6 +73,7 @@ public class EDCUsecaseHandler extends Step implements EDCUsecaseStep {
 				eDCAsset = createEDCAssetFacilator.updateEDCAsset(assetEntryRequest, policy);
 			}
 			eDCAsset.entrySet().forEach(entry -> objectNode.put(entry.getKey(), entry.getValue()));
+
 			return objectNode;
 		} catch (Exception e) {
 			throw new CsvHandlerUseCaseException(rowNumber, "EDC: " + e.getMessage());
