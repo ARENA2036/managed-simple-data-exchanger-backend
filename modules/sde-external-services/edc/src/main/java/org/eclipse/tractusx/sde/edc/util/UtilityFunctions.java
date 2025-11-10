@@ -51,18 +51,28 @@ public class UtilityFunctions {
 		}
 	}
 
-	public static List<Policies> getUsagePolicies(List<Policies> usagePolicies, List<ConstraintRequest> constraints) {
-		constraints.forEach(constraint -> {
-			String leftExpVal = constraint.getLeftOperand().getId();
-			String rightExpVal = constraint.getRightOperand().toString();
-			Policies policyResponse = identyAndGetUsagePolicy(leftExpVal, rightExpVal);
-			if (policyResponse != null)
-				usagePolicies.add(policyResponse);
-		});
-		return usagePolicies;
-	}
+    public static List<Policies> getUsagePolicies(List<Policies> usagePolicies, List<ConstraintRequest> constraints) {
+        if (constraints == null || constraints.isEmpty()) {
+            return usagePolicies;
+        }
 
-	public static Policies identyAndGetUsagePolicy(String leftExpVal, String rightExpVal) {
+        constraints.forEach(constraint -> {
+            String leftExpVal = constraint.getLeftOperand();
+            String rightExpVal = constraint.getRightOperand() != null
+                    ? constraint.getRightOperand().toString()
+                    : null;
+
+            Policies policyResponse = identyAndGetUsagePolicy(leftExpVal, rightExpVal);
+            if (policyResponse != null) {
+                usagePolicies.add(policyResponse);
+            }
+        });
+
+        return usagePolicies;
+    }
+
+
+    public static Policies identyAndGetUsagePolicy(String leftExpVal, String rightExpVal) {
 		return Policies.builder().technicalKey(leftExpVal).value(List.of(rightExpVal)).build();
 	}
 

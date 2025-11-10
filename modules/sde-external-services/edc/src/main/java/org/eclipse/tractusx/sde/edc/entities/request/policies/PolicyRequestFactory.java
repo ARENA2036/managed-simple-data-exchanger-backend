@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.tractusx.sde.edc.constants.EDCAssetConfigurableConstant;
 import org.springframework.stereotype.Service;
 
@@ -39,40 +41,43 @@ import lombok.SneakyThrows;
 public class PolicyRequestFactory {
 
 	private final EDCAssetConfigurableConstant edcAssetConfigurableConstant;
-	
-	public PolicyDefinitionRequest getPolicy(String policyId, String assetId, List<ActionRequest> action, String type) {
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-		List<PermissionRequest> permissions = getPermissions(assetId, action);
+    public PolicyDefinitionRequest getPolicy(String policyId, String assetId, List<ActionRequest> action, String type) {
 
-		 Map<String,String> contextMap = Map.of(
-			// "@vocab", "https://w3id.org/edc/v0.0.1/ns/",
-				"edc", "https://w3id.org/edc/v0.0.1/ns/",
-				 "tx", "https://w3id.org/tractusx/v0.0.1/ns/",
-		    "odrl", "http://www.w3.org/ns/odrl/2/",
-				"cx-policy", "https://w3id.org/catenax/policy/"
-				);
+        List<PermissionRequest> permissions = getPermissions(assetId, action);
 
-		PolicyRequest policyRequest = PolicyRequest.builder()
-//				.context(List.of(contextMapPolicy))
-			//	.context(contextList)
-				.type("odrl:Set")
-				.permissions(permissions)
-				.obligations(new ArrayList<>())
-				.prohibitions(new ArrayList<>())
-				.target(Map.of("@id", assetId))
-				.assigner(Map.of("@id","BPNL00000003AYRE"))
-				.build();
-		System.out.println("$$$ " + policyRequest);
-		//Use submodel id to generate unique policy id for asset use policy type as prefix asset/usage
-		policyId = getGeneratedPolicyId(policyId, type);
-				
-		return PolicyDefinitionRequest.builder()
-				.id(policyId)
-				.profile("cx-policy:" + edcAssetConfigurableConstant.getCxPolicyProfile())
-				.context(contextMap)
-				.policyRequest(policyRequest)
-				.build();
-	}
+        List<Object> contextList = List.of(
+                Map.of(
+                        "edc", "https://w3id.org/edc/v0.0.1/ns/",
+                        "tx", "https://w3id.org/tractusx/v0.0.1/ns/",
+                        "odrl", "http://www.w3.org/ns/odrl/2/",
+                        "cx-policy", "https://w3id.org/catenax/policy/"
+                )
+        );
+        PolicyRequest policyRequest = PolicyRequest.builder()
+                .type("http://www.w3.org/ns/odrl/2/Set")
+                .permission(permissions)
+                .obligations(new ArrayList<>())
+                .prohibitions(new ArrayList<>())
+                .target(Map.of("@id", assetId))
+                .assigner(Map.of("@id", "BPNL00000003AYRE"))
+                .build();
+
+        policyId = getGeneratedPolicyId(policyId, type);
+
+        PolicyDefinitionRequest policyDefinitionRequest = PolicyDefinitionRequest.builder()
+                .id(policyId)
+                .context(contextList)
+                .policyRequest(policyRequest)
+                .build();
+
+        System.out.println("$$$");
+        System.out.println(policyDefinitionRequest);
+
+        return policyDefinitionRequest;
+    }
+
 
 	@SneakyThrows
 	public PolicyDefinitionRequest setPolicyIdAndGetObject(String assetId, JsonNode jsonNode, String type) {
@@ -83,14 +88,15 @@ public class PolicyRequestFactory {
 		
 		//Use submodel id to generate unique policy id for asset use policy type as prefix asset/usage
 		String policyId = getGeneratedPolicyId(assetId, type);
-				
-		Map<String,String> contextMap = Map.of(
-				"@vocab", "https://w3id.org/edc/v0.0.1/ns/"
-				);
+
+        List<Object> contextList = List.of(
+                Map.of("@vocab", "https://w3id.org/edc/v0.0.1/ns/")
+        );
+
 		
 		return PolicyDefinitionRequest.builder()
 				.id(policyId)
-				.context(contextMap)
+				.context(contextList)
 				.policyRequest(contentPolicy)
 				.build();
 	}
@@ -107,18 +113,19 @@ public class PolicyRequestFactory {
 
 	public List<PermissionRequest> getPermissions(String assetId, List<ActionRequest> actions) {
 
-		ArrayList<PermissionRequest> permissions = new ArrayList<>();
+		ArrayList<PermissionRequest> permission = new ArrayList<>();
 		if (actions != null) {
 			actions.forEach(action -> {
+                Map<String, Object> logicalGroup = action.getAction();
 				PermissionRequest permissionRequest = PermissionRequest
 						.builder()
-						.action(LinkJsonLDId.builder().id("use").build())
+                        .action("access")
 //						.target(assetId)
-						.constraint(action.getAction())
+						.constraint(List.of(logicalGroup))
 						.build();
-				permissions.add(permissionRequest);
+				permission.add(permissionRequest);
 			});
 		}
-		return permissions;
+		return permission;
 	}
 }

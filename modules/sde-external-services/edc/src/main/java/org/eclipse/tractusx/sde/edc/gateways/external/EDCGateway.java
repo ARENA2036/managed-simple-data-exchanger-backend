@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.sde.edc.gateways.external;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -120,17 +121,28 @@ public class EDCGateway {
 	}
 	
 	@SneakyThrows
-	public JsonNode createPolicyDefinition(JsonNode request) {
-		try {
-			return edcFeignClientApi.createPolicy(request);
-		} catch(FeignException fe){
-			log.error("Exception Request " + fe.request());
-			log.error("Exception Message " + fe.getMessage());
-			log.error("Exception Message " + fe.responseBody());
-			throw new EDCGatewayException(fe.getMessage());
-		}
+    public JsonNode createPolicyDefinition(JsonNode request) {
+        try {
+            return edcFeignClientApi.createPolicy(request);
+        } catch (FeignException fe) {
+            log.error("Exception Request: {}", fe.request());
+            log.error("Exception Status: {}", fe.status());
+            log.error("Exception Message: {}", fe.getMessage());
 
-	}
+            if (fe.responseBody().isPresent()) {
+                try {
+                    String body = StandardCharsets.UTF_8.decode(fe.responseBody().get()).toString();
+                    log.error("Full EDC Response Body:\n{}", body);
+                } catch (Exception ex) {
+                    log.error("Failed to read response body", ex);
+                }
+            } else {
+                log.error("No response body from EDC");
+            }
+
+            throw new EDCGatewayException("EDC error: " + fe.getMessage());
+        }
+    }
 	
 	@SneakyThrows
 	public void updatePolicyDefinition(String policyUUId, JsonNode request) {

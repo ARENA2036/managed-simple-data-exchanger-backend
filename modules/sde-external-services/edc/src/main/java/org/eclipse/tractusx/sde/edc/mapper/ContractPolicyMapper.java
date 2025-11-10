@@ -49,7 +49,7 @@ public abstract class ContractPolicyMapper {
 		return PolicyRequest.builder()
 				.type("odrl:Offer")
 				.target(Map.of("@id",assetId))
-				.permissions(permissionObj)
+				.permission(permissionObj)
 				.prohibitions(new ArrayList<>())
 				.obligations(new ArrayList<>()).build();
 	}
