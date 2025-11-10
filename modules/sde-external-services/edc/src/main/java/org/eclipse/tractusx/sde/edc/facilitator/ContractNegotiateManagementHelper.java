@@ -229,19 +229,25 @@ public class ContractNegotiateManagementHelper extends AbstractEDCStepsHelper {
 		return agreementResponse;
 	}
 
-	private void formatPermissionConstraint(ObjectMapper objeMapper, List<Policies> policies, Object permissionObj) {
-		ObjectMapper objMapper = new ObjectMapper();
-		PermissionRequest permissionRequest = objMapper.convertValue(permissionObj, PermissionRequest.class);
+    private void formatPermissionConstraint(ObjectMapper objMapper, List<Policies> policies, Object permissionObj) {
+        PermissionRequest permissionRequest = objMapper.convertValue(permissionObj, PermissionRequest.class);
 
-		Object object = permissionRequest.getConstraint().get("odrl:and");
-		if (object != null)
-			setContraint(objeMapper, policies, object);
-		else {
-			object = permissionRequest.getConstraint().get("odrl:or");
-			if (object != null)
-				setContraint(objeMapper, policies, object);
-		}
-	}
+        List<Map<String, Object>> constraintList = permissionRequest.getConstraint();
+        if (constraintList == null || constraintList.isEmpty()) return;
+
+        for (Map<String, Object> logicalGroup : constraintList) {
+            Object andObj = logicalGroup.get("and");
+            if (andObj != null) {
+                setContraint(objMapper, policies, andObj);
+                continue;
+            }
+
+            Object orObj = logicalGroup.get("or");
+            if (orObj != null) {
+                setContraint(objMapper, policies, orObj);
+            }
+        }
+    }
 
 	private void setContraint(ObjectMapper objeMapper, List<Policies> policies, Object object) {
 		if (object instanceof ArrayList) {
