@@ -37,18 +37,19 @@ import lombok.SneakyThrows;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConstraintRequest {
 
-	@JsonProperty("@type")
-	@Builder.Default
-	private String type = "Constraint";
+    //	@JsonProperty("@type")
+    //	@Builder.Default
+    //	private String type = "Constraint";
+    private String type;
 
-	@JsonProperty("odrl:leftOperand")
-	private LinkJsonLDId leftOperand;
+	@JsonProperty("leftOperand")
+	private String   leftOperand;
 
-	@JsonProperty("odrl:rightOperand")
-	private Object rightOperand;
+	@JsonProperty("rightOperand")
+	private Object  rightOperand;
 
-	@JsonProperty("odrl:operator")
-	private LinkJsonLDId operator;
+	@JsonProperty("operator")
+	private String   operator;
 
 	@SneakyThrows
 	public String toJsonString() {

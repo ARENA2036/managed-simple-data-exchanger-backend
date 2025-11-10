@@ -65,7 +65,7 @@ public class PortalProxyController {
 	@PreAuthorize("hasPermission('','consumer_search_connectors')")
 	public ResponseEntity<List<ConnectorInfo>> fetchConnectorInfo(@RequestBody List<String> bpns) throws Exception {
 		log.info("Request received : /api/connectors-discovery");
-		log.info("➡️ API /connectors-discovery called with BPNs: {}", bpns);
+//		log.info("➡️ API /connectors-discovery called with BPNs: {}", bpns);
 		List<ConnectorInfo> fetchConnectorInfoResponse = portalProxyService.fetchConnectorInfo(bpns);
 		log.info("⬅️ API /connectors-discovery response: {}", fetchConnectorInfoResponse);
 		return ok().body(fetchConnectorInfoResponse);

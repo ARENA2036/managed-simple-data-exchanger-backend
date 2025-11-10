@@ -20,6 +20,7 @@
 
 package org.eclipse.tractusx.sde.edc.entities.request.policies;
 
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
@@ -46,13 +47,11 @@ public class PermissionRequest {
 //	@JsonProperty("odrl:target")
 //	private String target;
 
-	@JsonProperty("odrl:action") //odrl
-//	@JsonAlias({"odrl:action"})
-	private LinkJsonLDId action;
+	@JsonProperty("action") //odrl
+	private String action;
 
-	@JsonProperty("odrl:constraint") //odrl
-//	@JsonAlias({"odrl:constraint"})
-	private Map<String, Object> constraint;
+    @JsonProperty("constraint")
+    private List<Map<String, Object>> constraint;
 
 	@SneakyThrows
 	public String toJsonString() {

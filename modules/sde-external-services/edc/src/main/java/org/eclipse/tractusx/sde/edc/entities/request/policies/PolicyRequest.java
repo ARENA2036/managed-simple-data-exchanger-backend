@@ -49,30 +49,30 @@ public class PolicyRequest {
 
 	@JsonProperty("@type")
 	@Builder.Default
-	private String type = "odrl:Set";
+	private String type = "odrl:Set"; //odrl
 	
 	@JsonProperty("@context")
-	private Object context;
+	private List<Object> context;
 	
 	@JsonProperty("@id")
 	private String id;
 	
-	@JsonProperty("odrl:permission")
-	private Object permissions;
+	@JsonProperty("permission")
+	private Object permission;
 
-	@JsonProperty("odrl:prohibition") //odrl
+	@JsonProperty("prohibition") //odrl
 	private List<Prohibition> prohibitions;
 
-	@JsonProperty("odrl:obligation") //odrl
+	@JsonProperty("obligation") //odrl
 	private List<Obligation> obligations;
 
-	@JsonProperty("odrl:profile") //odrl
+	@JsonProperty("profile") //odrl
 	private String profile;
 
-	@JsonProperty("odrl:target")
+	@JsonProperty("target")
 	private Map<String, String> target;
 	
-	@JsonProperty("odrl:assigner")
+	@JsonProperty("assigner")
 	private Map<String, String> assigner;
 	
 

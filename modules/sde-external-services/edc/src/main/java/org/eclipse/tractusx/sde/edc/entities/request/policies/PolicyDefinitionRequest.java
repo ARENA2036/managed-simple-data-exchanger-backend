@@ -32,6 +32,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -40,7 +42,7 @@ import lombok.SneakyThrows;
 public class PolicyDefinitionRequest {
 
 	@JsonProperty("@context")
-	private Object context;
+	private List<Object> context;
 
 	@JsonProperty("@type")
 	@Builder.Default
