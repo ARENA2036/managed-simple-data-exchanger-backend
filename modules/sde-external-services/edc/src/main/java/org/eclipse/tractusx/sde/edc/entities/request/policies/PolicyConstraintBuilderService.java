@@ -124,46 +124,42 @@ public class PolicyConstraintBuilderService {
         List<ConstraintRequest> allConstraints = new ArrayList<>();
 
         if (policies != null && !policies.isEmpty()) {
-            policies.forEach(policy -> {
-                preparePolicyConstraint(allConstraints, policy, policy.getValue());
-            });
+            policies.forEach(policy -> preparePolicyConstraint(allConstraints, policy, policy.getValue()));
         }
 
+        // Add default FrameworkAgreement if missing
         boolean hasFrameworkAgreement = allConstraints.stream()
                 .anyMatch(c -> c.getLeftOperand() != null &&
-                        "FrameworkAgreement".equalsIgnoreCase(c.getLeftOperand()));
+                        "FrameworkAgreement".equalsIgnoreCase(c.getLeftOperand().get("@id")));
 
         if (!hasFrameworkAgreement) {
             allConstraints.add(ConstraintRequest.builder()
-                    .leftOperand("FrameworkAgreement")
-                    .operator("eq")
+                    .leftOperand(Map.of("@id", "FrameworkAgreement"))
+                    .operator(Map.of("@id", "odrl:eq"))
                     .rightOperand("DataExchangeGovernance:1.0")
                     .build());
         }
 
-        List<ActionRequest> actionList = new ArrayList<>();
-        if (!allConstraints.isEmpty()) {
+        // Sort constraints safely
+        allConstraints.sort(
+                Comparator.comparing(
+                        c -> c.getLeftOperand() != null ? c.getLeftOperand().get("@id") : null,
+                        Comparator.nullsLast(String::compareTo)
+                )
+        );
 
-            allConstraints.sort(
-                    Comparator.comparing(
-                            ConstraintRequest::getLeftOperand,
-                            Comparator.nullsLast(String::compareTo)
-                    )
-            );
+        // Wrap in ActionRequest
+        ActionRequest action = new ActionRequest();
+        action.addProperty("odrl:and", allConstraints);
 
-            ActionRequest action = new ActionRequest();
-            action.addProperty("and", allConstraints);
-            actionList.add(action);
-        }
-
-        return actionList;
+        return List.of(action);
     }
 
     private ActionRequest prepareActionRequest(String operator, List<ConstraintRequest> constraintList) {
 
         constraintList.sort(
                 Comparator.comparing(
-                        ConstraintRequest::getLeftOperand,
+                        c -> c.getLeftOperand() != null ? c.getLeftOperand().get("@id") : null,
                         Comparator.nullsLast(String::compareTo)
                 )
         );
@@ -171,9 +167,10 @@ public class PolicyConstraintBuilderService {
         String logicalOperator = operator.replace("odrl:", "");
 
         ActionRequest action = new ActionRequest();
-        action.addProperty(logicalOperator, constraintList);
+        action.addProperty("odrl:" + logicalOperator, constraintList);
         return action;
     }
+
 
     private static final Set<String> ALLOWED_OPERANDS = Set.of(
             "Membership",
@@ -188,36 +185,37 @@ public class PolicyConstraintBuilderService {
 
         String key = policy.getTechnicalKey();
 
+        // Skip unsupported operands
         if (!ALLOWED_OPERANDS.contains(key)) {
-            System.out.println("***" + " Skipping unsupported policy operand: {}"+ key);
-
+            System.out.println("*** Skipping unsupported policy operand: " + key);
             return;
         }
 
+        // Determine operator
         String operator;
         switch (key) {
             case "Membership":
             case "FrameworkAgreement":
             case "inForceDate":
-                operator = "eq";
+                operator = "odrl:eq";
                 break;
             case "BusinessPartnerNumber":
             case "BusinessPartnerGroup":
-                operator = "isAnyOf";
+                operator = "odrl:isAnyOf";
                 break;
             default:
-                operator = "eq";
+                operator = "odrl:eq";
         }
 
         for (String value : values) {
             if (StringUtils.isNotBlank(value)) {
-                Object rightOperand = "isAnyOf".equals(operator)
+                Object rightOperand = operator.equals("odrl:isAnyOf")
                         ? List.of(value)
                         : value;
 
                 ConstraintRequest request = ConstraintRequest.builder()
-                        .leftOperand(key)
-                        .operator(operator)
+                        .leftOperand(Map.of("@id", key)) // ✅ removed cx-policy:
+                        .operator(Map.of("@id", operator))
                         .rightOperand(rightOperand)
                         .build();
 
@@ -225,7 +223,6 @@ public class PolicyConstraintBuilderService {
             }
         }
     }
-
 
 
 

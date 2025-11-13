@@ -57,7 +57,11 @@ public class UtilityFunctions {
         }
 
         constraints.forEach(constraint -> {
-            String leftExpVal = constraint.getLeftOperand();
+            String leftExpVal = null;
+            if (constraint.getLeftOperand() != null) {
+                leftExpVal = constraint.getLeftOperand().get("@id");
+            }
+
             String rightExpVal = constraint.getRightOperand() != null
                     ? constraint.getRightOperand().toString()
                     : null;
@@ -70,6 +74,7 @@ public class UtilityFunctions {
 
         return usagePolicies;
     }
+
 
 
     public static Policies identyAndGetUsagePolicy(String leftExpVal, String rightExpVal) {

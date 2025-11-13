@@ -34,6 +34,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.tractusx.sde.bpndiscovery.handler.BpnDiscoveryProxyService;
@@ -121,8 +124,14 @@ public class ConsumerControlPanelService {
 							submodel, offset, limit));
 
 				} else {
-					log.warn("EDR token is null, unable to look Up Digital Twin for :" + dtOffer.toString());
-				}
+                    log.warn("EDR token is null, unable to look Up Digital Twin for :" + dtOffer);
+                    // Print JSON Object to console
+                    try {
+                        log.warn(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(dtOffer));
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
 			}
 		}
 		return new HashSet<>(queryOnDataOffers);

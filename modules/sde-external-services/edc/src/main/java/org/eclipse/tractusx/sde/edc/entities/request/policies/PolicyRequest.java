@@ -57,22 +57,22 @@ public class PolicyRequest {
 	@JsonProperty("@id")
 	private String id;
 	
-	@JsonProperty("permission")
-	private Object permission;
+	@JsonProperty("odrl:permission")
+    private List<PermissionRequest> permission;
 
-	@JsonProperty("prohibition") //odrl
+	@JsonProperty("odrl:prohibition") //odrl
 	private List<Prohibition> prohibitions;
 
-	@JsonProperty("obligation") //odrl
+	@JsonProperty("odrl:obligation") //odrl
 	private List<Obligation> obligations;
 
 	@JsonProperty("profile") //odrl
 	private String profile;
 
-	@JsonProperty("target")
+	@JsonProperty("odrl:target")
 	private Map<String, String> target;
 	
-	@JsonProperty("assigner")
+	@JsonProperty("odrl:assigner")
 	private Map<String, String> assigner;
 	
 
