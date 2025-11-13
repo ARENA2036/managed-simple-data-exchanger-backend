@@ -42,7 +42,7 @@ import java.util.List;
 public class PolicyDefinitionRequest {
 
 	@JsonProperty("@context")
-	private List<Object> context;
+	private Object context;
 
 	@JsonProperty("@type")
 	@Builder.Default

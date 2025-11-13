@@ -232,20 +232,17 @@ public class ContractNegotiateManagementHelper extends AbstractEDCStepsHelper {
     private void formatPermissionConstraint(ObjectMapper objMapper, List<Policies> policies, Object permissionObj) {
         PermissionRequest permissionRequest = objMapper.convertValue(permissionObj, PermissionRequest.class);
 
-        List<Map<String, Object>> constraintList = permissionRequest.getConstraint();
-        if (constraintList == null || constraintList.isEmpty()) return;
+        Map<String, Object> logicalGroup = permissionRequest.getConstraint();
+        if (logicalGroup == null) return;
 
-        for (Map<String, Object> logicalGroup : constraintList) {
-            Object andObj = logicalGroup.get("and");
-            if (andObj != null) {
-                setContraint(objMapper, policies, andObj);
-                continue;
-            }
+        Object andObj = logicalGroup.get("odrl:and");
+        if (andObj != null) {
+            setContraint(objMapper, policies, andObj);
+        }
 
-            Object orObj = logicalGroup.get("or");
-            if (orObj != null) {
-                setContraint(objMapper, policies, orObj);
-            }
+        Object orObj = logicalGroup.get("odrl:or");
+        if (orObj != null) {
+            setContraint(objMapper, policies, orObj);
         }
     }
 

@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AllArgsConstructor;
@@ -44,14 +45,11 @@ import lombok.SneakyThrows;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PermissionRequest {
 
-//	@JsonProperty("odrl:target")
-//	private String target;
+	@JsonProperty("odrl:action") //odrl
+	private Map<String, String> action;
 
-	@JsonProperty("action") //odrl
-	private String action;
-
-    @JsonProperty("constraint")
-    private List<Map<String, Object>> constraint;
+    @JsonProperty("odrl:constraint")
+    private Map<String, Object> constraint;
 
 	@SneakyThrows
 	public String toJsonString() {

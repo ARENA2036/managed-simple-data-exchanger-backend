@@ -30,6 +30,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
+import java.util.Map;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -42,14 +44,14 @@ public class ConstraintRequest {
     //	private String type = "Constraint";
     private String type;
 
-	@JsonProperty("leftOperand")
-	private String   leftOperand;
+	@JsonProperty("odrl:leftOperand")
+	private Map<String, String> leftOperand;
 
-	@JsonProperty("rightOperand")
+	@JsonProperty("odrl:rightOperand")
 	private Object  rightOperand;
 
-	@JsonProperty("operator")
-	private String   operator;
+	@JsonProperty("odrl:operator")
+	private  Map<String, String>   operator;
 
 	@SneakyThrows
 	public String toJsonString() {
