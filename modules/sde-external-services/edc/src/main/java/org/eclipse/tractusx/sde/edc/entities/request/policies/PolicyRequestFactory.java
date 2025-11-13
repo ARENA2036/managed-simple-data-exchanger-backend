@@ -47,16 +47,15 @@ public class PolicyRequestFactory {
 
         List<PermissionRequest> permissions = getPermissions(assetId, action);
 
-        List<Object> contextList = List.of(
-                Map.of(
-                        "edc", "https://w3id.org/edc/v0.0.1/ns/",
-                        "tx", "https://w3id.org/tractusx/v0.0.1/ns/",
-                        "odrl", "http://www.w3.org/ns/odrl/2/",
-                        "cx-policy", "https://w3id.org/catenax/policy/"
-                )
+        Map<String,String> contextMap = Map.of(
+                // "@vocab", "https://w3id.org/edc/v0.0.1/ns/",
+                "edc", "https://w3id.org/edc/v0.0.1/ns/",
+                "tx", "https://w3id.org/tractusx/v0.0.1/ns/",
+                "odrl", "http://www.w3.org/ns/odrl/2/",
+                "cx-policy", "https://w3id.org/catenax/policy/"
         );
         PolicyRequest policyRequest = PolicyRequest.builder()
-                .type("http://www.w3.org/ns/odrl/2/Set")
+                .type("odrl:Set")
                 .permission(permissions)
                 .obligations(new ArrayList<>())
                 .prohibitions(new ArrayList<>())
@@ -68,16 +67,18 @@ public class PolicyRequestFactory {
 
         PolicyDefinitionRequest policyDefinitionRequest = PolicyDefinitionRequest.builder()
                 .id(policyId)
-                .context(contextList)
+                .context(contextMap)
                 .policyRequest(policyRequest)
                 .build();
 
         System.out.println("$$$");
+        System.out.println(policyRequest.toJsonString());
+        System.out.println(policyDefinitionRequest.toJsonString());
+        System.out.println(policyRequest);
         System.out.println(policyDefinitionRequest);
 
         return policyDefinitionRequest;
     }
-
 
 	@SneakyThrows
 	public PolicyDefinitionRequest setPolicyIdAndGetObject(String assetId, JsonNode jsonNode, String type) {
@@ -119,9 +120,8 @@ public class PolicyRequestFactory {
                 Map<String, Object> logicalGroup = action.getAction();
 				PermissionRequest permissionRequest = PermissionRequest
 						.builder()
-                        .action("access")
-//						.target(assetId)
-						.constraint(List.of(logicalGroup))
+                        .action(Map.of("@id", "access"))
+						.constraint(logicalGroup)
 						.build();
 				permission.add(permissionRequest);
 			});
