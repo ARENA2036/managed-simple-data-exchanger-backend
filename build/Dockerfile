@@ -53,4 +53,4 @@ COPY --from=build modules/sde-core/target/*.jar ./app.jar
 EXPOSE 8080
 
 # set the startup command to run your binary
-CMD ["java", "-jar", "./app.jar","--spring.config.additional-location-=file:/app/application.properties"]
+CMD ["java", "-jar", "./app.jar"]
