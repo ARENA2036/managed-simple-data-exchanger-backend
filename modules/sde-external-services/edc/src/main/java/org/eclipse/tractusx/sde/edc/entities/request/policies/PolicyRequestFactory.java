@@ -120,7 +120,7 @@ public class PolicyRequestFactory {
                 Map<String, Object> logicalGroup = action.getAction();
 				PermissionRequest permissionRequest = PermissionRequest
 						.builder()
-                        .action(Map.of("@id", "access"))
+                        .action(Map.of("@id", "odrl:use"))
 						.constraint(logicalGroup)
 						.build();
 				permission.add(permissionRequest);
