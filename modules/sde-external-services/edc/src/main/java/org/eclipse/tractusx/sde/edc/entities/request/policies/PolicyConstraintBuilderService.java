@@ -132,13 +132,13 @@ public class PolicyConstraintBuilderService {
                 .anyMatch(c -> c.getLeftOperand() != null &&
                         "FrameworkAgreement".equalsIgnoreCase(c.getLeftOperand().get("@id")));
 
-        if (!hasFrameworkAgreement) {
-            allConstraints.add(ConstraintRequest.builder()
-                    .leftOperand(Map.of("@id", "FrameworkAgreement"))
-                    .operator(Map.of("@id", "odrl:eq"))
-                    .rightOperand("DataExchangeGovernance:1.0")
-                    .build());
-        }
+//        if (!hasFrameworkAgreement) {
+//            allConstraints.add(ConstraintRequest.builder()
+//                    .leftOperand(Map.of("@id", "cx-policy:FrameworkAgreement"))
+//                    .operator(Map.of("@id", "odrl:eq"))
+//                    .rightOperand("DataExchangeGovernance:1.0")
+//                    .build());
+//        }
 
         // Sort constraints safely
         allConstraints.sort(
@@ -214,7 +214,7 @@ public class PolicyConstraintBuilderService {
                         : value;
 
                 ConstraintRequest request = ConstraintRequest.builder()
-                        .leftOperand(Map.of("@id", key)) // ✅ removed cx-policy:
+                        .leftOperand(Map.of("@id", "cx-policy:" + key))
                         .operator(Map.of("@id", operator))
                         .rightOperand(rightOperand)
                         .build();
