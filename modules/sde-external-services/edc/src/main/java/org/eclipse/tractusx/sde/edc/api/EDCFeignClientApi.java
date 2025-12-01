@@ -57,31 +57,31 @@ public interface EDCFeignClientApi {
 	
 	
 	//Policy & Contract
-	@GetMapping("${edc.managementpath.apiversion:/v2}/policydefinitions/{id}")
+	@GetMapping("${edc.managementpath.apiversion:/v3}/policydefinitions/{id}")
 	public JsonNode getPolicy(@PathVariable("id") String policyId);
 	
-	@PostMapping("${edc.managementpath.apiversion:/v2}/policydefinitions")
+	@PostMapping("${edc.managementpath.apiversion:/v3}/policydefinitions")
 	public JsonNode createPolicy(@RequestBody JsonNode requestBody);
 
-	@PutMapping("${edc.managementpath.apiversion:/v2}/policydefinitions/{id}")
+	@PutMapping("${edc.managementpath.apiversion:/v3}/policydefinitions/{id}")
 	public void updatePolicy(@PathVariable("id") String policyUUId, @RequestBody JsonNode requestBody);
 
 	
 	//Contract defination
-	@PostMapping("${edc.managementpath.apiversion:/v2}/contractdefinitions")
+	@PostMapping("${edc.managementpath.apiversion:/v3}/contractdefinitions")
 	public String createContractDefination(@RequestBody ContractDefinitionRequest requestBody);
 	
-	@PutMapping("${edc.managementpath.apiversion:/v2}/contractdefinitions")
+	@PutMapping("${edc.managementpath.apiversion:/v3}/contractdefinitions")
 	public void updateContractDefination(@RequestBody ContractDefinitionRequest requestBody);
 	
-	@GetMapping("${edc.managementpath.apiversion:/v2}/contractdefinitions/{id}")
+	@GetMapping("${edc.managementpath.apiversion:/v3}/contractdefinitions/{id}")
 	public JsonNode getContractDefination(@PathVariable("id") String id);
 
 
-	@DeleteMapping(path = "${edc.managementpath.apiversion:/v2}/contractdefinitions/{id}")
+	@DeleteMapping(path = "${edc.managementpath.apiversion:/v3}/contractdefinitions/{id}")
 	public ResponseEntity<Object> deleteContractDefinition(@PathVariable("id") String contractdefinitionsId);
 
-	@DeleteMapping(path = "${edc.managementpath.apiversion:/v2}/policydefinitions/{id}")
+	@DeleteMapping(path = "${edc.managementpath.apiversion:/v3}/policydefinitions/{id}")
 	public ResponseEntity<Object> deletePolicyDefinitions(@PathVariable("id") String policydefinitionsId);
 
 	
