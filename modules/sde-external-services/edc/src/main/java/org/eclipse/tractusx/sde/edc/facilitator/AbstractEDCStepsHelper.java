@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class AbstractEDCStepsHelper {
 
-	@Value("${edc.consumer.hostname}${edc.consumer.managementpath:/data}${edc.consumer.managementpath.apiversion:/v2}")
+	@Value("${edc.consumer.hostname}${edc.consumer.managementpath:/data}${edc.consumer.managementpath.apiversion:/v3}")
 	protected String consumerHost;
 
 	@Value("${edc.consumer.hostname}${edc.consumer.managementpath:/data}")
@@ -42,7 +42,7 @@ public class AbstractEDCStepsHelper {
 	@Value("${edc.consumer.apikey}")
 	private String edcApiKeyValue;
 
-	@Value("${edc.hostname}${edc.managementpath:/data}${edc.managementpath.apiversion:/v2}")
+	@Value("${edc.hostname}${edc.managementpath:/data}${edc.managementpath.apiversion:/v3}")
 	protected String providerHost;
 
 	@Value("${edc.hostname}${edc.managementpath:/data}")
