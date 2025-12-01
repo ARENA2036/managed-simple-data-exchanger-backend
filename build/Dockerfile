@@ -1,6 +1,7 @@
 #################################################################################
 # Copyright (c) 2022,2024 T-Systems International GmbH
-# Copyright (c) 2022,2024 Contributors to the Eclipse Foundation
+# Copyright (c) 2025 ARENA2036 e.V.
+# Copyright (c) 2022,2025 Contributors to the Eclipse Foundation
 #
 # See the NOTICE file(s) distributed with this work for additional
 # information regarding copyright ownership.
@@ -29,7 +30,7 @@ COPY ../modules ./modules
 # build for release
 #Commeting this because workflow job already building jar file
 #As SDE its require some docker enviroment to run test cases so avoid it
-#RUN mvn clean install  
+#RUN mvn clean install
 
 # our final base image
 
@@ -41,7 +42,7 @@ ARG USER_GID=$USER_UID
 
 # Create the user
 
-RUN useradd -m -d /home/sdeuser -s /bin/bash -u $USER_UID -U $USERNAME 
+RUN useradd -m -d /home/sdeuser -s /bin/bash -u $USER_UID -U $USERNAME
 USER $USERNAME
 
 # set deployment directory
@@ -53,4 +54,4 @@ COPY --from=build modules/sde-core/target/*.jar ./app.jar
 EXPOSE 8080
 
 # set the startup command to run your binary
-CMD ["java", "-jar", "./app.jar","--spring.config.location=file:/app/configuration.properties"]
+CMD ["java", "-jar", "./app.jar"]
