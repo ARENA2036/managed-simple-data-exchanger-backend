@@ -60,11 +60,11 @@ public class PolicyRequestFactory {
                 .obligations(new ArrayList<>())
                 .prohibitions(new ArrayList<>())
                 .target(Map.of("@id", assetId))
-                .assigner(Map.of("@id", edcAssetConfigurableConstant.getBpdmProviderBpnl()))
+                .assigner(Map.of("@id", edcAssetConfigurableConstant.getManufacturerId()))
                 .build();
 
         policyId = getGeneratedPolicyId(policyId, type);
-
+        System.out.println("^^^ " + edcAssetConfigurableConstant.getManufacturerId());
         PolicyDefinitionRequest policyDefinitionRequest = PolicyDefinitionRequest.builder()
                 .id(policyId)
                 .context(contextMap)
