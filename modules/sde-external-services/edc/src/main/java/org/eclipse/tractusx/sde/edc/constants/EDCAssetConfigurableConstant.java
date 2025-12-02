@@ -70,4 +70,6 @@ public class EDCAssetConfigurableConstant {
 	@Value("${bpdm.provider.bpnl:BPN_NOT_FOUND}")
 	private String bpdmProviderBpnl;
 
+    @Value("${manufacturerId}")
+    private String manufacturerId;
 }
