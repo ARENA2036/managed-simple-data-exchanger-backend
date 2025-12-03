@@ -23,6 +23,7 @@ package org.eclipse.tractusx.sde.edc.mapper;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.tractusx.sde.edc.constants.EDCAssetConfigurableConstant;
 import org.eclipse.tractusx.sde.edc.entities.request.policies.ActionRequest;
 import org.eclipse.tractusx.sde.edc.entities.request.policies.PolicyRequest;
 import org.eclipse.tractusx.sde.edc.model.contractnegotiation.ContractNegotiations;
@@ -36,15 +37,15 @@ import lombok.SneakyThrows;
 public class ContractMapper {
 
 	private final ContractPolicyMapper contractPolicyMapper;
-
+    private final EDCAssetConfigurableConstant edcAssetConfigurableConstant;
 	@SneakyThrows
 	public ContractNegotiations prepareContractNegotiations(String providerProtocolUrl, String offerId, String assetId,
 			String provider, List<ActionRequest> action) {
 
 		PolicyRequest policy = contractPolicyMapper.preparePolicy(assetId, action);
 		policy.setId(offerId);
-
-		provider = (provider == null || provider.isEmpty()) ? "BPNL00000003AYRE" : provider;
+        String defaultProvider = edcAssetConfigurableConstant.getManufacturerId();
+		provider = (provider == null || provider.isEmpty()) ? defaultProvider : provider;
 		policy.setAssigner(Map.of("@id", provider));
 		return ContractNegotiations.builder()
 				.connectorAddress(providerProtocolUrl)

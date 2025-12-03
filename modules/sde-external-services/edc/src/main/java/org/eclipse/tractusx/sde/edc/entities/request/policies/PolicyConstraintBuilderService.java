@@ -185,6 +185,16 @@ public class PolicyConstraintBuilderService {
 
         String key = policy.getTechnicalKey();
 
+        // NEXT STEP REQUIRED NO "CX-POLICY:"
+        if (key.equals("cx-policy:Membership"))
+            key = "Membership";
+        if (key.equals("cx-policy:FrameworkAgreement"))
+            key = "FrameworkAgreement";
+
+        System.out.println("vvvvvvvv preparePolicyConstraint");
+        System.out.println(ALLOWED_OPERANDS);
+        System.out.println(key);
+
         // Skip unsupported operands
         if (!ALLOWED_OPERANDS.contains(key)) {
             System.out.println("*** Skipping unsupported policy operand: " + key);
