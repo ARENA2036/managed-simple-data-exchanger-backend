@@ -69,7 +69,7 @@ public class ContractNegotiationService extends AbstractEDCStepsHelper {
 
 		if (checkContractNegotiationStatus == null) {
 
-			// TODO THIS USES CONTRACTNEGOTIATION INSTEAD OF EDRCACHE SO NOT NEEDED ANYMORE
+			// TODO THIS USES CONTRACTNEGOTIATION INSTEAD OF EDR-CACHE SO NOT NEEDED ANYMORE
 //			String contractAgreementId = checkandGetContractAgreementId(assetId);
 //
 //			if (StringUtils.isBlank(contractAgreementId) || !eDRCachedResponseList.isEmpty()) {
