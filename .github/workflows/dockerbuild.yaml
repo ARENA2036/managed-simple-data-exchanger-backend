@@ -24,6 +24,8 @@ on:
   push:
     branches:
       - 'main'
+      - 'dockerbuild-workflow'
+      - 'sde-bugfix'
     tags:
       - 'v*.*.*'
       - 'v*.*.*-*'
@@ -55,7 +57,7 @@ jobs:
         with:
           java-version: '18'
           distribution: 'temurin'
-        
+
       - name: Build
         run: mvn -B package
 
