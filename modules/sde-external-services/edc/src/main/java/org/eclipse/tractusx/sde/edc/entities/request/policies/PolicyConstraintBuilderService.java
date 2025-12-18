@@ -21,15 +21,15 @@
 package org.eclipse.tractusx.sde.edc.entities.request.policies;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.tractusx.sde.common.configuration.properties.SDEConfigurationProperties;
 import org.eclipse.tractusx.sde.common.entities.Policies;
 import org.eclipse.tractusx.sde.common.entities.PolicyModel;
 import org.eclipse.tractusx.sde.common.mapper.JsonObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
+import org.eclipse.tractusx.sde.edc.constants.EDCAssetConfigurableConstant;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -40,40 +40,46 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PolicyConstraintBuilderService {
 
-	private static final String BUSINESS_PARTNER_NUMBER = "BusinessPartnerNumber";
+	private static final String U = "u";
+
+	private static final String A = "a";
 
 	private final PolicyRequestFactory policyRequestFactory;
 
 	private final JsonObjectMapper jsonobjectMapper;
 
-	@Value("${manufacturerId}")
-	private String manufacturerId;
+	private final EDCAssetConfigurableConstant edcAssetConfigurableConstant;
+
+	private final SDEConfigurationProperties sdeConfigurationProperties;
 
 //	private final IPolicyHubProxyService policyHubProxyService;
 //
 //	public JsonNode getAccessPolicy(String assetId, PolicyModel policy) {
 //		
-//		return policyRequestFactory.setPolicyIdAndGetObject(assetId,
+//		return jsonobjectMapper.objectToJsonNode(policyRequestFactory.setPolicyIdAndGetObject(assetId,
 //				policyHubProxyService.getPolicyContent(
-//						mapPolicy(PolicyTypeIdEnum.ACCESS, ConstraintOperandIdEnum.OR, policy.getAccessPolicies())),
-//				"a");
+//						mapPolicy(PolicyTypeIdEnum.ACCESS, ConstraintOperandIdEnum.OR, policy.getAccessPolicies(), "a")),
+//				"a"));
 //	}
 //
 //	public JsonNode getUsagePolicy(String assetId, PolicyModel policy) {
 //		
-//		return policyRequestFactory.setPolicyIdAndGetObject(assetId,
+//		return jsonobjectMapper.objectToJsonNode(policyRequestFactory.setPolicyIdAndGetObject(assetId,
 //				policyHubProxyService.getPolicyContent(
-//						mapPolicy(PolicyTypeIdEnum.USAGE, ConstraintOperandIdEnum.AND, policy.getUsagePolicies())),
-//				"u");
+//						mapPolicy(PolicyTypeIdEnum.USAGE, ConstraintOperandIdEnum.AND, policy.getUsagePolicies(), "u")),
+//				"u"));
 //	}
-	
+//
 //	private PolicyContentRequest mapPolicy(PolicyTypeIdEnum policyType, ConstraintOperandIdEnum constraintOperandId,
-//			List<Policies> policies) {
+//			List<Policies> policies, String type) {
 //
 //		List<Constraint> constraintsList = new ArrayList<>();
 //		policies.forEach(policy -> {
 //			
-//			List<String> valueList = getAndOwnerBPNIfNotExist(policy);
+//			List<String> valueList = policy.getValue();
+//
+//			//if (type.equals("a"))
+//			//	valueList = getAndOwnerBPNIfNotExist(policy, valueList);
 //			
 //			OperatorIdEnum operator = OperatorIdEnum.EQUALS;
 //
@@ -82,12 +88,14 @@ public class PolicyConstraintBuilderService {
 //			}
 //
 //			for (String value : valueList) {
-//				constraintsList.add(
-//						Constraint.builder()
-//						.key(policy.getTechnicalKey())
-//						.operator(operator)
-//						.value(value)
-//						.build());
+//				if (StringUtils.isNotBlank(value)) {
+//					constraintsList.add(
+//							Constraint.builder()
+//							.key(policy.getTechnicalKey())
+//							.operator(operator)
+//							.value(value)
+//							.build());
+//				}
 //			}
 //		});
 //
@@ -98,73 +106,95 @@ public class PolicyConstraintBuilderService {
 //				.build();
 //	}
 
-	public JsonNode getAccessPolicy(String assetId, PolicyModel policy) {
-		return jsonobjectMapper.objectToJsonNode(policyRequestFactory.getPolicy(assetId,
-				getPoliciesConstraints(policy.getAccessPolicies(), "odrl:or", "a"), Collections.emptyMap(), "a"));
+	public JsonNode getAccessPolicy(String policyId, String assetId, PolicyModel policy) {
+		return jsonobjectMapper.objectToJsonNode(
+				policyRequestFactory.getPolicy(policyId, assetId, getPoliciesConstraints(policy.getAccessPolicies(), A), A));
 	}
 
-	public JsonNode getUsagePolicy(String assetId, PolicyModel policy) {
-		return jsonobjectMapper.objectToJsonNode(policyRequestFactory.getPolicy(assetId,
-				getPoliciesConstraints(policy.getUsagePolicies(), "odrl:and", "u"), Collections.emptyMap(), "u"));
+	public JsonNode getUsagePolicy( String policyId, String assetId, PolicyModel policy) {
+		return jsonobjectMapper.objectToJsonNode(
+				policyRequestFactory.getPolicy(policyId, assetId, getPoliciesConstraints(policy.getUsagePolicies(), U), U));
 	}
 
-	public ActionRequest getUsagePoliciesConstraints(List<Policies> policies) {
-		return getPoliciesConstraints(policies, "odrl:and", "u");
+	public List<ActionRequest> getUsagePoliciesConstraints(List<Policies> policies) {
+		return getPoliciesConstraints(policies, U);
 	}
 
-	public ActionRequest getPoliciesConstraints(List<Policies> usagePolicies, String operator, String type) {
+	public List<ActionRequest> getPoliciesConstraints(List<Policies> policies, String type) {
+
 		List<ConstraintRequest> constraintList = new ArrayList<>();
 
-		if (usagePolicies != null && !usagePolicies.isEmpty()) {
-			usagePolicies.forEach(policy -> preparePolicyConstraint(constraintList, policy, type));
+		List<ConstraintRequest> bpnConstraintList = new ArrayList<>();
+
+		if (policies != null && !policies.isEmpty()) {
+			policies.forEach(policy -> {
+				if (type.equals(A)
+						&& policy.getTechnicalKey().equals(edcAssetConfigurableConstant.getBpnNumberTechnicalKey())) {
+					preparePolicyConstraint(bpnConstraintList, policy, getAndOwnerBPNIfNotExist(policy.getValue()));
+				} else {
+					preparePolicyConstraint(constraintList, policy, policy.getValue());
+				}
+			});
 		}
 
-		constraintList.sort(Comparator.comparing(ConstraintRequest::getLeftOperand));
-
+		List<ActionRequest> actionList = new ArrayList<>();
 		if (!constraintList.isEmpty()) {
-			ActionRequest action = ActionRequest.builder().build();
-			action.addProperty("@type", "LogicalConstraint");
-			action.addProperty(operator, constraintList);
-			return action;
+			actionList.add(prepareActionRequest("odrl:and", constraintList));
 		}
-		return null;
+
+		if (!bpnConstraintList.isEmpty()) {
+			actionList.add(prepareActionRequest("odrl:or", bpnConstraintList));
+		}
+
+		return actionList;
 
 	}
 
-	private void preparePolicyConstraint(List<ConstraintRequest> policies, Policies policy, String type) {
+	private ActionRequest prepareActionRequest(String operator, List<ConstraintRequest> constraintList) {
+		constraintList.sort(Comparator.comparing(a -> a.getLeftOperand().getId()));
+		ActionRequest action = ActionRequest.builder().build();
+		action.addProperty("@type", "LogicalConstraint");
+		action.addProperty(operator, constraintList);
+		return action;
+	}
+
+	private void preparePolicyConstraint(List<ConstraintRequest> policies, Policies policy, List<String> values) {
 
 		String operator = "odrl:eq";
-		
-		List<String> values = policy.getValue();
-		
-		if (type.equals("a"))
-			values = getAndOwnerBPNIfNotExist(policy, values);
-		
+
 		for (String value : values) {
+
 			if (StringUtils.isNotBlank(value)) {
+
+				String policyPrefix = "";
+
+				if (!policy.getTechnicalKey().startsWith(edcAssetConfigurableConstant.getCxPolicyPrefix())
+						&& !policy.getTechnicalKey().contains(":")) {
+					policyPrefix = edcAssetConfigurableConstant.getCxPolicyPrefix();
+				}
+
+				if (StringUtils.isNotBlank(policy.getOperator())) {
+					operator = policy.getOperator();
+				}
+
 				ConstraintRequest request = ConstraintRequest.builder()
-						.leftOperand(policy.getTechnicalKey())
-						.operator(Operator.builder().id(operator).build())
-						.rightOperand(value).build();
+						.leftOperand(LinkJsonLDId.builder().id(policyPrefix + policy.getTechnicalKey()).build())
+						.operator(LinkJsonLDId.builder().id(operator).build()).rightOperand(value).build();
 				policies.add(request);
 			}
 		}
 	}
 
-	private List<String> getAndOwnerBPNIfNotExist(Policies policy, List<String> values) {
-		
-		if (policy.getTechnicalKey().equals(BUSINESS_PARTNER_NUMBER) && !values.isEmpty()
-				&& (values.size() == 1 && StringUtils.isNotBlank(values.get(0))) && !values.contains(manufacturerId)) {
-			
-			List<String> temp = new ArrayList<>();
-			values.stream().forEach(temp::add);
-			temp.add(manufacturerId);
-			values = temp;
-			
-		}
-		
-		return values;
-		
-	}
+private List<String> getAndOwnerBPNIfNotExist(List<String> values) {
 
+        if (!values.isEmpty()
+                && !values.contains(sdeConfigurationProperties.getManufacturerId())
+                && (values.size() == 1 && !values.get(0).equals(""))) {
+            List<String> temp = new ArrayList<>(values);
+            temp.add(sdeConfigurationProperties.getManufacturerId());
+            values = temp;
+        }
+
+        return values;
+    }
 }

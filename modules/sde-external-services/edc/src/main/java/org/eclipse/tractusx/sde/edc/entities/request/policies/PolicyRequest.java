@@ -27,6 +27,7 @@ import java.util.Map;
 import org.eclipse.tractusx.sde.edc.model.policies.Obligation;
 import org.eclipse.tractusx.sde.edc.model.policies.Prohibition;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -43,21 +44,18 @@ import lombok.SneakyThrows;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PolicyRequest {
 
 	@JsonProperty("@type")
 	@Builder.Default
-	private String type = "Set";
+	private String type = "odrl:Set";
 	
 	@JsonProperty("@context")
-	@Builder.Default
-	private String context = "http://www.w3.org/ns/odrl.jsonld";
+	private Object context;
 	
 	@JsonProperty("@id")
 	private String id;
-	
-	@JsonProperty("profile")
-	private String profile;
 	
 	@JsonProperty("odrl:permission")
 	private Object permissions;
@@ -68,7 +66,8 @@ public class PolicyRequest {
 	@JsonProperty("odrl:obligation")
 	private List<Obligation> obligations;
 
-	private Map<String, String> extensibleProperties;
+	@JsonProperty("odrl:profile")
+	private String profile;
 
 	@JsonProperty("odrl:target")
 	private Map<String, String> target;

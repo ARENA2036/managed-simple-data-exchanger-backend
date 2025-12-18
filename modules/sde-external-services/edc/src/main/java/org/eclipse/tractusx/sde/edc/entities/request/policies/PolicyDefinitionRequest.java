@@ -1,7 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2022 BMW GmbH
- * Copyright (c) 2022, 2023 T-Systems International GmbH
- * Copyright (c) 2022, 2023 Contributors to the Eclipse Foundation
+ * Copyright (c) 2022,2024 T-Systems International GmbH
+ * Copyright (c) 2022,2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -21,8 +21,8 @@
 
 package org.eclipse.tractusx.sde.edc.entities.request.policies;
 
-import java.util.Map;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -36,21 +36,21 @@ import lombok.SneakyThrows;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(value = Include.NON_NULL)
 public class PolicyDefinitionRequest {
 
 	@JsonProperty("@context")
-	@Builder.Default
-	private Map<String, String> context = Map.of("odrl","http://www.w3.org/ns/odrl/2/");
+	private Object context;
 
 	@JsonProperty("@type")
 	@Builder.Default
-	private String polityRootType = "PolicyDefinitionRequestDto";
+	private String polityRootType = "PolicyDefinition";
 
 	@JsonProperty("@id")
     private String id;
 	
     @JsonProperty("policy")
-    private PolicyRequest policyRequest;
+    private Object policyRequest;
 
     @SneakyThrows
     public String toJsonString() {

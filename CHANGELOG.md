@@ -36,6 +36,44 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [2.4.0] - 2024-05-14
 
+### Fixed
+- Trivy issue fixed.
+
+
+## [2.4.3] - 2024-05-31
+
+### Added
+- New changes for PCF v7.0.0 support.
+- Security config changes.
+- Updated changelog and dependency file.
+- Dependencies jar versions updated. 
+- PCF exchange changes for 2408 version.
+
+### Fixed
+- Dependabot bump jar version fixed.
+- Trivy high security issue fixed for CVE-2024-34750.
+
+### Fixed
+- Dependabot bump jar version fixed.
+- Trivy high security issue fixed for CVE-2024-34750.  
+
+## [2.4.2] - 2024-05-30 [deprecated] 
+
+## [2.4.1] - 2024-05-24
+
+### Added
+- Correction in semanticId changes in pcf.
+- EDC code changes refactor.
+- PCF exchange code changes refactor.
+- New changes for BPDM service api access/call using EDC.
+- Refactors PCF asset exchange code changes.
+
+### Fixed
+- Fix for PCF data sovereignty test.
+- Security issue fixed.
+
+## [2.4.0] - 2024-05-14
+
 ### Added
 - Updated readme.md and open api yml file.
 - Added controller interface api's for Policy management.

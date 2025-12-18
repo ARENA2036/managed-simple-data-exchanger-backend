@@ -27,6 +27,7 @@ import org.eclipse.tractusx.sde.common.entities.PolicyModel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -74,6 +75,8 @@ public class QueryDataOfferModel {
 	private String policyId;
 
 	private PolicyModel policy;
+	
+	private JsonNode hasPolicy;
 
 	@Override
 	public boolean equals(Object obj) {
@@ -87,7 +90,9 @@ public class QueryDataOfferModel {
 		// type casting of the argument.
 		QueryDataOfferModel offer = (QueryDataOfferModel) obj;
 
-		return (offer.assetId.equals(this.assetId) && offer.connectorOfferUrl.equals(this.connectorOfferUrl));
+		return (offer.assetId.equals(this.assetId) 
+				&& offer.connectorOfferUrl.equals(this.connectorOfferUrl)
+				&& offer.sematicVersion.equals(this.sematicVersion));
 	}
 
 	@Override
