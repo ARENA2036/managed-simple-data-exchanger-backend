@@ -23,6 +23,7 @@ package org.eclipse.tractusx.sde.edc.entities.request.policies;
 import java.util.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.common.configuration.properties.SDEConfigurationProperties;
 import org.eclipse.tractusx.sde.common.entities.Policies;
@@ -35,6 +36,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import lombok.RequiredArgsConstructor;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PolicyConstraintBuilderService {
@@ -191,13 +193,14 @@ public class PolicyConstraintBuilderService {
         if (key.equals("cx-policy:FrameworkAgreement"))
             key = "FrameworkAgreement";
 
-        System.out.println("vvvvvvvv preparePolicyConstraint");
-        System.out.println(ALLOWED_OPERANDS);
-        System.out.println(key);
+        log.debug("preparePolicyConstraint");
+        log.debug("ALLOWED_OPERANDS: {}", ALLOWED_OPERANDS);
+        log.debug("key: {}", key);
+
 
         // Skip unsupported operands
         if (!ALLOWED_OPERANDS.contains(key)) {
-            System.out.println("*** Skipping unsupported policy operand: " + key);
+            log.info("*** Skipping unsupported policy operand: ", key);
             return;
         }
 

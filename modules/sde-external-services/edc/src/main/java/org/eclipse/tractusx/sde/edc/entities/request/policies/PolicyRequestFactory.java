@@ -27,6 +27,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.sde.edc.constants.EDCAssetConfigurableConstant;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +37,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PolicyRequestFactory {
@@ -64,18 +66,18 @@ public class PolicyRequestFactory {
                 .build();
 
         policyId = getGeneratedPolicyId(policyId, type);
-        System.out.println("^^^ " + edcAssetConfigurableConstant.getManufacturerId());
+        log.debug("ManufacturerId: {}", edcAssetConfigurableConstant.getManufacturerId());
+
         PolicyDefinitionRequest policyDefinitionRequest = PolicyDefinitionRequest.builder()
                 .id(policyId)
                 .context(contextMap)
                 .policyRequest(policyRequest)
                 .build();
 
-        System.out.println("$$$");
-        System.out.println(policyRequest.toJsonString());
-        System.out.println(policyDefinitionRequest.toJsonString());
-        System.out.println(policyRequest);
-        System.out.println(policyDefinitionRequest);
+        log.debug("PolicyRequest JSON:\n{}", policyRequest.toJsonString());
+        log.debug("PolicyDefinitionRequest JSON:\n{}", policyDefinitionRequest.toJsonString());
+        log.debug("PolicyRequest object: {}", policyRequest);
+        log.debug("PolicyDefinitionRequest object: {}", policyDefinitionRequest);
 
         return policyDefinitionRequest;
     }

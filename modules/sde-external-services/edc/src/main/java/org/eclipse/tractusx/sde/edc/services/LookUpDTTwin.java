@@ -205,10 +205,9 @@ public class LookUpDTTwin {
 			ProtocolInformation protocolInformation = subModelResponse.getEndpoints().get(0).getProtocolInformation();
 			
 			String subprotocolBody = protocolInformation.getSubprotocolBody();
-			System.out.println("subprotocolBody: " + subprotocolBody);
+            log.debug("subprotocolBody: {}", subprotocolBody);
 
-			
-			String submodelIdShort = subModelResponse.getIdShort();
+            String submodelIdShort = subModelResponse.getIdShort();
 			
 			String href = "";
 			if(submodelIdShort.equals("PCFExchangeEndpoint")) {

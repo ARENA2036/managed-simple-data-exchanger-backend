@@ -85,7 +85,6 @@ public class GenericSubmodelExecutor extends SubmodelExecutor {
 	@Override
 	public void executeCsvRecord(RowData rowData, ObjectNode jsonObject, String processId, PolicyModel policy) {
 
-		System.out.println("3");
 		csvParseStep.init(getSubmodelSchema());
 		csvParseStep.run(rowData, jsonObject, processId);
 

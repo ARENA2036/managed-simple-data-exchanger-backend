@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.common.constants.CommonConstants;
 import org.eclipse.tractusx.sde.common.entities.PolicyModel;
@@ -59,6 +60,7 @@ import lombok.SneakyThrows;
 
 @Component
 @Getter
+@Slf4j
 public class DigitalTwinsUtility {
 
 	private static final String PUBLIC_READABLE = "PUBLIC_READABLE";
@@ -220,8 +222,8 @@ public class DigitalTwinsUtility {
 
 	private List<Keys> bpnKeyRefrence(List<String> bpns) {
 		if (bpns != null && !(bpns.size() == 1 && bpns.contains(manufacturerId))) {
-			System.out.println("bpns: " + bpns);
-			System.out.println("manufacturerId: " + manufacturerId);
+            log.debug("bpns: {}", bpns);
+            log.debug("manufacturerId: {}", manufacturerId);
 
 			return bpns.stream().map(bpn -> Keys.builder().type("GlobalReference").value(bpn).build()).toList();
 		}

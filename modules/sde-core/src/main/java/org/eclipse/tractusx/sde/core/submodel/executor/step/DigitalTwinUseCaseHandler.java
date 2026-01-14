@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.common.configuration.properties.PCFAssetStaticPropertyHolder;
 import org.eclipse.tractusx.sde.common.configuration.properties.SDEConfigurationProperties;
@@ -57,6 +58,7 @@ import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
+@Slf4j
 @Service("digitalTwinUseCaseHandler")
 @RequiredArgsConstructor
 public class DigitalTwinUseCaseHandler extends Step implements DigitalTwinUsecaseStep {
@@ -93,9 +95,10 @@ public class DigitalTwinUseCaseHandler extends Step implements DigitalTwinUsecas
 			String identifier = getIdentifier(jsonObject, getIdentifierOfModel());
 
 			String shortIdForShell = generateShortId(jsonObject, getShortIdSpecsOfModel());
-			System.out.println("shortId %%%"+ shortIdForShell );
-			System.out.println("shortId identifier %%%"+  identifier);
-			Map<String, String> specificAssetIds = generateSpecificAssetIds(jsonObject,
+            log.debug("shortId: {}", shortIdForShell);
+            log.debug("shortId identifier: {}", identifier);
+
+            Map<String, String> specificAssetIds = generateSpecificAssetIds(jsonObject,
 					getSpecificAssetIdsSpecsOfModel());
 
 			addManufactureIdInSpecificAssetIds(specificAssetIds, sdeConfigProperties.getManufacturerId());
