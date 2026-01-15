@@ -1,5 +1,5 @@
 ###############################################################
-# Copyright (c) 2021, 2023 Contributors to the Eclipse Foundation
+# Copyright (c) 2023 Contributors to the Eclipse Foundation
 #
 # See the NOTICE file(s) distributed with this work for additional
 # information regarding copyright ownership.
@@ -16,5 +16,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 ###############################################################
-
+product: "managed-simple-data-exchanger"
 leadingRepository: "https://github.com/eclipse-tractusx/managed-simple-data-exchanger"
+repoCategory: "special"
+repositories:
+  - name: "tractus-x-umbrella"
+    usage: "The repository contains the Backend for the SDE/DFT."
+    url: "https://github.com/eclipse-tractusx/managed-simple-data-exchanger"

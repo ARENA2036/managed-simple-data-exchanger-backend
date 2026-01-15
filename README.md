@@ -1,4 +1,9 @@
-   # Simple Data Exchanger (formally known Data Format Transformer)
+# Simple Data Exchanger (formally known Data Format Transformer)
+[![Contributors][contributors-shield]][contributors-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Apache 2.0 License][license-shield]][license-url]
+[![Latest Release][release-shield]][release-url]
+
 ---
 ## Description
 
@@ -385,6 +390,9 @@ Authentication for the backend is handled via an API Key. This can be set in the
 ### EDC
 GitHub repository with correct version of the Eclipse DataSpace Connector Project: [repository](https://github.com/eclipse-tractusx/tractusx-edc).
 
+## How to contribute
+Please refer to our [CONTRIBUTION](./CONTRIBUTING.md) guidelines
+
 ## Licenses
 For used licenses, please see the [NOTICE](https://github.com/eclipse-tractusx/managed-simple-data-exchanger-backend/blob/main/NOTICE.md).
 
@@ -399,3 +407,18 @@ Bellow you can find the information regarding Docker Notice for this application
   - [Managed-simple-data-exchanger](DOCKER_NOTICE.md)
 
 
+[contributors-shield]: https://img.shields.io/github/contributors/eclipse-tractusx/managed-simple-data-exchanger-backend.svg?style=for-the-badge
+
+[contributors-url]: https://github.com/eclipse-tractusx/managed-simple-data-exchanger-backend/graphs/contributors
+
+[stars-shield]: https://img.shields.io/github/stars/eclipse-tractusx/managed-simple-data-exchanger-backend.svg?style=for-the-badge
+
+[stars-url]: https://github.com/eclipse-tractusx/managed-simple-data-exchanger-backend/stargazers
+
+[license-shield]: https://img.shields.io/github/license/eclipse-tractusx/managed-simple-data-exchanger-backend.svg?style=for-the-badge
+
+[license-url]: https://github.com/eclipse-tractusx/managed-simple-data-exchanger-backend/blob/main/LICENSE
+
+[release-shield]: https://img.shields.io/github/v/release/eclipse-tractusx/managed-simple-data-exchanger-backend?style=for-the-badge
+
+[release-url]: https://github.com/eclipse-tractusx/managed-simple-data-exchanger-backend/releases

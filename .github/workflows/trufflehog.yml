@@ -1,5 +1,4 @@
-#################################################################################
-# Copyright (c) 2024 T-Systems International GmbH
+###############################################################
 # Copyright (c) 2024 Contributors to the Eclipse Foundation
 #
 # See the NOTICE file(s) distributed with this work for additional
@@ -16,7 +15,7 @@
 # under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-################################################################################
+###############################################################
 name: "TruffleHog"
 
 on:
@@ -48,13 +47,13 @@ jobs:
 
       - name: TruffleHog OSS
         id: trufflehog
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@7e78ca385fb82c19568c7a4b341c97d57d9aa5e1
         continue-on-error: true
         with:
           path: ./  # Scan the entire repository
           base: "${{ github.event.repository.default_branch }}"  # Set base branch for comparison (pull requests)
-          extra_args: --filter-entropy=4 --results=verified,unknown --debug
-      
+          extra_args: --filter-entropy=4 --results=verified,unknown --debug --only-verified
+
       - name: Scan Results Status
         if: steps.trufflehog.outcome == 'failure'
-        run: exit 1  # Set workflow run to failure if TruffleHog finds secrets 
+        run: exit 1  # Set workflow run to failure if TruffleHog finds secrets
