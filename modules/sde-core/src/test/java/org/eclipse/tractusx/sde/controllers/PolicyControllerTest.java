@@ -67,7 +67,7 @@ class PolicyControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
-    public void init() {
+    void init() {
         policyRepository.deleteAll();
     }
 
@@ -129,13 +129,15 @@ class PolicyControllerTest {
 
     private PolicyModel getPolicy(String policyName) {
        
-    	List<Policies> accessPolicies = List.of(Policies.builder()
-        		.technicalKey("BusinessPartnerNumber")
-        		.value(List.of("BPNL00000005PROV", "BPNL00000005PROW", "BPNL00000005PROB"))
-        		.build(),Policies.builder()
-        		.technicalKey("Membership")
-        		.value(List.of("active"))
-        		.build());
+    	List<Policies> accessPolicies = List.of(
+                Policies.builder()
+                        .technicalKey("BusinessPartnerNumber")
+                        .value(List.of("BPNL00000005PROV", "BPNL00000005PROW", "BPNL00000005PROB"))
+                        .build(),
+                Policies.builder()
+                        .technicalKey("Membership")
+                        .value(List.of("active"))
+                        .build());
         
         Policies usagePolicies = Policies.builder()
         		.technicalKey("Membership")
