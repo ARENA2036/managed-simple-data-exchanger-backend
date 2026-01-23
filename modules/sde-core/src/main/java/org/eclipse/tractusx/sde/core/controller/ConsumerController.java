@@ -25,11 +25,7 @@ import static org.springframework.http.ResponseEntity.ok;
 import java.util.List;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.eclipse.tractusx.sde.common.exception.ServiceException;
 import org.eclipse.tractusx.sde.common.exception.ValidationException;
-//import org.eclipse.tractusx.sde.core.edr.AssetEdrResolveRequest;
-import org.eclipse.tractusx.sde.common.model.Acknowledgement;
 import org.eclipse.tractusx.sde.core.service.ConsumerService;
 import org.eclipse.tractusx.sde.edc.model.request.ConsumerRequest;
 import org.eclipse.tractusx.sde.edc.model.request.QueryDataOfferRequest;
@@ -94,20 +90,13 @@ public class ConsumerController {
 		return ok().body(edcPolicy);
 	}
 
-	
 	@PostMapping(value = "/subscribe-data-offers")
 	@PreAuthorize("hasPermission('','consumer_establish_contract_agreement')")
-	public void subscribeDataOffers(@Valid @RequestBody ConsumerRequest consumerRequest,
-													  HttpServletResponse response) {
+	public ResponseEntity<Object> subscribeDataOffers(@Valid @RequestBody ConsumerRequest consumerRequest) {
+		String processId = UUID.randomUUID().toString();
 		log.info("Request recevied : /api/subscribe-data-offers");
-		log.info("### " + consumerRequest.toString());
-
-//		String processId = UUID.randomUUID().toString();
-//		consumerControlPanelService.subscribeDataOffers(consumerRequest, processId);
-
-		consumerService.subscribeAndDownloadDataOffersSynchronous(consumerRequest, response);
-
-//		return ResponseEntity.ok().body(processId);
+		consumerControlPanelService.subscribeDataOffers(consumerRequest, processId);
+		return ResponseEntity.ok().body(processId);
 	}
 
 	@PostMapping(value = "/subscribe-download-data-offers-async")
@@ -153,24 +142,4 @@ public class ConsumerController {
 		log.info("Request received : /api/view-download-history-details");
 		return ok().body(consumerService.viewConsumerDownloadHistoryDetails(processId));
 	}
-
-//	@PostMapping("/assets/{assetId}/edr:resolve")
-//	@PreAuthorize("hasPermission('','consumer_resolve_edr')")
-//	public ResponseEntity<Object> resolveAssetEdr(
-//			@PathVariable String assetId,
-//			@Valid @RequestBody AssetEdrResolveRequest req
-//	) {
-//		var result = consumerService.resolveAssetEdr(assetId, req);
-//		return ok(result);
-//	}
-//
-//	@GetMapping("/assets/{assetId}/content")
-//	@PreAuthorize("hasPermission('','consumer_view_asset_content')")
-//	public void getAssetContent(
-//			@PathVariable String assetId,
-//			@RequestParam(defaultValue = "json") String type,
-//			HttpServletResponse response
-//	) throws ServiceException {
-//		consumerService.streamAssetContent(assetId, type, response);
-//	}
 }
