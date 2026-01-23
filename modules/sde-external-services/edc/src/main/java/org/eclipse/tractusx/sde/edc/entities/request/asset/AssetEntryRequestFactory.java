@@ -69,7 +69,10 @@ public class AssetEntryRequestFactory {
 
 		HashMap<String, Object> assetProperties = getAssetProperties(assetId, assetName, sematicId, dctType);
 
-		String uriString = subModelPayloadUrl(assetId);
+		//if uuid isn't present use the assetId instead
+		String requestUuid = StringUtils.isBlank(uuid)? assetId : uuid;
+
+		String uriString = subModelPayloadUrl(submodel, submoduleUriPath, requestUuid);
 
 		HashMap<String, String> dataAddressProperties = getDataAddressProperties(shellId, subModelId, uriString);
 		DataAddressRequest dataAddressRequest = DataAddressRequest.builder().properties(dataAddressProperties).build();
@@ -78,11 +81,12 @@ public class AssetEntryRequestFactory {
 				.build();
 	}
 
-	private String subModelPayloadUrl(String uuid) {
-//		return UriComponentsBuilder.fromHttpUrl(dftHostname)
-//                .path("/" + submodel + "/" + submoduleUriPath)
-//				.path("/" + uuid).toUriString();
-		return UriComponentsBuilder.fromHttpUrl(dftHostname).path("/" + uuid).toUriString();
+	private String subModelPayloadUrl(String submodel, String submoduleUriPath, String uuid) {
+		return UriComponentsBuilder.fromHttpUrl(dftHostname)
+				.path(submodel)
+				.path(submoduleUriPath)
+				.path(uuid)
+				.toUriString();
 	}
 
 	private HashMap<String, Object> getAssetProperties(String assetId, String assetName, String sematicId,
