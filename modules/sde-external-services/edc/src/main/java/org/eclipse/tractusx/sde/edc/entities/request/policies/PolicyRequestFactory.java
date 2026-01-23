@@ -2,6 +2,7 @@
  * Copyright (c) 2022 BMW GmbH
  * Copyright (c) 2022,2024 T-Systems International GmbH
  * Copyright (c) 2022,2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 ARENA2036 e.V.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -25,8 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.sde.edc.constants.EDCAssetConfigurableConstant;
 import org.springframework.stereotype.Service;
@@ -42,15 +41,13 @@ import lombok.SneakyThrows;
 @RequiredArgsConstructor
 public class PolicyRequestFactory {
 
-	private final EDCAssetConfigurableConstant edcAssetConfigurableConstant;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final EDCAssetConfigurableConstant edcAssetConfigurableConstant;
 
     public PolicyDefinitionRequest getPolicy(String policyId, String assetId, List<ActionRequest> action, String type) {
 
         List<PermissionRequest> permissions = getPermissions(assetId, action);
 
-        Map<String,String> contextMap = Map.of(
-                // "@vocab", "https://w3id.org/edc/v0.0.1/ns/",
+        Map<String, String> contextMap = Map.of(
                 "edc", "https://w3id.org/edc/v0.0.1/ns/",
                 "tx", "https://w3id.org/tractusx/v0.0.1/ns/",
                 "odrl", "http://www.w3.org/ns/odrl/2/",
@@ -65,8 +62,12 @@ public class PolicyRequestFactory {
                 .assigner(Map.of("@id", edcAssetConfigurableConstant.getManufacturerId()))
                 .build();
 
+        log.debug("Created PolicyRequest for manufacturerId {}:\n$$$\nPolicyRequest:\n{}",
+                edcAssetConfigurableConstant.getManufacturerId(),
+                policyRequest.toJsonString()
+        );
+
         policyId = getGeneratedPolicyId(policyId, type);
-        log.debug("ManufacturerId: {}", edcAssetConfigurableConstant.getManufacturerId());
 
         PolicyDefinitionRequest policyDefinitionRequest = PolicyDefinitionRequest.builder()
                 .id(policyId)
@@ -74,10 +75,10 @@ public class PolicyRequestFactory {
                 .policyRequest(policyRequest)
                 .build();
 
-        log.debug("PolicyRequest JSON:\n{}", policyRequest.toJsonString());
-        log.debug("PolicyDefinitionRequest JSON:\n{}", policyDefinitionRequest.toJsonString());
-        log.debug("PolicyRequest object: {}", policyRequest);
-        log.debug("PolicyDefinitionRequest object: {}", policyDefinitionRequest);
+        log.debug("Created policyDefinitionRequest for manufacturerId{}:\n$$$\npolicyDefinitionRequest:\n{}",
+                edcAssetConfigurableConstant.getManufacturerId(),
+                policyDefinitionRequest.toJsonString()
+        );
 
         return policyDefinitionRequest;
     }

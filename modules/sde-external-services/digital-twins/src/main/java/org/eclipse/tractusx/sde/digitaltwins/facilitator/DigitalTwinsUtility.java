@@ -191,7 +191,7 @@ public class DigitalTwinsUtility {
 
 		List<Object> specificIdentifiers = new ArrayList<>();
 
-		List<Keys> keyList = bpnKeyRefrence(PolicyOperationUtil.getAccessBPNList(policy));
+		List<Keys> keyList = bpnKeyReference(PolicyOperationUtil.getAccessBPNList(policy));
 
 		specificAssetIds.entrySet().stream().forEach(entry -> {
 
@@ -220,11 +220,9 @@ public class DigitalTwinsUtility {
 		return specificIdentifiers;
 	}
 
-	private List<Keys> bpnKeyRefrence(List<String> bpns) {
+	private List<Keys> bpnKeyReference(List<String> bpns) {
 		if (bpns != null && !(bpns.size() == 1 && bpns.contains(manufacturerId))) {
-            log.debug("bpns: {}", bpns);
-            log.debug("manufacturerId: {}", manufacturerId);
-
+			log.debug("bpns:  {} \nmanufacturerId: {}", bpns, manufacturerId);
 			return bpns.stream().map(bpn -> Keys.builder().type("GlobalReference").value(bpn).build()).toList();
 		}
 		return Collections.emptyList();

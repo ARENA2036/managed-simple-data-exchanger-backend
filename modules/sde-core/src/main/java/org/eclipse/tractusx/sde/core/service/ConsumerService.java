@@ -95,8 +95,6 @@ public class ConsumerService {
 
 	private final ContractNegotiationService contractNegotiationService;
 	private final EDRRequestHelper edrRequestHelper;
-//	private EdrTokenCacheService edrCache;
-
 
 	ObjectMapper mapper = new ObjectMapper();
 
@@ -161,7 +159,7 @@ public class ConsumerService {
 				entity.setOffers(mapper.writeValueAsString(entry.getValue()));
 				entity.setPolicies(mapper.writeValueAsString(consumerRequest.getUsagePolicies()));
 			} catch (JsonProcessingException e) {
-				e.printStackTrace();
+				log.warn(e.getMessage());
 			}
 
 			entity.setDownloadSuccessed(successCount.get());

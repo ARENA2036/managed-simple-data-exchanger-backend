@@ -85,12 +85,9 @@ public class EDCAssetUrlCacheService {
 						.getAuthorizationTokenForDataDownload(eDRCachedResponse.getTransferProcessId());
 
 		} catch (FeignException e) {
-			log.error("FeignException Request : " + e.request());
-			String errorMsg = "Unable to look up offer because: " + e.contentUTF8();
-			log.error("FeignException : " + errorMsg);
+			log.error("FeignException Request: {} \n  Content: {}",  e.request(), e.contentUTF8());
 		} catch (Exception e) {
-			String errorMsg = "Unable to look up offer because: " + e.getMessage();
-			log.error("Exception : " + errorMsg);
+			log.error("Exception: Unable to look up offer because: {}",  e.getMessage());
 		}
 
 		return null;
@@ -111,7 +108,7 @@ public class EDCAssetUrlCacheService {
 		dDTRmap.put(bpnNumber, cacheExpTime);
 		List<QueryDataOfferModel> ddtrUrl = dDTRUrlCacheUtility.getDDTRUrl(bpnNumber);
 		if (ddtrUrl.isEmpty()) {
-			log.info("Found connector list empty so removing existing cache and retry to fetch");
+			log.info("DDTR: Found connector list empty so removing existing cache and retry to fetch");
 			removeDDTRUrlCache(bpnNumber);
 		}
 		return ddtrUrl;
@@ -142,7 +139,7 @@ public class EDCAssetUrlCacheService {
 		pcfExchangeURLMap.put(bpnNumber, cacheExpTime);
 		List<QueryDataOfferModel> pcfExchangeurls = pcfExchangeAssetUtils.getPCFExchangeUrl(bpnNumber);
 		if (pcfExchangeurls.isEmpty()) {
-			log.info("Found connector list empty so removing existing cache and retry to fetch");
+			log.info("PCF: Found connector list empty so removing existing cache and retry to fetch");
 			removePCFExchangeCache(bpnNumber);
 		}
 		return pcfExchangeurls;
@@ -174,7 +171,7 @@ public class EDCAssetUrlCacheService {
 
 		List<QueryDataOfferModel> bpdmUrls = bpdmEdcAssetUtility.getBpdmUrl(edcAssetConfigurableConstant.getBpdmProviderBpnl());
 		if (bpdmUrls.isEmpty()) {
-			log.info("Found connector list empty so removing existing cache and retry to fetch");
+			log.info("BPDM: Found connector list empty so removing existing cache and retry to fetch");
 			removeBpdmCache();
 		}
 		return bpdmUrls;
