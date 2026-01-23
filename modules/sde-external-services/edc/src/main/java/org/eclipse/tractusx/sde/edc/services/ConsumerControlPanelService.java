@@ -124,12 +124,11 @@ public class ConsumerControlPanelService {
 							submodel, offset, limit));
 
 				} else {
-                    log.warn("EDR token is null, unable to look Up Digital Twin for :" + dtOffer);
-                    // Print JSON Object to console
+                    log.warn("EDR token is null, unable to look Up Digital Twin for : {}",  dtOffer);
                     try {
                         log.warn(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(dtOffer));
                     } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
+						log.error("Can't parse the following Digital Twin to JSON \n {}", dtOffer);
                     }
                 }
 			}
