@@ -55,7 +55,6 @@ public class DatabaseUsecaseHandler extends Step implements DatabaseUsecaseStep 
 	private final SubmodelService submodelService;
 	private final SubmoduleUtility submoduleUtility;
 	
-	@Qualifier("submoduleResponseHandler")
 	private final SubmoduleMapperUsecaseStep submoduleResponseHandler;
 	
 

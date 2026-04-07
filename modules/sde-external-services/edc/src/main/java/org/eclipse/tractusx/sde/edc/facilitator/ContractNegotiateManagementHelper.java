@@ -22,10 +22,7 @@ package org.eclipse.tractusx.sde.edc.facilitator;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.common.entities.Policies;
@@ -213,7 +210,7 @@ public class ContractNegotiateManagementHelper extends AbstractEDCStepsHelper {
 
 			if (policies.isEmpty())
 			
-			UtilityFunctions.getUsagePolicies(policies, List.of());
+			UtilityFunctions.mapPolicies(policies, List.of());
 			ContractAgreementInfo agreementInfo = ContractAgreementInfo.builder()
 					.contractEndDate(agreement.getContractEndDate())
 					.contractSigningDate(agreement.getContractSigningDate())
@@ -235,12 +232,14 @@ public class ContractNegotiateManagementHelper extends AbstractEDCStepsHelper {
         Map<String, Object> logicalGroup = permissionRequest.getConstraint();
         if (logicalGroup == null) return;
 
-        Object andObj = logicalGroup.get("odrl:and");
+        Object andObj = Optional.ofNullable(logicalGroup.get("odrl:and"))
+				.orElseGet(() -> logicalGroup.get("and"));
         if (andObj != null) {
             setContraint(objMapper, policies, andObj);
         }
 
-        Object orObj = logicalGroup.get("odrl:or");
+        Object orObj = Optional.ofNullable(logicalGroup.get("odrl:or"))
+				.orElseGet(() -> logicalGroup.get("or"));
         if (orObj != null) {
             setContraint(objMapper, policies, orObj);
         }
@@ -248,14 +247,14 @@ public class ContractNegotiateManagementHelper extends AbstractEDCStepsHelper {
 
 	private void setContraint(ObjectMapper objeMapper, List<Policies> policies, Object object) {
 		if (object instanceof ArrayList) {
-			List<ConstraintRequest> convertValue = objeMapper.convertValue(object,
+			List<ConstraintRequest> convertedValues = objeMapper.convertValue(object,
 					new TypeReference<List<ConstraintRequest>>() {
 					});
-			UtilityFunctions.getUsagePolicies(policies, convertValue);
+			UtilityFunctions.mapPolicies(policies, convertedValues);
 		} else if (object != null) {
 
-			ConstraintRequest convertValue = objeMapper.convertValue(object, ConstraintRequest.class);
-			UtilityFunctions.getUsagePolicies(policies, List.of(convertValue));
+			ConstraintRequest convertedValue = objeMapper.convertValue(object, ConstraintRequest.class);
+			UtilityFunctions.mapPolicies(policies, List.of(convertedValue));
 		}
 	}
 

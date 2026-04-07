@@ -115,8 +115,7 @@ public class ConsumerControlPanelService {
 			List<QueryDataOfferModel> ddTROffers = edcAssetUrlCacheService.getDDTRUrl(bpnNumber);
 
 			// 3 lookup shell for PCF sub model
-			for (QueryDataOfferModel dtOffer : ddTROffers) {
-
+			ddTROffers.stream().distinct().forEach(dtOffer ->{
 				EDRCachedByIdResponse edrToken = edcAssetUrlCacheService.verifyAndGetToken(bpnNumber, dtOffer);
 				if (edrToken != null) {
 
@@ -124,14 +123,14 @@ public class ConsumerControlPanelService {
 							submodel, offset, limit));
 
 				} else {
-                    log.warn("EDR token is null, unable to look Up Digital Twin for : {}",  dtOffer);
-                    try {
-                        log.warn(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(dtOffer));
-                    } catch (JsonProcessingException e) {
+					log.warn("EDR token is null, unable to look Up Digital Twin for : {}",  dtOffer);
+					try {
+						log.warn(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(dtOffer));
+					} catch (JsonProcessingException e) {
 						log.error("Can't parse the following Digital Twin to JSON \n {}", dtOffer);
-                    }
-                }
-			}
+					}
+				}
+			});
 		}
 		return new HashSet<>(queryOnDataOffers);
 

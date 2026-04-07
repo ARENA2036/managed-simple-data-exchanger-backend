@@ -31,6 +31,7 @@ import lombok.SneakyThrows;
 @Component
 public class ContractOfferRequestFactory {
 
+
 	@SneakyThrows
 	public ObjectNode getContractOfferRequest(String providerUrl, String counterPartyId, Integer limit, Integer offset,
 			String filterExpression) {
@@ -42,9 +43,14 @@ public class ContractOfferRequestFactory {
 		
 		String formatSchema = """
 				{
-				 "@context": {},
-				 "protocol": "dataspace-protocol-http",
-				 "counterPartyAddress": "%s",
+				 "@context": {
+				     "@vocab": "https://w3id.org/edc/v0.0.1/ns/",
+				     "odrl": "http://www.w3.org/ns/odrl/2/",
+				     "dct": "http://purl.org/dc/terms/"
+				 },
+				 "@type": "CatalogRequest",
+				 "protocol": "dataspace-protocol-http:2025-1",
+				 "counterPartyAddress": "%s/2025-1",
 				 "counterPartyId":"%s",
 				 "querySpec": {
 				 "offset": %s,

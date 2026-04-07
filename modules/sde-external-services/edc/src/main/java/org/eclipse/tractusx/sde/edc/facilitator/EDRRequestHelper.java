@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.tractusx.sde.common.configuration.properties.EDRConfigurationProperties;
 import org.eclipse.tractusx.sde.common.utils.LogUtil;
 import org.eclipse.tractusx.sde.edc.api.EDRApiProxy;
 import org.eclipse.tractusx.sde.edc.entities.request.policies.ActionRequest;
@@ -35,6 +36,7 @@ import org.eclipse.tractusx.sde.edc.model.contractnegotiation.ContractNegotiatio
 import org.eclipse.tractusx.sde.edc.model.edr.EDRCachedByIdResponse;
 import org.eclipse.tractusx.sde.edc.model.edr.EDRCachedResponse;
 import org.eclipse.tractusx.sde.edc.model.request.Offer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -50,6 +52,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EDRRequestHelper extends AbstractEDCStepsHelper {
 
+	private final EDRConfigurationProperties edrProperties;
+	@Value("${edr.refresh.auto:true}")
+	private boolean edrAutoRefresh;
 	private final EDRApiProxy edrApiProxy;
 	private final ContractMapper contractMapper;
 	private final ObjectMapper mapper = new ObjectMapper();
@@ -58,20 +63,17 @@ public class EDRRequestHelper extends AbstractEDCStepsHelper {
 	public String edrRequestInitiate(String providerUrl, String providerId, Offer offer, String assetId,
 			List<ActionRequest> action, Map<String, String> extensibleProperty) {
 
-		Map<String,String> contextMap= Map.of(
-			        "@vocab", "https://w3id.org/edc/v0.0.1/ns/",
-			        "edc", "https://w3id.org/edc/v0.0.1/ns/",
-			        "tx", "https://w3id.org/tractusx/v0.0.1/ns/",
-			        "tx-auth", "https://w3id.org/tractusx/auth/",
-			        "cx-policy", "https://w3id.org/catenax/policy/",
-			        "odrl", "http://www.w3.org/ns/odrl/2/"
-				);
+		List<Object> context = List.of(
+				"http://www.w3.org/ns/odrl.jsonld",
+				"https://w3id.org/catenax/2025/9/policy/context.jsonld",
+				Map.of("@vocab", "https://w3id.org/edc/v0.0.1/ns/")
+		);
 		
 		String offerId = offer.getOfferId();
 		ContractNegotiations contractNegotiations = contractMapper.prepareContractNegotiations(providerUrl, offerId,
 				assetId, providerId, action);
 		
-		contractNegotiations.setContext(contextMap);
+		contractNegotiations.setContext(context);
 		
 		log.debug(LogUtil.encode(contractNegotiations.toJsonString()));
 		
@@ -118,7 +120,7 @@ public class EDRRequestHelper extends AbstractEDCStepsHelper {
 
 	@SneakyThrows
 	public EDRCachedByIdResponse getEDRCachedByTransferProcessId(String transferProcessId) {
-		return edrApiProxy.getEDRCachedByTransferProcessId(new URI(consumerHostWithDataPath), transferProcessId, true,
+		return edrApiProxy.getEDRCachedByTransferProcessId(new URI(consumerHostWithDataPath), transferProcessId, edrProperties.getRefresh().getAuto(),
 				getAuthHeader());
 	}
 

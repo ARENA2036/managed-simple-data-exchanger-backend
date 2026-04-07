@@ -20,10 +20,12 @@
 
 package org.eclipse.tractusx.sde.edc.services;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.tractusx.sde.common.configuration.properties.EDRConfigurationProperties;
 import org.eclipse.tractusx.sde.common.exception.ServiceException;
 import org.eclipse.tractusx.sde.common.utils.LogUtil;
 import org.eclipse.tractusx.sde.edc.entities.request.policies.ActionRequest;
@@ -35,6 +37,7 @@ import org.eclipse.tractusx.sde.edc.model.contractnegotiation.ContractNegotiatio
 import org.eclipse.tractusx.sde.edc.model.edr.EDRCachedByIdResponse;
 import org.eclipse.tractusx.sde.edc.model.edr.EDRCachedResponse;
 import org.eclipse.tractusx.sde.edc.model.request.Offer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -50,8 +53,10 @@ import lombok.extern.slf4j.Slf4j;
 public class ContractNegotiationService extends AbstractEDCStepsHelper {
 
 	private final EDRRequestHelper edrRequestHelper;
-	private static final Integer RETRY = 5;
-	private static final Integer THRED_SLEEP_TIME = 5000;
+	@Value("${edr.retry.count:5}")
+	private Integer retries;
+	@Value("${edr.retry.time:500}")
+	private Integer threadSleepTime;
 
 	private final ContractNegotiateManagementHelper contractNegotiateManagement;
 
@@ -64,36 +69,37 @@ public class ContractNegotiationService extends AbstractEDCStepsHelper {
 
 		// Verify if there are already EDR process initiated then skip it for again download
 		String assetId = offer.getAssetId();
-		List<EDRCachedResponse> eDRCachedResponseList = edrRequestHelper.getEDRCachedByAsset(assetId);
+//		edrRequestHelper.edrRequestInitiate(recipientURL, connectorId, offer, assetId, action, extensibleProperty);
+		List<EDRCachedResponse> eDRCachedResponseList = Collections.emptyList();
+		try {
+			eDRCachedResponseList = edrRequestHelper.getEDRCachedByAsset(assetId);
+		}catch (FeignException feignException){
+			log.error(feignException.getMessage());
+		}
+
 		EDRCachedResponse checkContractNegotiationStatus = verifyEDRResponse(eDRCachedResponseList);
 
 		if (checkContractNegotiationStatus == null) {
-
-			// TODO THIS USES CONTRACTNEGOTIATION INSTEAD OF EDR-CACHE SO NOT NEEDED ANYMORE
-//			String contractAgreementId = checkandGetContractAgreementId(assetId);
-//
-//			if (StringUtils.isBlank(contractAgreementId) || !eDRCachedResponseList.isEmpty()) {
-//				log.info(LogUtil.encode("The EDR process was not completed, no EDR status found "
-//						+ "and not valid contract agreementId for " + recipientURL + ", " + assetId
-//						+ ", so initiating EDR process"));
-//				edrRequestHelper.edrRequestInitiate(recipientURL, connectorId, offer, assetId, action,
-//						extensibleProperty);
-//				checkContractNegotiationStatus = verifyEDRRequestStatus(assetId);
-//			} else {
-//				log.info(LogUtil.encode("There is valid contract agreement exist for " + recipientURL + ", " + assetId
-//						+ ", so ignoring EDR process initiation"));
-//				checkContractNegotiationStatus = EDRCachedResponse.builder().agreementId(contractAgreementId)
-//						.assetId(assetId).build();
-//			}
-
-			edrRequestHelper.edrRequestInitiate(recipientURL, connectorId, offer, assetId, action, extensibleProperty);
+			String contractAgreementId = checkAndGetContractAgreementId(assetId);
+			if (StringUtils.isBlank(contractAgreementId) || !eDRCachedResponseList.isEmpty()) {
+				log.info(LogUtil.encode("The EDR process was not completed, no EDR status found "
+						+ "and not valid contract agreementId for " + recipientURL + ", " + assetId
+						+ ", so initiating EDR process"));
+				edrRequestHelper.edrRequestInitiate(recipientURL, connectorId, offer, assetId, action,
+						extensibleProperty);
 			checkContractNegotiationStatus = verifyEDRRequestStatus(assetId);
-		} 
+			} else {
+				log.info(LogUtil.encode("There is valid contract agreement exist for " + recipientURL + ", " + assetId
+						+ ", so ignoring EDR process initiation"));
+				checkContractNegotiationStatus = EDRCachedResponse.builder().agreementId(contractAgreementId)
+						.assetId(assetId).build();
+			}
+		}
 		return checkContractNegotiationStatus;
 	}
 
 	@SneakyThrows
-	private String checkandGetContractAgreementId(String assetId) {
+	private String checkAndGetContractAgreementId(String assetId) {
 
 		List<JsonNode> contractAgreements = contractNegotiateManagement.getAllContractAgreements(assetId,
 				Type.CONSUMER.name(), 0, 10);
@@ -138,7 +144,7 @@ public class ContractNegotiationService extends AbstractEDCStepsHelper {
 		try {
 			do {
 				if (counter > 1)
-					Thread.sleep(THRED_SLEEP_TIME);
+					Thread.sleep(threadSleepTime);
 
 				eDRCachedResponseList = edrRequestHelper.getEDRCachedByAsset(assetId);
 				eDRCachedResponse = verifyEDRResponse(eDRCachedResponseList);
@@ -149,10 +155,10 @@ public class ContractNegotiationService extends AbstractEDCStepsHelper {
 				log.info(LogUtil.encode("Verifying EDC EDR status to download data for '" + assetId + "', The current status is '"
 						+ edrStatus + "', Attempt " + counter));
 				counter++;
-			} while (counter <= RETRY && eDRCachedResponse == null);
+			} while (counter <= retries && eDRCachedResponse == null);
 
 			if (eDRCachedResponse == null) {
-				String contractAgreementId = checkandGetContractAgreementId(assetId);
+				String contractAgreementId = checkAndGetContractAgreementId(assetId);
 				if (StringUtils.isNoneBlank(contractAgreementId)) {
 					eDRCachedResponse = EDRCachedResponse.builder().agreementId(contractAgreementId).assetId(assetId)
 							.build();
