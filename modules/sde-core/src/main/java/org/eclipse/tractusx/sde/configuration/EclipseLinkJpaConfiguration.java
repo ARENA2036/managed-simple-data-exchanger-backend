@@ -50,11 +50,11 @@ public class EclipseLinkJpaConfiguration extends JpaBaseConfiguration {
     }
 
     @Override
-    protected Map<String, Object> getVendorProperties() {
-        HashMap<String, Object> map = new HashMap<>();
-        map.put(PersistenceUnitProperties.WEAVING, detectWeavingMode());
-        map.put(PersistenceUnitProperties.DDL_GENERATION, PersistenceUnitProperties.CREATE_ONLY);
-        return map;
+    protected Map<String, Object> getVendorProperties(DataSource dataSource) {
+        return Map.of(
+                PersistenceUnitProperties.WEAVING, detectWeavingMode(),
+                PersistenceUnitProperties.DDL_GENERATION, PersistenceUnitProperties.CREATE_ONLY
+        );
     }
 
     private String detectWeavingMode() {

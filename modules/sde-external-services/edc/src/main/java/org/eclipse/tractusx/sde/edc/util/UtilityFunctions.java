@@ -51,15 +51,15 @@ public class UtilityFunctions {
 		}
 	}
 
-    public static List<Policies> getUsagePolicies(List<Policies> usagePolicies, List<ConstraintRequest> constraints) {
+    public static List<Policies> mapPolicies(List<Policies> policies, List<ConstraintRequest> constraints) {
         if (constraints == null || constraints.isEmpty()) {
-            return usagePolicies;
+            return policies;
         }
 
         constraints.forEach(constraint -> {
             String leftExpVal = null;
             if (constraint.getLeftOperand() != null) {
-                leftExpVal = constraint.getLeftOperand().get("@id");
+                leftExpVal =  ConstraintRequest.getConstraintLeftOperator(constraint);
             }
 
             String rightExpVal = constraint.getRightOperand() != null
@@ -68,11 +68,11 @@ public class UtilityFunctions {
 
             Policies policyResponse = identyAndGetUsagePolicy(leftExpVal, rightExpVal);
             if (policyResponse != null) {
-                usagePolicies.add(policyResponse);
+                policies.add(policyResponse);
             }
         });
 
-        return usagePolicies;
+        return policies;
     }
 
 

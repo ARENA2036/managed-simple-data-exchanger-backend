@@ -46,17 +46,16 @@ public interface EDCFeignClientApi {
 	public String createAsset(@RequestBody AssetEntryRequest requestBody);
 	
 	@PutMapping("${edc.managementpath.apiversion.asset:/v3}/assets")
-	public void updateAsset(@RequestBody AssetEntryRequest requestBody);
-	
+	public String updateAsset(@RequestBody AssetEntryRequest requestBody);
 	
 	@PostMapping("${edc.managementpath.apiversion.asset:/v3}/assets/request")
-	public JsonNode getAssetByType(@RequestBody ObjectNode requestBody);
+	public JsonNode getAssetByFilterExpression(@RequestBody ObjectNode requestBody);
 	
 	@DeleteMapping(path = "${edc.managementpath.apiversion.asset:/v3}/assets/{id}")
 	public ResponseEntity<Object> deleteAssets(@PathVariable("id") String assetsId);
 	
 	
-	//Policy & Contract
+	//Policy
 	@GetMapping("${edc.managementpath.apiversion:/v3}/policydefinitions/{id}")
 	public JsonNode getPolicy(@PathVariable("id") String policyId);
 	
@@ -64,27 +63,29 @@ public interface EDCFeignClientApi {
 	public JsonNode createPolicy(@RequestBody JsonNode requestBody);
 
 	@PutMapping("${edc.managementpath.apiversion:/v3}/policydefinitions/{id}")
-	public void updatePolicy(@PathVariable("id") String policyUUId, @RequestBody JsonNode requestBody);
-
-	
-	//Contract defination
-	@PostMapping("${edc.managementpath.apiversion:/v3}/contractdefinitions")
-	public String createContractDefination(@RequestBody ContractDefinitionRequest requestBody);
-	
-	@PutMapping("${edc.managementpath.apiversion:/v3}/contractdefinitions")
-	public void updateContractDefination(@RequestBody ContractDefinitionRequest requestBody);
-	
-	@GetMapping("${edc.managementpath.apiversion:/v3}/contractdefinitions/{id}")
-	public JsonNode getContractDefination(@PathVariable("id") String id);
-
-
-	@DeleteMapping(path = "${edc.managementpath.apiversion:/v3}/contractdefinitions/{id}")
-	public ResponseEntity<Object> deleteContractDefinition(@PathVariable("id") String contractdefinitionsId);
+	public JsonNode updatePolicy(@PathVariable("id") String policyUUId, @RequestBody JsonNode requestBody);
 
 	@DeleteMapping(path = "${edc.managementpath.apiversion:/v3}/policydefinitions/{id}")
 	public ResponseEntity<Object> deletePolicyDefinitions(@PathVariable("id") String policydefinitionsId);
 
 	
+	//Contract Definition
+	@PostMapping("${edc.managementpath.apiversion:/v3}/contractdefinitions")
+	public String createContractDefination(@RequestBody ContractDefinitionRequest requestBody);
+	
+	@PutMapping("${edc.managementpath.apiversion:/v3}/contractdefinitions")
+	public JsonNode updateContractDefination(@RequestBody ContractDefinitionRequest requestBody);
+	
+	@GetMapping("${edc.managementpath.apiversion:/v3}/contractdefinitions/{id}")
+	public JsonNode getContractDefination(@PathVariable("id") String id);
+
+	@PostMapping("${edc.managementpath.apiversion.asset:/v3}/contractdefinitions/request")
+	public JsonNode getContractDefinitionsByFilterExpression(@RequestBody ObjectNode requestBody);
+
+	@DeleteMapping(path = "${edc.managementpath.apiversion:/v3}/contractdefinitions/{id}")
+	public ResponseEntity<Object> deleteContractDefinition(@PathVariable("id") String contractDefinitionId);
+
+
 	//Business Partner Group
 	@GetMapping("/business-partner-groups/{bpn}")
 	public JsonNode getBusinessPartnerGroups(@PathVariable("bpn") String bpn);

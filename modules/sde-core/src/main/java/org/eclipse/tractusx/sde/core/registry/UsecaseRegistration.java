@@ -52,7 +52,8 @@ public class UsecaseRegistration {
 	@SuppressWarnings("unchecked")
 	public Set<String> neededSubmodelList(List<String> selectedUsecases) {
 		Set<String> listofsubmodel = new LinkedHashSet<>();
-		this.useCases.stream().filter(usecase -> selectedUsecases.contains(usecase.get("id").toString())).toList()
+		this.useCases.stream()
+				.filter(usecase -> selectedUsecases.contains(usecase.get("id").toString()))
 				.forEach(obj -> listofsubmodel.addAll((ArrayList<String>) obj.get("submodules")));
 		return listofsubmodel;
 	}

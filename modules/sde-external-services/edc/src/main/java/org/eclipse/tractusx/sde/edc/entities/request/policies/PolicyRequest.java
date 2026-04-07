@@ -22,15 +22,13 @@
 package org.eclipse.tractusx.sde.edc.entities.request.policies;
 
 import java.util.List;
-import java.util.Map;
 
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.eclipse.tractusx.sde.edc.model.policies.Obligation;
 import org.eclipse.tractusx.sde.edc.model.policies.Prohibition;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AllArgsConstructor;
@@ -45,11 +43,18 @@ import lombok.SneakyThrows;
 @AllArgsConstructor
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonSerialize(using = PolicyRequestSerializer.class)
 public class PolicyRequest {
+	@JsonIgnore
+	private static final ObjectMapper MAPPER = new ObjectMapper();
+
+	@JsonIgnore
+	@Builder.Default
+	private boolean useNameSpacePrefix = false;
 
 	@JsonProperty("@type")
 	@Builder.Default
-	private String type = "odrl:Set"; //odrl
+	private String type = "Set"; //odrl:Set for jupiter Release
 	
 	@JsonProperty("@context")
 	private List<Object> context;
@@ -57,28 +62,27 @@ public class PolicyRequest {
 	@JsonProperty("@id")
 	private String id;
 	
-	@JsonProperty("odrl:permission")
+	@JsonAlias("odrl:permission")
     private List<PermissionRequest> permission;
 
-	@JsonProperty("odrl:prohibition") //odrl
-	private List<Prohibition> prohibitions;
+	@JsonAlias("odrl:prohibition")
+	private List<Prohibition> prohibition;
 
-	@JsonProperty("odrl:obligation") //odrl
-	private List<Obligation> obligations;
+	@JsonAlias("odrl:obligation")
+	private List<Obligation> obligation;
 
-	@JsonProperty("profile") //odrl
+	@JsonAlias("odrl:profile")
 	private String profile;
 
-	@JsonProperty("odrl:target")
-	private Map<String, String> target;
+	@JsonAlias("odrl:target")
+	private String target;
 	
-	@JsonProperty("odrl:assigner")
-	private Map<String, String> assigner;
+	@JsonAlias("odrl:assigner")
+	private  String assigner;
 	
 
 	@SneakyThrows
 	public String toJsonString() {
-		final ObjectMapper mapper = new ObjectMapper();
-		return mapper.writeValueAsString(this);
+		return MAPPER.writeValueAsString(this);
 	}
 }

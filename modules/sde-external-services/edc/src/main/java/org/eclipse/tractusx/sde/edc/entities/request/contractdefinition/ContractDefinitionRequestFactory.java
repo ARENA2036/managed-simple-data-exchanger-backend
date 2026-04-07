@@ -29,28 +29,31 @@ import org.springframework.stereotype.Service;
 @Service
 public class ContractDefinitionRequestFactory {
 
-	public ContractDefinitionRequest getContractDefinitionRequest(String uuid, String assetId, String accessPolicyId,
-			String usagePolicyId) {
-		
-		String submodelId = uuid;
-		if (submodelId.indexOf("urn:uuid") != -1) {
-			submodelId = submodelId.substring(submodelId.indexOf("urn:uuid", 9));
-			submodelId =submodelId.replace("urn:uuid:", "");
-		}
-		
-		List<Criterion> criteria = new ArrayList<>();
-		criteria.add(Criterion.builder()
-				.operandLeft("https://w3id.org/edc/v0.0.1/ns/id")
-				.operator("=")
-				.operandRight(assetId)
-				.build());
-		
-		return ContractDefinitionRequest.builder()
-				.contractPolicyId(usagePolicyId == null ? accessPolicyId : usagePolicyId)
-				.accessPolicyId(accessPolicyId)
-				.id(submodelId)
-				.assetsSelector(criteria)
-				.build();
-	}
+    public ContractDefinitionRequest createContractDefinitionRequest(
+            String uuid,
+            String assetId,
+            String accessPolicyId,
+            String usagePolicyId) {
+
+        String submodelId = uuid;
+        if (submodelId.contains("urn:uuid")) {
+            submodelId = submodelId.substring(submodelId.indexOf("urn:uuid", 9));
+            submodelId = submodelId.replace("urn:uuid:", "");
+        }
+
+        List<Criterion> criteria = new ArrayList<>();
+        criteria.add(Criterion.builder()
+                .operandLeft("https://w3id.org/edc/v0.0.1/ns/id")
+                .operator("=")
+                .operandRight(assetId)
+                .build());
+
+        return ContractDefinitionRequest.builder()
+                .contractPolicyId(usagePolicyId == null ? accessPolicyId : usagePolicyId)
+                .accessPolicyId(accessPolicyId)
+                .id(submodelId)
+                .assetsSelector(criteria)
+                .build();
+    }
 
 }
