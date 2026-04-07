@@ -44,7 +44,10 @@ public class BPDMExchangeAssetConsumer {
 	@SneakyThrows
 	public void init() {
 		try {
-			List<LegalEntityResponse> legalEntitiesResponse = partnerPoolService.fetchLegalEntitiesData(null, "test", 0,
+			List<LegalEntityResponse> legalEntitiesResponse = partnerPoolService.fetchLegalEntitiesData(
+					null,
+					"test",
+					0,
 					10);
 			log.info("BPDM service ready to use, 'test' company found leagal entity =>" + legalEntitiesResponse.size());
 		} catch (Exception e) {

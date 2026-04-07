@@ -37,6 +37,7 @@ import org.eclipse.tractusx.sde.common.submodel.executor.create.steps.impl.CsvPa
 import org.eclipse.tractusx.sde.common.submodel.executor.create.steps.impl.GenerateUrnUUID;
 import org.eclipse.tractusx.sde.common.submodel.executor.create.steps.impl.JsonRecordFormating;
 import org.eclipse.tractusx.sde.common.submodel.executor.create.steps.impl.JsonRecordValidate;
+import org.eclipse.tractusx.sde.submodelserver.handler.SubmodelServerHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -63,15 +64,17 @@ public class GenericSubmodelExecutor extends SubmodelExecutor {
 
 	private final SubmoduleMapperUsecaseStep submodelMapperUseCaseStep;
 
-	public GenericSubmodelExecutor(CsvParse csvParseStep, JsonRecordFormating jsonRecordformater,
-			GenerateUrnUUID generateUrnUUID, JsonRecordValidate jsonRecordValidate,
+	private final SubmodelServerHandler submodelServerStep;
+
+	public GenericSubmodelExecutor(CsvParse csvParseStep, JsonRecordFormating jsonRecordFormater,
+			GenerateUrnUUID generateUrnUUID, JsonRecordValidate jsonRecordValidate, SubmodelServerHandler submodelServerStep,
 			@Qualifier("digitalTwinUseCaseHandler") DigitalTwinUsecaseStep digitalTwinUseCaseStep,
 			@Qualifier("eDCUsecaseHandler") EDCUsecaseStep edcUseCaseStep,
 			@Qualifier("bPNDiscoveryUseCaseHandler") BPNDiscoveryUsecaseStep bpnUseCaseTwinStep,
 			@Qualifier("databaseUsecaseHandler") DatabaseUsecaseStep databaseUseCaseStep,
 			@Qualifier("submoduleResponseHandler") SubmoduleMapperUsecaseStep submodelMapperUseCaseStep) {
 		this.csvParseStep = csvParseStep;
-		this.jsonRecordformater = jsonRecordformater;
+		this.jsonRecordformater = jsonRecordFormater;
 		this.generateUrnUUID = generateUrnUUID;
 		this.jsonRecordValidate = jsonRecordValidate;
 		this.digitalTwinUseCaseStep = digitalTwinUseCaseStep;
@@ -79,6 +82,7 @@ public class GenericSubmodelExecutor extends SubmodelExecutor {
 		this.bpnUseCaseTwinStep = bpnUseCaseTwinStep;
 		this.databaseUseCaseStep = databaseUseCaseStep;
 		this.submodelMapperUseCaseStep = submodelMapperUseCaseStep;
+		this.submodelServerStep = submodelServerStep;
 	}
 
 	@SneakyThrows
@@ -123,6 +127,9 @@ public class GenericSubmodelExecutor extends SubmodelExecutor {
 
 		getDatabaseExecutorStep().init(getSubmodelSchema());
 		getDatabaseExecutorStep().run(rowIndex, jsonObject, processId, policy);
+
+		submodelServerStep.init(getSubmodelSchema());
+		submodelServerStep.run(rowIndex, jsonObject, processId, policy);
 	}
 
 	@Override

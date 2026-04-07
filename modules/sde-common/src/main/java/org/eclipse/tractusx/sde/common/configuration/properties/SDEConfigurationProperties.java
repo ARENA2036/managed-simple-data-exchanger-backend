@@ -28,8 +28,8 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class SDEConfigurationProperties {
 
-    @Value(value = "${dft.hostname}")
-    private String sdeHostname;
+    @Value(value = "${submodel.datasource.hostname}")
+    private String submodelServerHostname;
 
     @Value(value = "${manufacturerId}")
     private String manufacturerId;
