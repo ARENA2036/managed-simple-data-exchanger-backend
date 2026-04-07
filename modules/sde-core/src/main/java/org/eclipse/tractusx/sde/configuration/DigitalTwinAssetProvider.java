@@ -1,6 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2023,2024 T-Systems International GmbH
  * Copyright (c) 2023,2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 ARENA2036 e.V.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -20,22 +21,19 @@
 
 package org.eclipse.tractusx.sde.configuration;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringSubstitutor;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import org.eclipse.tractusx.sde.common.configuration.properties.DigitalTwinConfigurationProperties;
 import org.eclipse.tractusx.sde.common.entities.Policies;
 import org.eclipse.tractusx.sde.common.entities.PolicyModel;
 import org.eclipse.tractusx.sde.common.utils.PolicyOperationUtil;
-import org.eclipse.tractusx.sde.common.utils.UUIdGenerator;
 import org.eclipse.tractusx.sde.core.utils.ValueReplacerUtility;
 import org.eclipse.tractusx.sde.edc.constants.EDCAssetConfigurableConstant;
 import org.eclipse.tractusx.sde.edc.entities.request.asset.AssetEntryRequest;
 import org.eclipse.tractusx.sde.edc.entities.request.asset.AssetEntryRequestFactory;
-import org.eclipse.tractusx.sde.edc.facilitator.CreateEDCAssetFacilator;
+import org.eclipse.tractusx.sde.edc.facilitator.CreateEDCAssetFacilitator;
 import org.eclipse.tractusx.sde.edc.gateways.external.EDCGateway;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -48,94 +46,149 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import static org.eclipse.tractusx.sde.common.utils.JsonObjectUtility.*;
 
 @Slf4j
-@Configuration
+@Service
 @RequiredArgsConstructor
-@Profile("default")
 public class DigitalTwinAssetProvider {
 
-	private final AssetEntryRequestFactory assetFactory;
-	private final EDCGateway edcGateway;
-	private final CreateEDCAssetFacilator createEDCAssetFacilator;
-	private final DigitalTwinConfigurationProperties digitalTwinConfigurationProperties;
-	private final ValueReplacerUtility valueReplacerUtility;
-	private final EDCAssetConfigurableConstant edcAssetConfigurableConstant;
+    public static final String EDC_DTR_CONTRACT_LOOKUP_TEMPLATE = "edc_request_template/edc_contract_definition_lookup.json";
+    public static final String EDC_DTR_ASSET_LOOKUP_TEMPLATE = "edc_request_template/edc_dtr_asset_lookup.json";
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-	@PostConstruct
-	@SneakyThrows
-	public void init() {
+    private final AssetEntryRequestFactory assetFactory;
+    private final EDCGateway edcGateway;
+    private final CreateEDCAssetFacilitator createEDCAssetFacilitator;
+    private final DigitalTwinConfigurationProperties digitalTwinConfigurationProperties;
+    private final ValueReplacerUtility valueReplacerUtility;
+    private final EDCAssetConfigurableConstant edcAssetConfigurableConstant;
 
-		if (digitalTwinConfigurationProperties.getDigitalTwinsRegistryPath()
-				.equals(digitalTwinConfigurationProperties.getDigitalTwinsLookupPath())) {
-			create("registry", digitalTwinConfigurationProperties.getDigitalTwinsRegistryPath());
-		} else {
-			create("registry-api", digitalTwinConfigurationProperties.getDigitalTwinsRegistryPath());
-			create("discovery-api", digitalTwinConfigurationProperties.getDigitalTwinsLookupPath());
-		}
-	}
 
-	private void create(String registryType, String registryAPI) throws JsonProcessingException {
+    @PostConstruct
+    @SneakyThrows
+    public void registerDigitalTwinRegistryToEdc() {
 
-		String assetId = UUIdGenerator.getUuid();
+        if (digitalTwinConfigurationProperties.getDigitalTwinsRegistryPath()
+                .equals(digitalTwinConfigurationProperties.getDigitalTwinsLookupPath())) {
+            registerDigitalTwinRegistryToEdc("registry", digitalTwinConfigurationProperties.getDigitalTwinsRegistryPath());
+        } else {
+            registerDigitalTwinRegistryToEdc("registry-api", digitalTwinConfigurationProperties.getDigitalTwinsRegistryPath());
+            registerDigitalTwinRegistryToEdc("discovery-api", digitalTwinConfigurationProperties.getDigitalTwinsLookupPath());
+        }
+    }
 
-		AssetEntryRequest assetEntryRequest = assetFactory.getAssetRequest("", "Digital twin registry information",
-				assetId, "1", "", "", "", edcAssetConfigurableConstant.getAssetPropTypeDigitalTwin());
+    private void registerDigitalTwinRegistryToEdc(String registryType, String registryAPI) throws JsonProcessingException {
+        //Check if the digital twin registry asset is already present
+        ObjectNode requestBody = (ObjectNode) MAPPER
+                .readTree(valueReplacerUtility.getRequestFile(EDC_DTR_ASSET_LOOKUP_TEMPLATE));
+        JsonNode dtrAssets = edcGateway.getAssetsByFilterExpression(requestBody);
+        //set up the createAssetRequest
+        String baseUrl = digitalTwinConfigurationProperties.getDigitalTwinsHostname() + registryAPI;
+        AssetEntryRequest createAssetRequest = assetFactory.createDigitalTwinRegistryAssetRequest(baseUrl, registryType);
 
-		String baseUrl = digitalTwinConfigurationProperties.getDigitalTwinsHostname() + registryAPI;
+        //No digital twin registry asset is already present
+        if (!containsDtrAsset(dtrAssets)) {
+            //create the asset, the related policies and a contract definition
+            Map<String, String> createEDCAsset = createEDCAssetFacilitator.createAssetWithPoliciesAndContract(createAssetRequest, createPolicies());
+            log.info("Digital twin {} asset creates: {}", registryType, createEDCAsset.toString());
+        }
+        //One or multiple digital twin registry assets already present
+        else {
+            log.info("Digital twin {} asset already exists in edc connector", registryType);
+            //Multiple digital twin registry assets already present
+            if (dtrAssets.size() > 1) {
+                log.warn("Multiple Digital Twin Registry Assets exist in edc connector:");
+                createDtrContractIfPossible(registryType, dtrAssets, createAssetRequest);
+            }
+            //One digital twin registry asset is already present
+            else {
+                // Check if one or multiple contracts already present if no create contract and policies therefor
+                createDtrContractIfPossible(registryType, dtrAssets, createAssetRequest);
+            }
+        }
+    }
 
-		assetEntryRequest.getProperties().put(registryType, baseUrl);
+    private void createDtrContractIfPossible(String registryType, JsonNode dtrAssets, AssetEntryRequest createAssetRequest) {
+        //find and collect all contracts over all assets
+        List<JsonNode> contractDefinitions = findAllDtrContractDefinitions(dtrAssets);
+        //check if also multiple dtr contracts exist
+        if (contractDefinitions.size() > 1) {
+            log.error("Multiple Digital Twin Registry Contracts exist in edc connector");
+            contractDefinitions.stream()
+                    .map(contract -> getValueFromJsonObjectAsString(contract, "@id"))
+                    .distinct()
+                    .forEach(contractId -> log.error("-Located Digital Twin Registry Contract: {}", contractId));
+        }
+        // One digital twin registry contract is already present
+        else if (contractDefinitions.size() == 1) {
+            // log the already present Contract
+            JsonNode contractDefinition = contractDefinitions.get(0);
+            log.info("Digital Twin Registry Contract found in edc connector: {}", contractDefinition.toPrettyString());
+        }
+        // No digital twin registry contract is present
+        // -> therefor update the present asset and create the related policies and contract
+        else {
+            String dtrAssetId = getFirstValueFromJsonArray(dtrAssets, "@id");
+            createAssetRequest.setId(dtrAssetId);
+            Map<String, String> createEDCAsset = createEDCAssetFacilitator.updateAssetAndCreatePoliciesAndContract(createAssetRequest, createPolicies());
+            log.info("Digital twin {} asset updated: {}", registryType, createEDCAsset.toString());
+        }
+    }
 
-		assetEntryRequest.getDataAddress().getProperties().put("baseUrl", baseUrl);
+    private PolicyModel createPolicies() {
+        List<Policies> accessPolicy = PolicyOperationUtil
+                .getStringPolicyAsPolicyList(edcAssetConfigurableConstant.getDigitalTwinExchangeAccessPolicy());
 
-		assetEntryRequest.getDataAddress().getProperties().put("oauth2:tokenUrl",
-				digitalTwinConfigurationProperties.getDigitalTwinsAuthenticationUrl());
+        List<Policies> usagePolicy = PolicyOperationUtil
+                .getStringPolicyAsPolicyList(edcAssetConfigurableConstant.getDigitalTwinExchangeUsagePolicy());
 
-		assetEntryRequest.getDataAddress().getProperties().put("oauth2:clientId",
-				digitalTwinConfigurationProperties.getDigitalTwinsAuthenticationClientId());
+        return PolicyModel.builder()
+                .accessPolicies(accessPolicy)
+                .usagePolicies(usagePolicy)
+                .build();
+    }
 
-		assetEntryRequest.getDataAddress().getProperties().put("oauth2:clientSecret",
-				digitalTwinConfigurationProperties.getDigitalTwinsAuthenticationClientSecret());
+    private List<JsonNode> findAllDtrContractDefinitions(JsonNode dtrAssets) {
+        List<JsonNode> contractDefinitions = new ArrayList<>();
 
-		if (assetEntryRequest.getDataAddress().getProperties().containsKey("oauth2:clientSecretKey")) {
-			assetEntryRequest.getDataAddress().getProperties().remove("oauth2:clientSecretKey");
-		}
+        for (JsonNode asset : dtrAssets) {
+            String assetId = getValueFromJsonObjectAsString(asset, "@id");
+            JsonNode dtrContracts = findDtrContractDefinitionsByAsset(assetId);
+            if (dtrContracts == null) {
+                continue;
+            }
+            if (!dtrContracts.isNull() && dtrContracts.isArray()) {
+                dtrContracts.iterator().forEachRemaining(contractDefinitions::add);
+            } else {
+                contractDefinitions.add(dtrContracts);
+            }
+        }
+        return contractDefinitions;
+    }
 
-		if (StringUtils.isNotBlank(digitalTwinConfigurationProperties.getDigitalTwinsAuthenticationScope())) {
-			assetEntryRequest.getDataAddress().getProperties().put("oauth2:scope",
-					digitalTwinConfigurationProperties.getDigitalTwinsAuthenticationScope());
-		}
 
-		Map<String, String> inputData = new HashMap<>();
-		inputData.put("baseUrl", baseUrl);
-		inputData.put("registryType", registryType);
-		inputData.put("assetType", edcAssetConfigurableConstant.getAssetPropTypeDigitalTwin());
+    private JsonNode findDtrContractDefinitionsByAsset(String assetId) {
+        if (assetId == null || assetId.isBlank()) {
+            return NullNode.getInstance();
+        }
 
-		ObjectNode requestBody = (ObjectNode) new ObjectMapper().readTree(valueReplacerUtility
-				.valueReplacerUsingFileTemplate("/edc_request_template/edc_asset_lookup.json", inputData));
+        try {
+            JsonNode contractDefinitionRequestBody = MAPPER.readTree(
+                    valueReplacerUtility.valueReplacerUsingFileTemplate(EDC_DTR_CONTRACT_LOOKUP_TEMPLATE, Map.of("assetId", assetId)));
+            return edcGateway.getContractDefinitionsByFilterExpression((ObjectNode) contractDefinitionRequestBody);
+        } catch (JsonProcessingException e) {
+            log.warn("Error parsing EDC Contract Definitions for asset {}", assetId, e);
+        }
+        return NullNode.getInstance();
+    }
 
-		if (!edcGateway.assetExistsLookupBasedOnType(requestBody)) {
+    private boolean containsDtrAsset(JsonNode dtrAssets) {
+        return Optional.ofNullable(dtrAssets)
+                .map(result -> result.isArray() && !result.isEmpty())
+                .orElse(false);
+    }
 
-			List<Policies> accessPolicy = PolicyOperationUtil
-					.getStringPolicyAsPolicyList(edcAssetConfigurableConstant.getDigitalTwinExchangeAccessPolicy());
-			
-			List<Policies> usagePolicy = PolicyOperationUtil
-					.getStringPolicyAsPolicyList(edcAssetConfigurableConstant.getDigitalTwinExchangeUsagePolicy());
-			
-			PolicyModel policy = PolicyModel.builder().accessPolicies(accessPolicy)
-					.usagePolicies(usagePolicy)
-					.build();
-
-			Map<String, String> createEDCAsset = createEDCAssetFacilator.createEDCAsset(assetEntryRequest, policy);
-			log.info("Digital twin " + registryType + " asset creates :" + createEDCAsset.toString());
-		} else {
-			log.info("Digital twin " + registryType + " asset exists in edc connector, so ignoring asset creation");
-		}
-	}
-
-	@SneakyThrows
-	private String valueReplacer(String requestTemplatePath, Map<String, String> inputData) {
-		StringSubstitutor stringSubstitutor1 = new StringSubstitutor(inputData);
-		return stringSubstitutor1.replace(requestTemplatePath);
-	}
 }

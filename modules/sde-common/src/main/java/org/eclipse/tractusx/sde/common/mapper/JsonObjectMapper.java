@@ -67,4 +67,9 @@ public abstract class JsonObjectMapper {
 	public JsonNode objectToJsonNode(Object jobj) {
 		return mapper.convertValue(jobj, JsonNode.class);
 	}
+
+	@SneakyThrows
+	public <T> T jsonNodeToObject(JsonNode node, Class<T> clazz) {
+		return mapper.treeToValue(node, clazz);
+	}
 }

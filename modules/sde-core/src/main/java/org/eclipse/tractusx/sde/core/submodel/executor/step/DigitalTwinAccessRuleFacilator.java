@@ -59,7 +59,6 @@ public class DigitalTwinAccessRuleFacilator extends Step {
 
 	private final SDEConfigurationProperties sdeConfigProperties;
 
-	@Qualifier("DatabaseUsecaseHandler")
 	private final DatabaseUsecaseStep databaseUseCaseStep;
 
 	private static final String PUBLIC_READABLE = "PUBLIC_READABLE";

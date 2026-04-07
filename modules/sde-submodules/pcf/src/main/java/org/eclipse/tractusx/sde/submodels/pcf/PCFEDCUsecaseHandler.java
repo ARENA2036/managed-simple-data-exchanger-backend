@@ -102,7 +102,7 @@ public class PCFEDCUsecaseHandler extends Step implements EDCUsecaseStep {
 
         // Create contract definition
         ContractDefinitionRequest contractDefinitionRequest = contractFactory
-                .getContractDefinitionRequest(newOfferId, assetId, accessPolicyUUId, usagePolicyUUId);
+                .createContractDefinitionRequest(newOfferId, assetId, accessPolicyUUId, usagePolicyUUId);
 
         String contractDefinitionId = contractDefinitionRequest.getId();
         if (!edcGateway.contractDefinitionExistsLookup(contractDefinitionId)) {

@@ -48,9 +48,10 @@ public interface DigitalTwinUsecaseStep {
 	}
 
 	default String generateShortId(JsonNode jsonObject, JsonArray shortIdSpecsOfModel) {
-		return shortIdSpecsOfModel.asList().stream().map(ele -> JsonObjectUtility
-				.getValueFromJsonObjectAsString(jsonObject, extractExactFieldName(ele.getAsString())))
-				.collect(Collectors.joining("_"));
+		return shortIdSpecsOfModel.asList().stream()
+				.map(ele -> JsonObjectUtility.getValueFromJsonObjectAsString(jsonObject, extractExactFieldName(ele.getAsString())))
+				.collect(Collectors.joining("_"))
+				.replace(" ", "");
 	}
 
 	default Map<String, String> generateSpecificAssetIds(JsonNode jsonObject, JsonObject specificAssetIdsSpecsOfModel) {
