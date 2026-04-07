@@ -29,7 +29,7 @@
 		<groupId>org.eclipse.tractusx</groupId>
 		<artifactId>sde</artifactId>
 		<version>0.0.1</version>
-		<relativePath>../../</relativePath>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<artifactId>sde-common</artifactId>
 	<name>sde-common</name>
@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-text</artifactId>
-			<version>1.12.0</version>
+			<version>1.15.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
