@@ -37,7 +37,7 @@ public interface IPortalExternalServiceApi {
 		return Logger.Level.FULL; // logs request & response completely
 	}
 
-	@PostMapping(path = "/api/administration/Connectors/discovery")
+	@PostMapping(path = "/api/administration/connectors/discovery")
 	List<ConnectorInfo> fetchConnectorInfo(@RequestBody List<String> bpns);
 
 	@GetMapping(path = "/api/administration/partnernetwork/memberCompanies")

@@ -79,8 +79,12 @@ public class EDRRequestHelper extends AbstractEDCStepsHelper {
 		
 		if (Optional.ofNullable(offer.getHasPolicy()).isPresent()) {
 			JsonNode hasPolicy = offer.getHasPolicy();
-			((ObjectNode) hasPolicy).putPOJO("odrl:assigner", Map.of("@id", providerId));
-			((ObjectNode) hasPolicy).putPOJO("odrl:target", Map.of("@id", assetId));
+//			((ObjectNode) hasPolicy).putPOJO("odrl:assigner", Map.of("@id", providerId));
+//			((ObjectNode) hasPolicy).putPOJO("odrl:target", Map.of("@id", assetId));
+			((ObjectNode) hasPolicy).remove("odrl:assigner");
+			((ObjectNode) hasPolicy).remove("odrl:target");
+			((ObjectNode) hasPolicy).putPOJO("assigner", providerId);
+			((ObjectNode) hasPolicy).putPOJO("target", assetId);
 			contractNegotiations.setPolicy(offer.getHasPolicy());
 		}
 		
@@ -107,6 +111,32 @@ public class EDRRequestHelper extends AbstractEDCStepsHelper {
 				    "filterExpression": [
 				        {
 				            "operandLeft": "assetId",
+				            "operator": "=",
+				            "operandRight": "%s"
+				        }
+				    ]
+				}
+				""";
+		JsonNode requestBody = new ObjectMapper().readTree(String.format(requestbody, assetId));
+
+		return edrApiProxy.getEDRCachedByAsset(new URI(consumerHostWithDataPath), requestBody, getAuthHeader());
+	}
+
+	@SneakyThrows
+	public List<EDRCachedResponse> getEDRCachedByContractNegotiationId(String assetId) {
+		String requestbody = """
+				{
+				    "@context": {
+				        "@vocab": "https://w3id.org/edc/v0.0.1/ns/"
+				    },
+				    "@type": "QuerySpec",
+				    "offset": 0,
+				    "limit": 10,
+				    "sortOrder": "DESC",
+				    "sortField": "createdAt",
+				    "filterExpression": [
+				        {
+				            "operandLeft": "contractNegotiationId",
 				            "operator": "=",
 				            "operandRight": "%s"
 				        }

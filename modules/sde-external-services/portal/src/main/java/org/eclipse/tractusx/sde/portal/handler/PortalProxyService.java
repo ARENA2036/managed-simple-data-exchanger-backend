@@ -26,6 +26,7 @@ import org.eclipse.tractusx.sde.portal.model.ConnectorInfo;
 import org.eclipse.tractusx.sde.portal.model.response.UnifiedBPNValidationStatusEnum;
 import org.eclipse.tractusx.sde.portal.model.response.UnifiedBpnValidationResponse;
 import org.eclipse.tractusx.sde.portal.utils.MemberCompanyBPNCacheUtilityService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,8 @@ public class PortalProxyService {
 	private final MemberCompanyBPNCacheUtilityService cacheUtilityService;
 
 	private final IPortalExternalServiceApi portalExternalServiceApi;
+	@Value("${bpdm.provider.bpnl:BPNL00000003AYRE}")
+	private String providerBPNL;
 
 	@SneakyThrows
 	public List<ConnectorInfo> fetchConnectorInfo(List<String> bpns) {
@@ -46,6 +49,7 @@ public class PortalProxyService {
 		List<ConnectorInfo> response = portalExternalServiceApi.fetchConnectorInfo(bpns);
 
 		log.info("⬅️ Received ConnectorInfo from portalExternalServiceApi for {} : {}", bpns, response);
+		response.stream().filter(entry -> providerBPNL.equals(entry.getBpn())).forEach(connector -> connector.setConnectorEndpoint(List.of("https://dataprovider-edc-controlplane.staging.arena2036-x.de/api/v1/dsp")));
 
 		return response;
 	}

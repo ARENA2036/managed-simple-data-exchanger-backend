@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.bpndiscovery.model.request.BpnDiscoveryRequest;
 import org.eclipse.tractusx.sde.common.constants.SubmoduleCommonColumnsConstant;
@@ -42,6 +43,7 @@ import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
+@Slf4j
 @Service("bPNDiscoveryUseCaseHandler")
 @RequiredArgsConstructor
 public class BPNDiscoveryUseCaseHandler extends Step implements BPNDiscoveryUsecaseStep {
@@ -82,7 +84,9 @@ public class BPNDiscoveryUseCaseHandler extends Step implements BPNDiscoveryUsec
 				bpnDiscoveryProxyService.bpnDiscoveryBatchData(bpnDiscoveryKeyList);
 
 			} catch (Exception e) {
-				throw new ServiceException("Exception in BPN Discovery creation : " + e.getMessage());
+				//throw new ServiceException("Exception in BPN Discovery creation : " + e.getMessage());
+				//only log the error because the application will still work even without the new generated
+				log.error(e.getMessage());
 			}
 		}
 		return jsonObject;

@@ -49,6 +49,15 @@ public class AssetEntryRequestFactory {
     @Value(value = "${submodel.datasource.hostname}")
 	private String submodelDatasourceHostname;
 
+	@Value(value = "${submodel.datasource.authentication.enable}")
+	private boolean submodelAuthEnable;
+
+	@Value(value = "${submodel.datasource.clientId}")
+	private String submodelClientId;
+
+	@Value(value = "${submodel.datasource.clientSecret}")
+	private String submodelClientSecret;
+
 	@Value(value = "${manufacturerId}")
 	private String manufacturerId;
 
@@ -152,11 +161,13 @@ public class AssetEntryRequestFactory {
         if(edcVersionProperties.getMinor() < 11){
             assetProperties.put(EDCAssetConstant.ASSET_PROP_CONTENTTYPE, EDCAssetConstant.ASSET_PROP_CONTENT_TYPE);
         }
+		//We don't need the prop version
 		assetProperties.put(EDCAssetConstant.ASSET_PROP_VERSION, EDCAssetConstant.ASSET_PROP_VERSION_VALUE);
 		assetProperties.put(EDCAssetConstant.ASSET_PROP_NAME, assetName);
 		assetProperties.put(EDCAssetConstant.RDFS_LABEL, assetName);
 		assetProperties.put(EDCAssetConstant.RDFS_COMMENT, assetName);
-		assetProperties.put(EDCAssetConstant.DCAT_VERSION, edcAssetConfigurableConstant.getAssetPropDcatVersion());
+		//We don't need the prop dcat version
+		//assetProperties.put(EDCAssetConstant.DCAT_VERSION, edcAssetConfigurableConstant.getAssetPropDcatVersion());
         assetProperties.put(EDCAssetConstant.CX_COMMON_VERSION,
                 edcAssetConfigurableConstant.getAssetPropCommonVersion());
         if(edcAssetConfigurableConstant.getAssetPropTypeDigitalTwin().equalsIgnoreCase(edcAssetType)){
@@ -189,9 +200,11 @@ public class AssetEntryRequestFactory {
 		} else {
 			dataAddressProperties.put("baseUrl", endpoint);
 		}
-		dataAddressProperties.put("oauth2:tokenUrl", idpIssuerTokenURL + "/protocol/openid-connect/token");
-		dataAddressProperties.put("oauth2:clientId", clientId);
-		dataAddressProperties.put("oauth2:clientSecretKey", "client-secret");
+		if(submodelAuthEnable){
+			dataAddressProperties.put("oauth2:tokenUrl", idpIssuerTokenURL + "/protocol/openid-connect/token");
+			dataAddressProperties.put("oauth2:clientId", submodelClientId);
+			dataAddressProperties.put("oauth2:clientSecret", submodelClientSecret);
+		}
 		dataAddressProperties.put("proxyMethod", "true");
 		dataAddressProperties.put("proxyBody", "true");
 		dataAddressProperties.put("proxyPath", "true");

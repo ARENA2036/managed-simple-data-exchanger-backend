@@ -20,9 +20,7 @@
 
 package org.eclipse.tractusx.sde.edc.services;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.common.configuration.properties.EDRConfigurationProperties;
@@ -37,6 +35,7 @@ import org.eclipse.tractusx.sde.edc.model.contractnegotiation.ContractNegotiatio
 import org.eclipse.tractusx.sde.edc.model.edr.EDRCachedByIdResponse;
 import org.eclipse.tractusx.sde.edc.model.edr.EDRCachedResponse;
 import org.eclipse.tractusx.sde.edc.model.request.Offer;
+import org.eclipse.tractusx.sde.edc.model.response.QueryDataOfferModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -55,10 +54,30 @@ public class ContractNegotiationService extends AbstractEDCStepsHelper {
 	private final EDRRequestHelper edrRequestHelper;
 	@Value("${edr.retry.count:5}")
 	private Integer retries;
-	@Value("${edr.retry.time:500}")
+	@Value("${edr.retry.time:1500}")
 	private Integer threadSleepTime;
+	@Value("${edr.refresh.enable:false}")
+	private boolean withEdrRefresh;
 
 	private final ContractNegotiateManagementHelper contractNegotiateManagement;
+
+
+	public String initiateContractNegotiation(QueryDataOfferModel offerModel,List<ActionRequest> action){
+		Offer offer = Offer.builder()
+				.assetId(offerModel.getAssetId())
+				.offerId(offerModel.getOfferId()).policyId(offerModel.getPolicyId())
+				.connectorId(offerModel.getConnectorId())
+				.connectorOfferUrl(offerModel.getConnectorOfferUrl())
+				.hasPolicy(offerModel.getHasPolicy())
+				.build();
+
+		String recipientURL = offerModel.getConnectorOfferUrl();
+
+		if (!offer.getConnectorOfferUrl().endsWith(protocolPath))
+			recipientURL = recipientURL + protocolPath;
+
+		return edrRequestHelper.edrRequestInitiate(recipientURL, offerModel.getConnectorId(), offer, offerModel.getAssetId(), action, Map.of());
+	}
 
 	@SneakyThrows
 	public EDRCachedResponse verifyOrCreateContractNegotiation(String connectorId,
@@ -69,15 +88,27 @@ public class ContractNegotiationService extends AbstractEDCStepsHelper {
 
 		// Verify if there are already EDR process initiated then skip it for again download
 		String assetId = offer.getAssetId();
-//		edrRequestHelper.edrRequestInitiate(recipientURL, connectorId, offer, assetId, action, extensibleProperty);
-		List<EDRCachedResponse> eDRCachedResponseList = Collections.emptyList();
+
+		List<EDRCachedResponse> eDRCachedResponseList = new ArrayList<>();
 		try {
-			eDRCachedResponseList = edrRequestHelper.getEDRCachedByAsset(assetId);
+			if(withEdrRefresh){
+				eDRCachedResponseList = edrRequestHelper.getEDRCachedByAsset(assetId);
+			} else {
+				String agreementId = edrRequestHelper.edrRequestInitiate(recipientURL, connectorId, offer, assetId, action, extensibleProperty);
+				EDRCachedResponse edrCachedByContractNegotiationId = getEDRCachedByContractNegotiationId(agreementId);
+				if(edrCachedByContractNegotiationId != null){
+					eDRCachedResponseList.add(edrCachedByContractNegotiationId);
+				}
+			}
+
 		}catch (FeignException feignException){
 			log.error(feignException.getMessage());
 		}
-
-		EDRCachedResponse checkContractNegotiationStatus = verifyEDRResponse(eDRCachedResponseList);
+        List<EDRCachedResponse> edrVerificationList = new ArrayList<>();
+        eDRCachedResponseList.stream()
+                .min(Comparator.comparingLong(EDRCachedResponse::getCreatedAt))
+                .ifPresent(edrVerificationList::add);
+		EDRCachedResponse checkContractNegotiationStatus = verifyEDRResponse(edrVerificationList);
 
 		if (checkContractNegotiationStatus == null) {
 			String contractAgreementId = checkAndGetContractAgreementId(assetId);
@@ -133,6 +164,23 @@ public class ContractNegotiationService extends AbstractEDCStepsHelper {
 			}
 		}
 		return eDRCachedResponse;
+	}
+
+	@SneakyThrows
+	public EDRCachedResponse getEDRCachedByContractNegotiationId(String contractNegotiationId) {
+		List<EDRCachedResponse> eDRCachedResponseList;
+		int counter = 1;
+
+		do {
+			if (counter > 1){
+				Thread.sleep(threadSleepTime);
+			}
+
+			eDRCachedResponseList = edrRequestHelper.getEDRCachedByContractNegotiationId(contractNegotiationId);
+			counter++;
+		} while (counter <= retries && eDRCachedResponseList.isEmpty());
+
+		return eDRCachedResponseList.stream().findFirst().orElse(null);
 	}
 
 	@SneakyThrows

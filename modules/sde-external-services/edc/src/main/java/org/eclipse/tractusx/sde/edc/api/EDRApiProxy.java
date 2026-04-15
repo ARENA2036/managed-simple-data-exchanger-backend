@@ -54,6 +54,11 @@ public interface EDRApiProxy {
 			@PathVariable("transferProcessId") String transferProcessId, @RequestParam("auto_refresh") boolean autoRefresh,
 			@RequestHeader Map<String, String> requestHeader);
 
+	@GetMapping(path = "/v3/edrs/{transferProcessId}/dataaddress")
+	JsonNode getEDRCachedByTransferProcessIdTest(URI url,
+			@PathVariable("transferProcessId") String transferProcessId, @RequestParam("auto_refresh") boolean autoRefresh,
+			@RequestHeader Map<String, String> requestHeader);
+
 	@GetMapping
 	Object getActualDataFromProviderDataPlane(URI url, @RequestHeader Map<String, String> requestHeader);
 

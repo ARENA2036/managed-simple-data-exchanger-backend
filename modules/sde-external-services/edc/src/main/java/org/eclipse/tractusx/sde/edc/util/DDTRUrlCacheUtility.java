@@ -63,9 +63,9 @@ public class DDTRUrlCacheUtility {
 
 		return List.of(
 				Criterion.builder()
-				.operandLeft("https://w3id.org/edc/v0.0.1/ns/type")
+				.operandLeft("'http://purl.org/dc/terms/type'.'@id'")
 				.operator("=")
-				.operandRight("DigitalTwinRegistry")
+				.operandRight("https://w3id.org/catenax/taxonomy#DigitalTwinRegistry")
 				.build());
 	}
 }

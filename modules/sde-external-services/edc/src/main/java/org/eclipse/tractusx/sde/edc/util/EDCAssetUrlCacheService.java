@@ -186,4 +186,17 @@ public class EDCAssetUrlCacheService {
 		bpdmEdcAssetUtility.removeBpdmCache(edcAssetConfigurableConstant.getBpdmProviderBpnl());
 		bpdmMap.remove(edcAssetConfigurableConstant.getBpdmProviderBpnl());
 	}
+
+    public EDRCachedByIdResponse getTokenWithoutRefresh(String bpnNumber, QueryDataOfferModel dtOffer) {
+		List<ActionRequest> action = policyConstraintBuilderService
+				.getUsagePoliciesConstraints(dtOffer.getPolicy().getUsagePolicies());
+
+		// initiate Negotiation -> create edr cache
+		String agreementId = contractNegotiationService.initiateContractNegotiation(dtOffer, action);
+		// get tranfer process id
+		EDRCachedResponse edrCachedResponse = contractNegotiationService.getEDRCachedByContractNegotiationId(agreementId);
+		// get Authorization Details
+		return contractNegotiationService
+				.getAuthorizationTokenForDataDownload(edrCachedResponse.getTransferProcessId());
+    }
 }

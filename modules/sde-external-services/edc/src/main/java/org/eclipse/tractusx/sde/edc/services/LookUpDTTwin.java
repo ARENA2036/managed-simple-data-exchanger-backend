@@ -162,8 +162,14 @@ public class LookUpDTTwin {
 	}
 
 	@SneakyThrows
-	private List<QueryDataOfferModel> getSubmodelDetails(ShellLookupRequest shellLookupRequest, String endpoint,
-			Map<String, String> header, String dtOfferUrl, List<String> shellIds, String submodel, String searchBPN) {
+	private List<QueryDataOfferModel> getSubmodelDetails(
+			ShellLookupRequest shellLookupRequest,
+			String endpoint,
+			Map<String, String> header,
+			String dtOfferUrl,
+			List<String> shellIds,
+			String submodel,
+			String searchBPN) {
 		List<QueryDataOfferModel> queryOnDataOffers = new ArrayList<>();
         shellIds.stream().distinct()
 				.map(shellId -> {

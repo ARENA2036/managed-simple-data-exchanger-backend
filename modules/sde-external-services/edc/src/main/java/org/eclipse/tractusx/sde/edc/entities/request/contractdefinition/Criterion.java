@@ -36,7 +36,7 @@ public class Criterion {
 
 	@JsonProperty("@type")
 	@Builder.Default
-	private String type = "CriterionDto";
+	private String type = "Criterion";
 	
     private String operandLeft;
     private String operator;

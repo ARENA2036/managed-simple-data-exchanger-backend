@@ -59,4 +59,7 @@ public class EDRCachedResponse {
 	@JsonProperty(EDCAssetConstant.ASSET_PREFIX + "contractNegotiationId")
 	private String contractNegotiationId;
 
+	@JsonProperty(EDCAssetConstant.ASSET_PREFIX + "createdAt")
+	private Long createdAt;
+
 }

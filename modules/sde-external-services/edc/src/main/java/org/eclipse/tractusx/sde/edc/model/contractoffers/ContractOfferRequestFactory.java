@@ -35,7 +35,7 @@ public class ContractOfferRequestFactory {
 	@SneakyThrows
 	public ObjectNode getContractOfferRequest(String providerUrl, String counterPartyId, Integer limit, Integer offset,
 			String filterExpression) {
-
+        // TODO DBK: create an edc version related formatSchema for the filterexpression
 		if (!StringUtils.isBlank(filterExpression))
 			filterExpression = String.format(", %s", filterExpression);
 		else

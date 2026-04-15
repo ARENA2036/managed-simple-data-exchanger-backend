@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.tractusx.sde.bpndiscovery.handler.BpnDiscoveryProxyService;
@@ -61,6 +60,7 @@ import org.eclipse.tractusx.sde.edc.model.request.QueryDataOfferRequest;
 import org.eclipse.tractusx.sde.edc.model.response.QueryDataOfferModel;
 import org.eclipse.tractusx.sde.edc.util.EDCAssetUrlCacheService;
 import org.eclipse.tractusx.sde.edc.util.UtilityFunctions;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -86,6 +86,8 @@ public class ConsumerControlPanelService {
 	private final EDCAssetUrlCacheService edcAssetUrlCacheService;
 	private final ContractNegotiationService contractNegotiationService;
 	private final LookUpDTTwin lookUpDTTwin;
+	@Value("${edr.refresh.enable:false}")
+	private boolean withEdrRefresh;
 
 	public Set<QueryDataOfferModel> queryOnDataOffers(String manufacturerPartId, String searchBpnNumber,
 			String submodel, Integer offset, Integer limit) {
@@ -116,7 +118,12 @@ public class ConsumerControlPanelService {
 
 			// 3 lookup shell for PCF sub model
 			ddTROffers.stream().distinct().forEach(dtOffer ->{
-				EDRCachedByIdResponse edrToken = edcAssetUrlCacheService.verifyAndGetToken(bpnNumber, dtOffer);
+				EDRCachedByIdResponse edrToken;
+				if(withEdrRefresh){
+					edrToken = edcAssetUrlCacheService.verifyAndGetToken(bpnNumber, dtOffer);
+				}else{
+					edrToken = edcAssetUrlCacheService.getTokenWithoutRefresh(bpnNumber, dtOffer);
+				}
 				if (edrToken != null) {
 
 					queryOnDataOffers.addAll(lookUpDTTwin.lookUpTwin(edrToken, dtOffer, manufacturerPartId, bpnNumber,
