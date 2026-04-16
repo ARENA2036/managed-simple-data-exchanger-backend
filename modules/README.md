@@ -14,6 +14,7 @@ SDE backend splited into multiple services loosely-coupled Maven modules.
 - modules/sde-external-services/portal
 - modules/sde-external-services/bpn-discovery
 - modules/sde-external-services/policy-hub
+- modules/sde-external-services/submodel-server
 
 - modules/sde-common
 - modules/sde-core
