@@ -113,7 +113,7 @@ public class AssetEntryRequestFactory {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(submodelDatasourceHostname);
         if(useSeparatedSubmodelServer){
             uriString =  uriBuilder
-                    .pathSegment(createAssetId(shellId, submodel))
+                    .pathSegment(assetId)
                     .toUriString();
         } else {
             uriString = uriBuilder
@@ -195,11 +195,8 @@ public class AssetEntryRequestFactory {
 	private HashMap<String, String> getDataAddressProperties(String shellId, String subModelId, String endpoint) {
 		HashMap<String, String> dataAddressProperties = new HashMap<>();
 		dataAddressProperties.put("type", EDCAssetConstant.TYPE);
-		if (StringUtils.isBlank(shellId) && StringUtils.isBlank(subModelId) ){
-			dataAddressProperties.put("baseUrl", String.format(endpoint, shellId, subModelId));
-		} else {
-			dataAddressProperties.put("baseUrl", endpoint);
-		}
+		dataAddressProperties.put("baseUrl", endpoint);
+
 		if(submodelAuthEnable){
 			dataAddressProperties.put("oauth2:tokenUrl", idpIssuerTokenURL + "/protocol/openid-connect/token");
 			dataAddressProperties.put("oauth2:clientId", submodelClientId);

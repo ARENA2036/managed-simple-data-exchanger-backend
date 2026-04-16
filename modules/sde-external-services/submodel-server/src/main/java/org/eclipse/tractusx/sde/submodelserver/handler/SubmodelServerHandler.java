@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.common.constants.SubmoduleCommonColumnsConstant;
 import org.eclipse.tractusx.sde.common.entities.PolicyModel;
 import org.eclipse.tractusx.sde.common.submodel.executor.Step;
@@ -14,10 +13,7 @@ import org.eclipse.tractusx.sde.common.utils.JsonObjectUtility;
 import org.eclipse.tractusx.sde.edc.entities.request.asset.AssetEntryRequestFactory;
 import org.eclipse.tractusx.sde.submodelserver.api.SubmodelServerApi;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.net.URI;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,17 +26,17 @@ public class SubmodelServerHandler extends Step {
     private String submodelDatasourceHostname;
 
     @SneakyThrows
-    public JsonNode run(Integer rowIndex, ObjectNode jsonObject, String processId, PolicyModel policy) {
-        String shellId = JsonObjectUtility.getValueFromJsonObjectAsString(jsonObject,
+    public JsonNode run(Integer rowIndex, ObjectNode assetInfo, ObjectNode submodelData, PolicyModel policy, String processId) {
+        String shellId = JsonObjectUtility.getValueFromJsonObjectAsString(assetInfo,
                 SubmoduleCommonColumnsConstant.SHELL_ID);
-        String subModelId = JsonObjectUtility.getValueFromJsonObjectAsString(jsonObject,
+        String subModelId = JsonObjectUtility.getValueFromJsonObjectAsString(assetInfo,
                 SubmoduleCommonColumnsConstant.SUBMODULE_ID);
         String assetId = assetEntryRequestFactory.createAssetId(shellId, subModelId);
 
-        logDebug("%%% [SubmodelServer] start upload  AssetId: " + assetId + ", Submodel-Content: " + jsonObject);
-        submodelDatasourceClient.uploadAsset(assetId, jsonObject);
+        logDebug("%%% [SubmodelServer] start upload  AssetId: " + assetId + ", Submodel-Content: " + assetInfo);
+        submodelDatasourceClient.uploadAsset(assetId, submodelData);
         logDebug("%%% [SubmodelServer] uploaded: AssetId: " + assetId );
-        return jsonObject;
+        return assetInfo;
     }
 
 }

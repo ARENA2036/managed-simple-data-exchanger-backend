@@ -20,6 +20,7 @@
 
 package org.eclipse.tractusx.sde.core.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,6 +38,7 @@ import org.eclipse.tractusx.sde.common.mapper.SubmodelMapper;
 import org.eclipse.tractusx.sde.common.model.Submodel;
 import org.eclipse.tractusx.sde.common.submodel.executor.SubmodelExecutor;
 import org.eclipse.tractusx.sde.common.validators.SubmodelCSVValidator;
+import org.eclipse.tractusx.sde.core.csv.service.CsvContentJsonConverter;
 import org.eclipse.tractusx.sde.core.csv.service.CsvHandlerService;
 import org.eclipse.tractusx.sde.core.failurelog.FailureLogs;
 import org.eclipse.tractusx.sde.core.policy.entity.PolicyMapper;
@@ -79,6 +81,8 @@ public class SubmodelOrchestartorService {
 	private final FailureLogs failureLogs;
 
 	private final CsvHandlerService csvHandlerService;
+
+	private final CsvContentJsonConverter csvContentJsonConverter;
 
 	private final PolicyService policyService;
 
@@ -130,7 +134,8 @@ public class SubmodelOrchestartorService {
 					ObjectNode newjObject = jsonObjectMapper.submodelFileRequestToJsonNodePojo(submodelPolicyRequest);
 					newjObject.put(ROW_NUMBER, rowjObj.position());
 					newjObject.put(PROCESS_ID, processId);
-					executor.executeCsvRecord(rowjObj, newjObject, processId, submodelPolicyRequest);
+					ObjectNode submodelData = csvContentJsonConverter.convertRow(csvContent.getColumns(), rowjObj);
+					executor.executeCsvRecord(rowjObj, newjObject, processId, submodelPolicyRequest, submodelData);
 					// fetch by ID and check it if it is success then its updated.
 					successCount.incrementAndGet();
 
@@ -182,7 +187,10 @@ public class SubmodelOrchestartorService {
 
 			rowData.parallelStream().forEachOrdered(rowjObj -> {
 				try {
-					executor.executeJsonRecord(rowjObj.get(ROW_NUMBER).asInt(), rowjObj, processId, policy);
+//					List<String> fieldNames = new ArrayList<>();
+//					rowjObj.fieldNames().forEachRemaining(fieldNames::add);
+//					ObjectNode submodelData = csvContentJsonConverter.convertRow(fieldNames, rowjObj);
+					executor.executeJsonRecord(rowjObj.get(ROW_NUMBER).asInt(), rowjObj, processId, policy, rowjObj.deepCopy());
 					successCount.incrementAndGet();
 				} catch (Exception e) {
 					failureLogs.saveLog(processId, e.getMessage());

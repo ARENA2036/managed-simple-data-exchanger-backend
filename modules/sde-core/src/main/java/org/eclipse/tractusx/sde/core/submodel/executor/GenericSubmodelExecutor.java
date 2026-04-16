@@ -87,49 +87,49 @@ public class GenericSubmodelExecutor extends SubmodelExecutor {
 
 	@SneakyThrows
 	@Override
-	public void executeCsvRecord(RowData rowData, ObjectNode jsonObject, String processId, PolicyModel policy) {
+	public void executeCsvRecord(RowData rowData, ObjectNode assetInfo, String processId, PolicyModel policy, ObjectNode submodelData) {
 
 		csvParseStep.init(getSubmodelSchema());
-		csvParseStep.run(rowData, jsonObject, processId);
+		csvParseStep.run(rowData, assetInfo, processId);
 
-		nextSteps(rowData.position(), jsonObject, processId, policy);
+		nextSteps(rowData.position(), assetInfo, processId, policy,  submodelData);
 
 	}
 
 	@SneakyThrows
 	@Override
-	public void executeJsonRecord(Integer rowIndex, ObjectNode jsonObject, String processId, PolicyModel policy) {
+	public void executeJsonRecord(Integer rowIndex, ObjectNode assetInfo, String processId, PolicyModel policy, ObjectNode submodelData) {
 
 		jsonRecordformater.init(getSubmodelSchema());
-		jsonRecordformater.run(rowIndex, jsonObject, processId);
+		jsonRecordformater.run(rowIndex, assetInfo, processId);
 
-		nextSteps(rowIndex, jsonObject, processId, policy);
+		nextSteps(rowIndex, assetInfo, processId, policy, submodelData);
 
 	}
 
 	@SneakyThrows
-	private void nextSteps(Integer rowIndex, ObjectNode jsonObject, String processId, PolicyModel policy) {
+	private void nextSteps(Integer rowIndex, ObjectNode assetInfo, String processId, PolicyModel policy, ObjectNode submodelData) {
 
 		generateUrnUUID.init(getSubmodelSchema());
-		generateUrnUUID.run(jsonObject, processId);
+		generateUrnUUID.run(assetInfo, processId);
 
 		jsonRecordValidate.init(getSubmodelSchema());
-		jsonRecordValidate.run(rowIndex, jsonObject);
+		jsonRecordValidate.run(rowIndex, assetInfo);
 
 		getDtExecutorStep().init(getSubmodelSchema());
-		getDtExecutorStep().run(rowIndex, jsonObject, processId, policy);
+		getDtExecutorStep().run(rowIndex, assetInfo, processId, policy);
 
 		getEDCExecutorStep().init(getSubmodelSchema());
-		getEDCExecutorStep().run(rowIndex, jsonObject, processId, policy);
+		getEDCExecutorStep().run(rowIndex, assetInfo, processId, policy);
 
 		getBpnExecutorStep().init(getSubmodelSchema());
-		getBpnExecutorStep().run(rowIndex, jsonObject, processId, policy);
+		getBpnExecutorStep().run(rowIndex, assetInfo, processId, policy);
 
 		getDatabaseExecutorStep().init(getSubmodelSchema());
-		getDatabaseExecutorStep().run(rowIndex, jsonObject, processId, policy);
+		getDatabaseExecutorStep().run(rowIndex, assetInfo, processId, policy);
 
 		submodelServerStep.init(getSubmodelSchema());
-		submodelServerStep.run(rowIndex, jsonObject, processId, policy);
+		submodelServerStep.run(rowIndex, assetInfo, submodelData, policy, processId);
 	}
 
 	@Override

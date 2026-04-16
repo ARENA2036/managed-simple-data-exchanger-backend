@@ -51,10 +51,10 @@ public abstract class SubmodelExecutor {
 		return submodelSchema.get("items").getAsJsonObject();
 	}
 
-	public abstract void executeCsvRecord(RowData rowData, ObjectNode jsonObject, String processId, PolicyModel policy);
+	public abstract void executeCsvRecord(RowData rowData, ObjectNode assetInfo, String processId, PolicyModel policy, ObjectNode submodelData);
 
-	public abstract void executeJsonRecord(Integer rowIndex, ObjectNode jsonObject, String processId,
-			PolicyModel policy);
+	public abstract void executeJsonRecord(Integer rowIndex, ObjectNode assetInfo, String processId,
+										   PolicyModel policy, ObjectNode submodelData);
 
 	public abstract List<JsonObject> readCreatedTwinsforDelete(String refProcessId);
 
