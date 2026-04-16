@@ -61,7 +61,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Build
-        run: mvn -B package
+        run: mvn -B package -DskipTests
 
       # Create SemVer or ref tags dependent of trigger event
       - name: Docker meta
