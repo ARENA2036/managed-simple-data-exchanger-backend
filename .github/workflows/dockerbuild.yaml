@@ -25,6 +25,7 @@ on:
       - 'main'
       - 'dockerbuild-workflow'
       - 'sde-bugfix'
+      - 'DT-185'
     tags:
       - 'v*.*.*'
       - 'v*.*.*-*'
