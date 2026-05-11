@@ -1,6 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2022,2024 T-Systems International GmbH
  * Copyright (c) 2022,2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2026 ARENA2036 e.V.
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -132,17 +133,12 @@ public class DigitalTwinsUtility {
 						.endpointProtocolVersion(List.of(CommonConstants.ENDPOINT_PROTOCOL_VERSION))
 						.subprotocol(CommonConstants.SUB_PROTOCOL)
 						.subprotocolBody("id=" + edcAssetId + ";dspEndpoint=" + digitalTwinEdcDspEndpoint)
-					//	.subprotocolBody(truncateToMaxLength("id=" + edcAssetId + ";dspEndpoint=" + digitalTwinEdcDspEndpoint, 128))
 						.subprotocolBodyEncoding(CommonConstants.BODY_ENCODING)
 						.securityAttributes(List.of(new SecurityAttributes("NONE", "NONE", "NONE"))).build())
 				.build());
 		return endpoints;
 	}
 
-	//check
-	private String truncateToMaxLength(String input, int maxLength) {
-		return input.length() <= maxLength ? input : input.substring(0, maxLength);
-	}
 	public String createAccessRuleMandatorySpecificAssetIds(Map<String, String> specificAssetIds) {
 		StringBuilder sb= new StringBuilder();
 		specificAssetIds.entrySet().stream().forEach(ele->{
