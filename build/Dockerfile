@@ -34,7 +34,7 @@ COPY ../modules ./modules
 
 # our final base image
 
-FROM eclipse-temurin:19.0.2_7-jdk-focal
+FROM eclipse-temurin:21-jre-alpine
 
 ARG USERNAME=sdeuser
 ARG USER_UID=1001
@@ -42,7 +42,8 @@ ARG USER_GID=$USER_UID
 
 # Create the user
 
-RUN useradd -m -d /home/sdeuser -s /bin/bash -u $USER_UID -U $USERNAME
+RUN addgroup -g $USER_GID $USERNAME \
+    && adduser -D -u $USER_UID -G $USERNAME $USERNAME
 USER $USERNAME
 
 # set deployment directory
