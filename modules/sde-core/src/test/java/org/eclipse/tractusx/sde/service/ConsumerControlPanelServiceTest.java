@@ -82,7 +82,7 @@ class ConsumerControlPanelServiceTest {
     private ConsumerControlPanelService consumerControlPanelService;
 
     @Test
-    void testQueryOnDataOfferEmpty() throws Exception {
+    void testQueryOnDataOfferEmpty() {
         BpnDiscoverySearchResponse build = BpnDiscoverySearchResponse.builder()
                 .bpns(List.of())
                 .build();
