@@ -79,7 +79,7 @@ class DigitalTwinAssetProviderTest {
 
         when(digitalTwinConfigurationProperties.getDigitalTwinsHostname()).thenReturn("https://dtr.example");
         when(valueReplacerUtility.getRequestFile(DigitalTwinAssetProvider.EDC_DTR_ASSET_LOOKUP_TEMPLATE)).thenReturn("{}");
-        lenient().when(valueReplacerUtility.valueReplacer(eq(DigitalTwinAssetProvider.EDC_DTR_CONTRACT_LOOKUP_TEMPLATE), any()))
+        lenient().when(valueReplacerUtility.valueReplacerUsingFileTemplate(eq(DigitalTwinAssetProvider.EDC_DTR_CONTRACT_LOOKUP_TEMPLATE), any()))
                 .thenReturn("{}");
         lenient().when(edcAssetConfigurableConstant.getDigitalTwinExchangeAccessPolicy()).thenReturn("Membership@active");
         lenient().when(edcAssetConfigurableConstant.getDigitalTwinExchangeUsagePolicy())
@@ -251,7 +251,7 @@ class DigitalTwinAssetProviderTest {
                   {"@id":"existing-asset"}
                 ]
                 """));
-        when(valueReplacerUtility.valueReplacer(eq(DigitalTwinAssetProvider.EDC_DTR_CONTRACT_LOOKUP_TEMPLATE), any()))
+        when(valueReplacerUtility.valueReplacerUsingFileTemplate(eq(DigitalTwinAssetProvider.EDC_DTR_CONTRACT_LOOKUP_TEMPLATE), any()))
                 .thenReturn("not-json");
 
         provider.registerDigitalTwinRegistryToEdc();

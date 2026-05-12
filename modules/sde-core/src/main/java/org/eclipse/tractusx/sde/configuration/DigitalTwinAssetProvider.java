@@ -35,8 +35,7 @@ import org.eclipse.tractusx.sde.edc.entities.request.asset.AssetEntryRequest;
 import org.eclipse.tractusx.sde.edc.entities.request.asset.AssetEntryRequestFactory;
 import org.eclipse.tractusx.sde.edc.facilitator.CreateEDCAssetFacilitator;
 import org.eclipse.tractusx.sde.edc.gateways.external.EDCGateway;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,6 +51,7 @@ import static org.eclipse.tractusx.sde.common.utils.JsonObjectUtility.*;
 
 @Slf4j
 @Service
+@ConditionalOnProperty(name = "digital-twins.asset.registration.enabled", havingValue = "true", matchIfMissing = true)
 @RequiredArgsConstructor
 public class DigitalTwinAssetProvider {
 
