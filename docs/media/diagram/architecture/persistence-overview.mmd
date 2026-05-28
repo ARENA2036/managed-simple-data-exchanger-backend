@@ -1,0 +1,80 @@
+erDiagram
+  PROCESS_REPORT {
+    string id PK
+    string process_id
+    string submodel
+    string status
+    int total_count
+    int success_count
+    int failure_count
+    int updated_count
+    string policy_uuid
+    text access_policies
+    text usage_policies
+  }
+
+  FAILURE_LOG {
+    string uuid PK
+    string process_id
+    text log
+    timestamp date_time
+  }
+
+  POLICY_TBL {
+    string uuid PK
+    string policy_name
+    text access_policies
+    text usage_policies
+    timestamp last_updated_time
+  }
+
+  SDE_ROLE {
+    string sde_role PK
+    string description
+  }
+
+  SDE_PERMISSION {
+    string sde_permission PK
+    string description
+  }
+
+  SDE_ROLE_PERMISSION_MAPPING {
+    string sde_role FK
+    string sde_permission FK
+  }
+
+  CONTRACT_NEGOTIATION_INFO {
+    string id PK
+    string connector_id
+    text offer_id
+    string negotiation_id
+    string process_id
+  }
+
+  CONSUMER_DOWNLOAD_HISTORY {
+    string process_id PK
+    string status
+    text offers
+    text policies
+    string reference_process_id
+  }
+
+  PCF_REQUESTS_TBL {
+    string request_id PK
+    string product_id
+    string bpn_number
+    string status
+    string type
+  }
+
+  PCF_RESPONSE_TBL {
+    string request_id
+    string product_id
+    string bpn_number
+    text response
+    text message
+  }
+
+  PROCESS_REPORT ||--o{ FAILURE_LOG : "process_id"
+  SDE_ROLE ||--o{ SDE_ROLE_PERMISSION_MAPPING : "role"
+  SDE_PERMISSION ||--o{ SDE_ROLE_PERMISSION_MAPPING : "permission"

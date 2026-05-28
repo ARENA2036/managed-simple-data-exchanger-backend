@@ -1,0 +1,25 @@
+flowchart LR
+  user["Provider / Consumer User"]
+  frontend["SDE Frontend"]
+  backend["SDE Backend\nSpring Boot /api"]
+  db[("PostgreSQL\nFlyway + JPA")]
+  keycloak["Keycloak / OAuth2 Issuer"]
+  edcProvider["Provider EDC\nManagement + Dataplane"]
+  edcConsumer["Consumer EDC\nCatalog + Contract + EDR"]
+  dtr["Digital Twin Registry"]
+  portal["Portal / Partner Pool"]
+  bpn["BPN Discovery"]
+  policyHub["Policy Hub"]
+  submodelServer["Submodel Server"]
+
+  user -->|"uses"| frontend
+  frontend -->|"Bearer JWT / REST"| backend
+  backend -->|"JPA / Flyway"| db
+  backend -->|"JWT validation"| keycloak
+  backend -->|"assets, policies, contracts"| edcProvider
+  backend -->|"catalog, negotiation, EDR, dataplane"| edcConsumer
+  backend -->|"shells, submodels, access rules"| dtr
+  backend -->|"legal entities, connector discovery"| portal
+  backend -->|"lookup/register manufacturer part ids"| bpn
+  backend -->|"policy attributes/types/content"| policyHub
+  backend -->|"submodel payload upload/download"| submodelServer
