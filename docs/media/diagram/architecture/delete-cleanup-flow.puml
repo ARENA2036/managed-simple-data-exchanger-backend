@@ -1,0 +1,30 @@
+@startuml
+title Provider Delete/Cleanup Flow
+autonumber
+
+actor Provider
+participant "SDE Backend\nSubmodelProcessController" as api
+participant "SubmodelOrchestartorService" as orch
+participant "SubmodelExecutor" as exec
+database "PostgreSQL" as db
+participant "EDC Provider" as edc
+participant "Digital Twin Registry" as dtr
+
+Provider -> api: DELETE /api/{submodel}/delete/{processId}
+api -> orch: deleteSubmodelDigitalTwinsAndEDC(refProcessId, delProcessId, submodel)
+orch -> db: read original ProcessReport
+orch -> exec: read created twins for delete
+orch -> db: start delete ProcessReport
+
+loop each stored record
+  exec -> edc: delete contract definition
+  exec -> edc: delete access policy
+  exec -> edc: delete usage policy
+  exec -> edc: delete asset
+  exec -> dtr: delete submodel descriptor from shell
+  exec -> db: mark submodel row as deleted
+end
+
+orch -> db: finish delete ProcessReport
+api --> Provider: 200 { processId: delProcessId }
+@enduml

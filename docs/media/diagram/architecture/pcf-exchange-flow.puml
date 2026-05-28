@@ -1,0 +1,37 @@
+@startuml
+title PCF Exchange Flow
+autonumber
+
+actor Consumer
+actor Provider
+participant "SDE Backend\nPcfExchangeController" as api
+participant "PCFExchangeService" as pcf
+participant "Consumer EDC" as cedc
+participant "Provider EDC Dataplane" as pedc
+database "PostgreSQL\npcf_requests/pcf_response" as db
+
+Consumer -> api: POST /api/pcf/request/{productId}
+api -> pcf: requestForPcfDataExistingOffer(productId, consumerRequest)
+pcf -> cedc: negotiate/reuse EDR for PCF offer
+pcf -> pedc: proxy PCF request to provider endpoint
+pedc -> api: GET /api/pcf/productIds/{productId}\nHeader Edc-Bpn, requestId
+api -> pcf: savePcfRequestData
+pcf -> db: persist provider request
+api --> pedc: 202 accepted
+
+Provider -> api: POST /api/pcf/actionsonrequest
+api -> pcf: approve/reject/send notification
+alt approved with PCF data
+  pcf -> pedc: PUT PCF data to consumer endpoint
+  pedc -> api: PUT /api/pcf/productIds/{productId}
+  api -> pcf: recievedPCFData
+  pcf -> db: persist PCF response
+else rejected
+  pcf -> pedc: send reject notification/message
+end
+
+Consumer -> api: GET /api/pcf/request/{requestId}
+api -> pcf: viewForPcfDataOffer
+pcf -> db: read request/response status
+api --> Consumer: PCF status/data
+@enduml

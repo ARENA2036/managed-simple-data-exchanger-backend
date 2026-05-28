@@ -1,0 +1,41 @@
+@startuml
+title Provider Upload/Register Flow
+autonumber
+
+actor Provider
+participant "SDE Backend\nSubmodelProcessController" as api
+participant "SubmodelOrchestartorService" as orch
+participant "GenericSubmodelExecutor" as exec
+database "PostgreSQL" as db
+participant "Digital Twin Registry" as dtr
+participant "EDC Provider" as edc
+participant "BPN Discovery" as bpn
+participant "Submodel Server" as sms
+
+Provider -> api: POST /api/{submodel}/upload\nor /manualentry
+api -> orch: processSubmodelCsv/processSubmodel(policy, processId, submodel)
+orch -> db: start ProcessReport
+orch -> exec: execute each row in parallel
+
+loop each row
+  exec -> exec: map CSV/JSON, generate identifiers, validate
+  exec -> dtr: lookup shell by specificAssetIds
+  alt shell missing and creation allowed
+    exec -> dtr: create shell descriptor
+  end
+  exec -> dtr: create/update submodel descriptor
+  exec -> dtr: create/update access rules
+  exec -> edc: lookup asset
+  alt asset missing
+    exec -> edc: create asset, access policy, usage policy, contract definition
+  else asset exists
+    exec -> edc: update asset, policies and contract definition
+  end
+  exec -> bpn: register/search manufacturer part lookup data
+  exec -> sms: upload submodel payload
+  exec -> db: persist submodel history row
+end
+
+orch -> db: finish ProcessReport with success/failure/updated counts
+api --> Provider: 200 { processId }
+@enduml
