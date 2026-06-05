@@ -10,7 +10,6 @@ skinparam SequenceGroupFontColor black
 skinparam SequenceGroupBodyBackgroundColor DarkGrey
 skinparam SequenceGroupBackgroundColor DimGrey
 skinparam BackgroundColor #SlateGray
-
 autonumber
 actor User as user
 participant "SDE\nBackend" as be

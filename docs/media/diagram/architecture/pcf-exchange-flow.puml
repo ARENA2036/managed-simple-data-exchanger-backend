@@ -1,4 +1,14 @@
 @startuml
+<style>
+root {
+  FontColor #?black:white
+}
+</style>
+skinparam actorStyle awesome
+skinparam SequenceGroupFontColor black
+skinparam SequenceGroupBodyBackgroundColor DarkGrey
+skinparam SequenceGroupBackgroundColor DimGrey
+skinparam BackgroundColor #SlateGray
 title PCF Exchange Flow
 autonumber
 

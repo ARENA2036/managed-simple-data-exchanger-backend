@@ -31,6 +31,8 @@ Flow:
 13. The process report is finished with success, failure, and updated counts.
 14. For PCF uploads, already approved requests may be served automatically.
 
+![Provider Upload/Register Flow](../media/runtime-flow-provider.svg)
+
 Diagram source:
 [runtime-flow-provider.puml](../media/diagram/architecture/runtime-flow-provider.puml)
 
@@ -63,6 +65,8 @@ Known issue: static analysis found that the CSV branch in the ZIP writer is
 commented out. Even when CSV is requested, JSON files may be written into the
 ZIP output. This is tracked in [Known Gaps](known-gaps.md).
 
+![Consumer Search and Download Flow](../media/runtime-flow-consumer.svg)
+
 Diagram source:
 [runtime-flow-consumer.puml](../media/diagram/architecture/runtime-flow-consumer.puml)
 
@@ -89,6 +93,8 @@ Not visible as complete cleanup:
 - BPN Discovery cleanup
 - Submodel Server cleanup
 - PCF EDC deletion, because PCF uses a static PCF Exchange asset
+
+![Delete/Cleanup Flow](../media/delete-cleanup-flow.svg)
 
 Diagram source:
 [delete-cleanup-flow.puml](../media/diagram/architecture/delete-cleanup-flow.puml)
@@ -118,13 +124,19 @@ Flow:
 9. After a PCF upload, pending or approved requests may be served
    automatically.
 
+![PCF Exchange Flow](../media/pcf-exchange-flow.svg)
+
 Diagram source:
 [pcf-exchange-flow.puml](../media/diagram/architecture/pcf-exchange-flow.puml)
 
 ## Startup Flow: Digital Twin Registry as EDC Asset
 
-The existing diagram `docs/media/diagram/sequenzes/register_dtr.puml`
+The existing diagram `docs/media/diagram/architecture/register_dtr.puml`
 describes optional startup registration of the Digital Twin Registry itself as
 an EDC asset. The backend creates the asset, access policy, usage policy, and
 contract definition if they do not already exist.
 
+![Digital Twin Registry Registration Flow](../media/register_dtr.svg)
+
+Diagram source:
+[register_dtr.puml](../media/diagram/architecture/register_dtr.puml)

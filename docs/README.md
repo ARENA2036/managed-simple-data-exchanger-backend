@@ -16,7 +16,8 @@ diverge.
 6. [Data Model and Flyway](architecture/data-model.md)
 7. [Security](architecture/security.md)
 8. [Operations and DevOps](architecture/operations.md)
-9. [Known Gaps](architecture/known-gaps.md)
+9. [Testing Strategy](testing.md)
+10. [Known Gaps](architecture/known-gaps.md)
 
 ## Analysis Basis
 
@@ -32,7 +33,6 @@ The documentation is based on static analysis of these sources:
 - `modules/sde-submodules`
 - `modules/pcf-exchange`
 - `build/Dockerfile`
-- existing PlantUML diagram under `docs/media/diagram/sequenzes`
 
 Not verified:
 
@@ -94,7 +94,13 @@ Diagram sources are located under `docs/media/diagram/architecture`:
 - [External Systems](media/diagram/architecture/external-systems.mmd)
 - [Security Overview](media/diagram/architecture/security-overview.mmd)
 - [Persistence Overview](media/diagram/architecture/persistence-overview.mmd)
-- [Provider Upload/Register Flow](media/diagram/architecture/runtime-flow-provider.puml)
-- [Consumer Download Flow](media/diagram/architecture/runtime-flow-consumer.puml)
-- [Delete/Cleanup Flow](media/diagram/architecture/delete-cleanup-flow.puml)
-- [PCF Exchange Flow](media/diagram/architecture/pcf-exchange-flow.puml)
+- [Provider Upload/Register Flow](media/runtime-flow-provider.svg)
+  ([source](media/diagram/architecture/runtime-flow-provider.puml))
+- [Consumer Download Flow](media/runtime-flow-consumer.svg)
+  ([source](media/diagram/architecture/runtime-flow-consumer.puml))
+- [Delete/Cleanup Flow](media/delete-cleanup-flow.svg)
+  ([source](media/diagram/architecture/delete-cleanup-flow.puml))
+- [PCF Exchange Flow](media/pcf-exchange-flow.svg)
+  ([source](media/diagram/architecture/pcf-exchange-flow.puml))
+- [Digital Twin Registry Registration Flow](media/register_dtr.svg)
+  ([source](media/diagram/architecture/register_dtr.puml))
