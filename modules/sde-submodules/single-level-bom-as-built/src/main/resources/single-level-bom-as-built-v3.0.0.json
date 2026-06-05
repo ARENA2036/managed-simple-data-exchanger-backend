@@ -273,7 +273,10 @@
 				}
 			]
 		},
-		"shortIdSpecs": [],
+		"shortIdSpecs": [
+			"${part_instance_id}",
+			"${manufacturer_part_id}"
+		],
 		"createShellIfNotExist": true,
 		"autoPopulatedfields": [
 			{
