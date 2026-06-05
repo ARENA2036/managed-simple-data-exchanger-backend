@@ -1,7 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2023,2024 T-Systems International GmbH
- * Copyright (c) 2023,2024 Contributors to the Eclipse Foundation
  * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2023,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -18,6 +18,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
+
 package org.eclipse.tractusx.sde.bpndiscovery.handler;
 
 import java.util.ArrayList;
