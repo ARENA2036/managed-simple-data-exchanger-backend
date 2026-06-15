@@ -24,6 +24,8 @@ on:
   push:
     branches:
       - 'main'
+      - 'sde-bugfix'
+      - 'DT-185'
     tags:
       - 'v*.*.*'
       - 'v*.*.*-*'
@@ -37,7 +39,7 @@ on:
         required: true
         default: 'latest'
 env:
-  IMAGE_NAMESPACE: "tractusx"
+  IMAGE_NAMESPACE: "harbor-hub-shared.arena.3ascloud.de/arena2036"
   IMAGE_NAME: "managed-simple-data-exchanger-backend"
   SERVER_URL: '${{ github.server_url }}'
   REPOSITORY: '${{ github.repository }}'
@@ -58,58 +60,55 @@ jobs:
         with:
           java-version: '18'
           distribution: 'temurin'
-        
+
       - name: Build
-        run: mvn -B package
+        run: mvn -B package -DskipTests
 
       # Create SemVer or ref tags dependent of trigger event
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
         with:
-         images: |
+          images: |
             ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}
-         # Automatically prepare image tags; See action docs for more examples. 
-         # semver patter will generate tags like these for example :1 :1.2 :1.2.3
-         tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=raw,value=main
-            type=semver,pattern={{major}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=${{ github.sha }}
+          # Automatically prepare image tags; See action docs for more examples.
+          # semver patter will generate tags like these for example :1 :1.2 :1.2.3
+          tags: |
             type=raw,value=${{ github.event.inputs.image_tag }}
-         flavor: |
+            tags: ${{ steps.meta.outputs.tags }}, ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest
+            type=raw,value=${{ github.sha }}
+          flavor: |
             latest=true
 
       - name: Docker Login
         # if: github.event_name != 'pull_request'
-        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        uses: azure/docker-login@v1
         with:
-          # Use existing DockerHub credentials present as secrets
-          username: ${{ secrets.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+          login-server: ${{ secrets.HBR_REGISTRY }}
+          username: ${{ secrets.HBR_USERNAME }}
+          password: ${{ secrets.HBR_PASSWORD }}
 
-      - name: Build and push
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+      - name: Build and push Docker image to HBR Registry
+        uses: docker/build-push-action@67a2d409c0a876cbe6b11854e3e25193efe4e62d # v6.12.0
         with:
-         context: .
-         file: ./build/Dockerfile
-         # Build image for verification purposes on every trigger event. Only push if event is not a PR
-         push: ${{ github.event_name != 'pull_request' }}
-         tags: ${{ steps.meta.outputs.tags }}, ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest
-         labels: ${{ steps.meta.outputs.labels }}
+          context: .
+          file: ./build/Dockerfile
+          # Build image for verification purposes on every trigger event. Only push if event is not a PR
+          # push: ${{ github.event_name != 'pull_request' }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}, ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest
+          labels: ${{ steps.meta.outputs.labels }}
 
-       # https://github.com/peter-evans/dockerhub-description
-       # Important step to push image description to DockerHub 
-      - name: Update Docker Hub description
-        if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4.0.2
-        with:
-         # readme-filepath defaults to toplevel README.md, Only necessary if you have a dedicated file with your 'Notice for docker images'   
-         # readme-filepath: path/to/dedicated/notice-for-docker-image.md 
-         username: ${{ secrets.DOCKER_HUB_USER }}
-         password: ${{ secrets.DOCKER_HUB_TOKEN }}
-         repository: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}
-         # IMPORTANT: Adjust this to the actual path of your container image notice
-         readme-filepath: ./DOCKER_NOTICE.md
+      # https://github.com/peter-evans/dockerhub-description
+      # Important step to push image description to DockerHub
+      # - name: Update Docker Hub description
+      #   if: github.event_name != 'pull_request'
+      #   uses: peter-evans/dockerhub-description@v4
+      #   with:
+      #      # readme-filepath defaults to toplevel README.md, Only necessary if you have a dedicated file with your 'Notice for docker images'
+      #      # readme-filepath: path/to/dedicated/notice-for-docker-image.md
+      #      username: ${{ secrets.DOCKER_HUB_USER }}
+      #      password: ${{ secrets.DOCKER_HUB_TOKEN }}
+      #      repository: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}
+      #      # IMPORTANT: Adjust this to the actual path of your container image notice
+      #      readme-filepath: ./DOCKER_NOTICE.md

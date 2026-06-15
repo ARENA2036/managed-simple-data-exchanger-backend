@@ -1,6 +1,7 @@
 /********************************************************************************
- * Copyright (c) 2022, 2024 T-Systems International GmbH
- * Copyright (c) 2022, 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2022,2024 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2022,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -21,14 +22,13 @@
 package org.eclipse.tractusx.sde.edc.facilitator;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.URISyntaxException;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.common.entities.Policies;
 import org.eclipse.tractusx.sde.edc.api.ContractApi;
+import org.eclipse.tractusx.sde.edc.api.EDRApiProxy;
 import org.eclipse.tractusx.sde.edc.entities.request.policies.ActionRequest;
 import org.eclipse.tractusx.sde.edc.entities.request.policies.ConstraintRequest;
 import org.eclipse.tractusx.sde.edc.entities.request.policies.PermissionRequest;
@@ -55,13 +55,14 @@ import lombok.SneakyThrows;
 public class ContractNegotiateManagementHelper extends AbstractEDCStepsHelper {
 
 	private final ContractApi contractApi;
+	private final EDRApiProxy edrApiProxy;
 	private final ContractMapper contractMapper;
 
 	ObjectMapper mapper = new ObjectMapper();
 
-	@SneakyThrows
-	public String negotiateContract(String providerUrl, String providerId, String offerId, String assetId,
-			List<ActionRequest> action, Map<String, String> extensibleProperty) {
+	//@SneakyThrows
+	public AcknowledgementId negotiateContract(String providerUrl, String providerId, String offerId, String assetId,
+											   List<ActionRequest> action, Map<String, String> extensibleProperty) {
 
 		var recipientURL = UtilityFunctions.removeLastSlashOfUrl(providerUrl);
 		if (!recipientURL.endsWith(protocolPath))
@@ -70,9 +71,38 @@ public class ContractNegotiateManagementHelper extends AbstractEDCStepsHelper {
 		ContractNegotiations contractNegotiations = contractMapper.prepareContractNegotiations(recipientURL, offerId,
 				assetId, providerId, action);
 
-		AcknowledgementId acknowledgementId = contractApi.contractnegotiations(new URI(consumerHost),
-				contractNegotiations, getAuthHeader());
-		return acknowledgementId.getId();
+		AcknowledgementId acknowledgementId = null;
+		try {
+			acknowledgementId = contractApi.contractnegotiations(new URI(consumerHost),
+					contractNegotiations, getAuthHeader());
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+		return acknowledgementId;
+	}
+
+	//@SneakyThrows
+	public AcknowledgementId negotiateContractEDR(String providerUrl, String providerId, String offerId, String assetId,
+											   List<ActionRequest> action, Map<String, String> extensibleProperty) {
+
+		var recipientURL = UtilityFunctions.removeLastSlashOfUrl(providerUrl);
+		if (!recipientURL.endsWith(protocolPath))
+			recipientURL = recipientURL + protocolPath;
+
+		ContractNegotiations contractNegotiations = contractMapper.prepareContractNegotiations(recipientURL, offerId,
+				assetId, providerId, action);
+
+		AcknowledgementId acknowledgementId = null;
+
+		try {
+			JsonNode jsonNode = mapper.convertValue(contractNegotiations, JsonNode.class);
+			acknowledgementId = edrApiProxy.edrCacheCreate(new URI(consumerHost), jsonNode, getAuthHeader());
+
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+
+		return acknowledgementId;
 	}
 
 	@SneakyThrows
@@ -181,7 +211,7 @@ public class ContractNegotiateManagementHelper extends AbstractEDCStepsHelper {
 
 			if (policies.isEmpty())
 			
-			UtilityFunctions.getUsagePolicies(policies, List.of());
+			UtilityFunctions.mapPolicies(policies, List.of());
 			ContractAgreementInfo agreementInfo = ContractAgreementInfo.builder()
 					.contractEndDate(agreement.getContractEndDate())
 					.contractSigningDate(agreement.getContractSigningDate())
@@ -197,30 +227,35 @@ public class ContractNegotiateManagementHelper extends AbstractEDCStepsHelper {
 		return agreementResponse;
 	}
 
-	private void formatPermissionConstraint(ObjectMapper objeMapper, List<Policies> policies, Object permissionObj) {
-		ObjectMapper objMapper = new ObjectMapper();
-		PermissionRequest permissionRequest = objMapper.convertValue(permissionObj, PermissionRequest.class);
+    private void formatPermissionConstraint(ObjectMapper objMapper, List<Policies> policies, Object permissionObj) {
+        PermissionRequest permissionRequest = objMapper.convertValue(permissionObj, PermissionRequest.class);
 
-		Object object = permissionRequest.getConstraint().get("odrl:and");
-		if (object != null)
-			setContraint(objeMapper, policies, object);
-		else {
-			object = permissionRequest.getConstraint().get("odrl:or");
-			if (object != null)
-				setContraint(objeMapper, policies, object);
-		}
-	}
+        Map<String, Object> logicalGroup = permissionRequest.getConstraint();
+        if (logicalGroup == null) return;
+
+        Object andObj = Optional.ofNullable(logicalGroup.get("odrl:and"))
+				.orElseGet(() -> logicalGroup.get("and"));
+        if (andObj != null) {
+            setContraint(objMapper, policies, andObj);
+        }
+
+        Object orObj = Optional.ofNullable(logicalGroup.get("odrl:or"))
+				.orElseGet(() -> logicalGroup.get("or"));
+        if (orObj != null) {
+            setContraint(objMapper, policies, orObj);
+        }
+    }
 
 	private void setContraint(ObjectMapper objeMapper, List<Policies> policies, Object object) {
 		if (object instanceof ArrayList) {
-			List<ConstraintRequest> convertValue = objeMapper.convertValue(object,
+			List<ConstraintRequest> convertedValues = objeMapper.convertValue(object,
 					new TypeReference<List<ConstraintRequest>>() {
 					});
-			UtilityFunctions.getUsagePolicies(policies, convertValue);
+			UtilityFunctions.mapPolicies(policies, convertedValues);
 		} else if (object != null) {
 
-			ConstraintRequest convertValue = objeMapper.convertValue(object, ConstraintRequest.class);
-			UtilityFunctions.getUsagePolicies(policies, List.of(convertValue));
+			ConstraintRequest convertedValue = objeMapper.convertValue(object, ConstraintRequest.class);
+			UtilityFunctions.mapPolicies(policies, List.of(convertedValue));
 		}
 	}
 

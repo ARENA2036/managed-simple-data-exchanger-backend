@@ -1,6 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2024 T-Systems International GmbH
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,6 +18,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
+
 package org.eclipse.tractusx.sde.edc.util;
 
 import java.time.LocalDateTime;
@@ -85,12 +87,9 @@ public class EDCAssetUrlCacheService {
 						.getAuthorizationTokenForDataDownload(eDRCachedResponse.getTransferProcessId());
 
 		} catch (FeignException e) {
-			log.error("FeignException Request : " + e.request());
-			String errorMsg = "Unable to look up offer because: " + e.contentUTF8();
-			log.error("FeignException : " + errorMsg);
+			log.error("FeignException Request: {} \n  Content: {}",  e.request(), e.contentUTF8());
 		} catch (Exception e) {
-			String errorMsg = "Unable to look up offer because: " + e.getMessage();
-			log.error("Exception : " + errorMsg);
+			log.error("Exception: Unable to look up offer because: {}",  e.getMessage());
 		}
 
 		return null;
@@ -111,7 +110,7 @@ public class EDCAssetUrlCacheService {
 		dDTRmap.put(bpnNumber, cacheExpTime);
 		List<QueryDataOfferModel> ddtrUrl = dDTRUrlCacheUtility.getDDTRUrl(bpnNumber);
 		if (ddtrUrl.isEmpty()) {
-			log.info("Found connector list empty so removing existing cache and retry to fetch");
+			log.info("DDTR: Found connector list empty so removing existing cache and retry to fetch");
 			removeDDTRUrlCache(bpnNumber);
 		}
 		return ddtrUrl;
@@ -142,7 +141,7 @@ public class EDCAssetUrlCacheService {
 		pcfExchangeURLMap.put(bpnNumber, cacheExpTime);
 		List<QueryDataOfferModel> pcfExchangeurls = pcfExchangeAssetUtils.getPCFExchangeUrl(bpnNumber);
 		if (pcfExchangeurls.isEmpty()) {
-			log.info("Found connector list empty so removing existing cache and retry to fetch");
+			log.info("PCF: Found connector list empty so removing existing cache and retry to fetch");
 			removePCFExchangeCache(bpnNumber);
 		}
 		return pcfExchangeurls;
@@ -171,9 +170,10 @@ public class EDCAssetUrlCacheService {
 			cacheExpTime = currDate.plusHours(12);
 		}
 		bpdmMap.put(edcAssetConfigurableConstant.getBpdmProviderBpnl(), cacheExpTime);
+
 		List<QueryDataOfferModel> bpdmUrls = bpdmEdcAssetUtility.getBpdmUrl(edcAssetConfigurableConstant.getBpdmProviderBpnl());
 		if (bpdmUrls.isEmpty()) {
-			log.info("Found connector list empty so removing existing cache and retry to fetch");
+			log.info("BPDM: Found connector list empty so removing existing cache and retry to fetch");
 			removeBpdmCache();
 		}
 		return bpdmUrls;
@@ -188,4 +188,17 @@ public class EDCAssetUrlCacheService {
 		bpdmEdcAssetUtility.removeBpdmCache(edcAssetConfigurableConstant.getBpdmProviderBpnl());
 		bpdmMap.remove(edcAssetConfigurableConstant.getBpdmProviderBpnl());
 	}
+
+    public EDRCachedByIdResponse getTokenWithoutRefresh(String bpnNumber, QueryDataOfferModel dtOffer) {
+		List<ActionRequest> action = policyConstraintBuilderService
+				.getUsagePoliciesConstraints(dtOffer.getPolicy().getUsagePolicies());
+
+		// initiate Negotiation -> create edr cache
+		String agreementId = contractNegotiationService.initiateContractNegotiation(dtOffer, action);
+		// get tranfer process id
+		EDRCachedResponse edrCachedResponse = contractNegotiationService.getEDRCachedByContractNegotiationId(agreementId);
+		// get Authorization Details
+		return contractNegotiationService
+				.getAuthorizationTokenForDataDownload(edrCachedResponse.getTransferProcessId());
+    }
 }

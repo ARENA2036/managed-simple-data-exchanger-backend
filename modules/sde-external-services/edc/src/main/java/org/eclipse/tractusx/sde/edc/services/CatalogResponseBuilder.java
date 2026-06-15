@@ -1,6 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2024 T-Systems International GmbH
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -22,6 +23,7 @@ package org.eclipse.tractusx.sde.edc.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.tractusx.sde.common.entities.Policies;
 import org.eclipse.tractusx.sde.common.entities.PolicyModel;
@@ -44,6 +46,7 @@ public class CatalogResponseBuilder extends AbstractEDCStepsHelper {
 	private final ContractOfferCatalogApi contractOfferCatalogApiProxy;
 	private final ContractOfferRequestFactory contractOfferRequestFactory;
 
+	//TODO Check if the counterPartyId is a DID
 	public List<QueryDataOfferModel> queryOnDataOffers(String providerUrl, String counterPartyId, Integer offset, Integer limit,
 			String filterExpression) {
 
@@ -59,20 +62,28 @@ public class CatalogResponseBuilder extends AbstractEDCStepsHelper {
 		JsonNode contractOfferCatalog = contractOfferCatalogApiProxy.getContractOffersCatalog(
 				contractOfferRequestFactory.getContractOfferRequest(sproviderUrl, counterPartyId, limit, offset, filterExpression));
 
-		JsonNode jOffer = contractOfferCatalog.get("dcat:dataset");
+		JsonNode jOffer = getDataset(contractOfferCatalog);
+		if (jOffer == null) {
+			return queryOfferResponse;
+		}
+
+		handleContractOffer(jOffer, sproviderUrl, contractOfferCatalog, queryOfferResponse);
+
+		return queryOfferResponse;
+	}
+
+	private void handleContractOffer(JsonNode jOffer, String sproviderUrl, JsonNode contractOfferCatalog, List<QueryDataOfferModel> queryOfferResponse) {
 		if (jOffer.isArray()) {
 			jOffer.forEach(
 					offer -> handleContractOffer(sproviderUrl, contractOfferCatalog, offer, queryOfferResponse));
 		} else {
 			handleContractOffer(sproviderUrl, contractOfferCatalog, jOffer, queryOfferResponse);
 		}
-
-		return queryOfferResponse;
 	}
 
 	public void handleContractOffer(String sproviderUrl, JsonNode contractOfferCatalog, JsonNode offer, List<QueryDataOfferModel> queryOfferResponse) {
 
-		JsonNode contractOffers = offer.get("odrl:hasPolicy");
+		JsonNode contractOffers = getHasPolicy(offer);
 		
 		String edcstr = EDCAssetConstant.ASSET_PREFIX;
 		
@@ -112,14 +123,15 @@ public class CatalogResponseBuilder extends AbstractEDCStepsHelper {
 
 		if (policy != null && policy.isArray()) {
 			policy.forEach(pol -> {
-				JsonNode permission = pol.get("odrl:permission");
+				JsonNode permission = getPermission(pol);
 				checkAndSetPolicyPermissionsConstraints(build, permission);
 			});
 		} else if (policy != null) {
-			JsonNode permission = policy.get("odrl:permission");
+			JsonNode permission = getPermission(policy);
 			checkAndSetPolicyPermissionsConstraints(build, permission);
 		}
 	}
+
 	private void checkAndSetPolicyPermissionsConstraints(QueryDataOfferModel build, JsonNode permissions) {
 
 		if (permissions != null && permissions.isArray()) {
@@ -134,12 +146,12 @@ public class CatalogResponseBuilder extends AbstractEDCStepsHelper {
 	
 	private void checkAndSetPolicyPermissionConstraints(QueryDataOfferModel build, JsonNode permission) {
 
-		JsonNode constraints = permission.get("odrl:constraint");
+		JsonNode constraints = getConstraint(permission);
 
 		List<Policies> usagePolicies = new ArrayList<>();
 
 		if (constraints != null) {
-			JsonNode jsonNode = constraints.get("odrl:and");
+			JsonNode jsonNode = getAnd(constraints);
 
 			if (jsonNode != null && jsonNode.isArray()) {
 				jsonNode.forEach(constraint -> setConstraint(usagePolicies, constraint));
@@ -157,16 +169,15 @@ public class CatalogResponseBuilder extends AbstractEDCStepsHelper {
 		// accespoliocy already applied for access control,
 		// in this constrain all are usage policy
 
-		JsonNode letfOerand = jsonNode.get("odrl:leftOperand");
-		String leftOperand = "";
-		if(letfOerand.isObject()) {
-			leftOperand = getFieldFromJsonNode(letfOerand, "@id");
-		} else {
-			leftOperand = getFieldFromJsonNode(jsonNode, "odrl:leftOperand");
+		JsonNode leftOperand = getLeftOperand(jsonNode);
+		JsonNode rightOperand = getRightOperand(jsonNode);
+		String leftOperandText = leftOperand != null ? leftOperand.asText() : "";
+		if(leftOperand != null && leftOperand.isObject()) {
+			leftOperandText = getFieldFromJsonNode(leftOperand, "@id");
 		}
-		
-		String rightOperand = getFieldFromJsonNode(jsonNode, "odrl:rightOperand");
-		Policies policyResponse = UtilityFunctions.identyAndGetUsagePolicy(leftOperand, rightOperand);
+
+		String rightOperandText = rightOperand != null ? rightOperand.asText() : "";
+		Policies policyResponse = UtilityFunctions.identyAndGetUsagePolicy(leftOperandText, rightOperandText);
 		if (policyResponse != null)
 			usagePolicies.add(policyResponse);
 	}
@@ -178,4 +189,41 @@ public class CatalogResponseBuilder extends AbstractEDCStepsHelper {
 			return "";
 	}
 
+	private static JsonNode getHasPolicy(JsonNode offer) {
+		return Optional.ofNullable(offer.get("odrl:hasPolicy"))
+				.orElseGet(() -> offer.get("hasPolicy"));
+	}
+
+
+	private static JsonNode getPermission(JsonNode pol) {
+		return Optional.ofNullable(pol.get("odrl:permission"))
+				.orElseGet(() -> pol.get("permission"));
+	}
+
+	private static JsonNode getConstraint(JsonNode permission) {
+		return Optional.ofNullable(permission.get("odrl:constraint"))
+				.orElseGet(() -> permission.get("constraint"));
+	}
+
+
+	private static JsonNode getDataset(JsonNode contractOfferCatalog) {
+		return Optional.ofNullable(contractOfferCatalog.get("dcat:dataset"))
+				.orElseGet(() -> contractOfferCatalog.get("dataset"));
+	}
+
+	private static JsonNode getLeftOperand(JsonNode jsonNode) {
+		return Optional.ofNullable(jsonNode.get("odrl:leftOperand")
+		).orElseGet(() -> jsonNode.get("leftOperand"));
+	}
+
+	private static JsonNode getRightOperand(JsonNode jsonNode) {
+		return Optional.ofNullable(jsonNode.get("odrl:rightOperand")
+		).orElseGet(() -> jsonNode.get("rightOperand"));
+	}
+
+
+	private static JsonNode getAnd(JsonNode constraints) {
+		return Optional.ofNullable(constraints.get("odrl:and"))
+				.orElseGet(() -> constraints.get("and"));
+	}
 }

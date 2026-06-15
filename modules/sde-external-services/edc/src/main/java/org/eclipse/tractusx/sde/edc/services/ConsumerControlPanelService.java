@@ -1,6 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2022,2024 T-Systems International GmbH
- * Copyright (c) 2022,2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2022,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -34,6 +35,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.tractusx.sde.bpndiscovery.handler.BpnDiscoveryProxyService;
@@ -48,6 +51,7 @@ import org.eclipse.tractusx.sde.edc.entities.request.policies.PolicyConstraintBu
 import org.eclipse.tractusx.sde.edc.facilitator.ContractNegotiateManagementHelper;
 import org.eclipse.tractusx.sde.edc.facilitator.EDRRequestHelper;
 import org.eclipse.tractusx.sde.edc.gateways.database.ContractNegotiationInfoRepository;
+import org.eclipse.tractusx.sde.edc.model.contractnegotiation.AcknowledgementId;
 import org.eclipse.tractusx.sde.edc.model.contractnegotiation.ContractNegotiationDto;
 import org.eclipse.tractusx.sde.edc.model.edr.EDRCachedByIdResponse;
 import org.eclipse.tractusx.sde.edc.model.edr.EDRCachedResponse;
@@ -57,6 +61,7 @@ import org.eclipse.tractusx.sde.edc.model.request.QueryDataOfferRequest;
 import org.eclipse.tractusx.sde.edc.model.response.QueryDataOfferModel;
 import org.eclipse.tractusx.sde.edc.util.EDCAssetUrlCacheService;
 import org.eclipse.tractusx.sde.edc.util.UtilityFunctions;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -82,6 +87,8 @@ public class ConsumerControlPanelService {
 	private final EDCAssetUrlCacheService edcAssetUrlCacheService;
 	private final ContractNegotiationService contractNegotiationService;
 	private final LookUpDTTwin lookUpDTTwin;
+	@Value("${edr.refresh.enable:false}")
+	private boolean withEdrRefresh;
 
 	public Set<QueryDataOfferModel> queryOnDataOffers(String manufacturerPartId, String searchBpnNumber,
 			String submodel, Integer offset, Integer limit) {
@@ -111,18 +118,27 @@ public class ConsumerControlPanelService {
 			List<QueryDataOfferModel> ddTROffers = edcAssetUrlCacheService.getDDTRUrl(bpnNumber);
 
 			// 3 lookup shell for PCF sub model
-			for (QueryDataOfferModel dtOffer : ddTROffers) {
-
-				EDRCachedByIdResponse edrToken = edcAssetUrlCacheService.verifyAndGetToken(bpnNumber, dtOffer);
+			ddTROffers.stream().distinct().forEach(dtOffer ->{
+				EDRCachedByIdResponse edrToken;
+				if(withEdrRefresh){
+					edrToken = edcAssetUrlCacheService.verifyAndGetToken(bpnNumber, dtOffer);
+				}else{
+					edrToken = edcAssetUrlCacheService.getTokenWithoutRefresh(bpnNumber, dtOffer);
+				}
 				if (edrToken != null) {
 
 					queryOnDataOffers.addAll(lookUpDTTwin.lookUpTwin(edrToken, dtOffer, manufacturerPartId, bpnNumber,
 							submodel, offset, limit));
 
 				} else {
-					log.warn("EDR token is null, unable to look Up Digital Twin for :" + dtOffer.toString());
+					log.warn("EDR token is null, unable to look Up Digital Twin for : {}",  dtOffer);
+					try {
+						log.warn(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(dtOffer));
+					} catch (JsonProcessingException e) {
+						log.error("Can't parse the following Digital Twin to JSON \n {}", dtOffer);
+					}
 				}
-			}
+			});
 		}
 		return new HashSet<>(queryOnDataOffers);
 
@@ -140,8 +156,10 @@ public class ConsumerControlPanelService {
 
 		consumerRequest.getOffers().parallelStream().forEach(offer -> {
 			try {
-				negotiateContractId.set(contractNegotiateManagement.negotiateContract(offer.getConnectorOfferUrl(),
-						offer.getConnectorId(), offer.getOfferId(), offer.getAssetId(), action, extensibleProperty));
+				AcknowledgementId acknowledgementId = contractNegotiateManagement.negotiateContract(offer.getConnectorOfferUrl(),
+						offer.getConnectorId(), offer.getOfferId(), offer.getAssetId(), action, extensibleProperty);
+
+				negotiateContractId.set(acknowledgementId.getId());
 				int retry = 3;
 				int counter = 1;
 
@@ -154,12 +172,20 @@ public class ConsumerControlPanelService {
 						&& !checkContractNegotiationStatus.get().getState().equals("FINALIZED")
 						&& !checkContractNegotiationStatus.get().getState().equals("TERMINATED") && counter <= retry);
 
-			} catch (InterruptedException ie) {
+			}
+			catch(FeignException fe){
+				log.error("Exception Request " + fe.request());
+				log.error("Exception Message " + fe.getMessage());
+				log.error("Exception Message " + fe.responseBody());
+			}
+			catch (InterruptedException ie) {
 				log.error("Exception in subscribeDataOffers" + ie.getMessage());
 				Thread.currentThread().interrupt();
 			} catch (Exception e) {
 				log.error("Exception in subscribeDataOffers" + e.getMessage());
-			} finally {
+
+			}
+			finally {
 				ContractNegotiationInfoEntity contractNegotiationInfoEntity = ContractNegotiationInfoEntity.builder()
 						.id(UUID.randomUUID().toString()).processId(processId).connectorId(offer.getConnectorId())
 						.offerId(offer.getOfferId())

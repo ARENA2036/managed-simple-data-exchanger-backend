@@ -1,6 +1,7 @@
 /********************************************************************************
- * Copyright (c) 2022, 2023 T-Systems International GmbH
- * Copyright (c) 2022, 2023 Contributors to the Eclipse Foundation
+ * Copyright (c) 2022,2023 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2022,2023,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -45,6 +46,7 @@ public class RolePermissionCustomRepository {
 				"SELECT p FROM RolePermissionEntity p Where p.sdeRole IN :role and p.sdePermission IN :permission ");
 		query.setParameter("role", role);
 		query.setParameter("permission", permission);
+
 		return query.getResultList();
 	}
 

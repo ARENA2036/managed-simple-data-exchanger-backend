@@ -1,6 +1,7 @@
 /********************************************************************************
- * Copyright (c) 2023, 2024 T-Systems International GmbH
- * Copyright (c) 2023, 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2023,2024 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2023,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -91,7 +92,7 @@ public class TokenUtility {
 						"Unable to get auth token because auth response resultBody is: " + resultBody);
 		} catch (FeignException e) {
 			log.error("FeignException RequestBody : " + e.request());
-			String errorMsg = "Error in DT twin lookup " + e.request().url() + ", because: " + body+ "," + e.contentUTF8();
+			String errorMsg = "Error in DT twin lookup " + e.request().url() + ", because: " + body+ "," + e.toString();
 			log.error("FeignException : " + errorMsg);
 			throw new ServiceException(errorMsg);
 		} catch (Exception e) {

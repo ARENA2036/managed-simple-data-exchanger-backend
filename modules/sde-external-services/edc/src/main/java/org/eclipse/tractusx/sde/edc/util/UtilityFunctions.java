@@ -1,6 +1,7 @@
 /********************************************************************************
- * Copyright (c) 2022, 2024 T-Systems International GmbH
- * Copyright (c) 2022, 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2022,2024 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2022,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -51,18 +52,33 @@ public class UtilityFunctions {
 		}
 	}
 
-	public static List<Policies> getUsagePolicies(List<Policies> usagePolicies, List<ConstraintRequest> constraints) {
-		constraints.forEach(constraint -> {
-			String leftExpVal = constraint.getLeftOperand().getId();
-			String rightExpVal = constraint.getRightOperand().toString();
-			Policies policyResponse = identyAndGetUsagePolicy(leftExpVal, rightExpVal);
-			if (policyResponse != null)
-				usagePolicies.add(policyResponse);
-		});
-		return usagePolicies;
-	}
+    public static List<Policies> mapPolicies(List<Policies> policies, List<ConstraintRequest> constraints) {
+        if (constraints == null || constraints.isEmpty()) {
+            return policies;
+        }
 
-	public static Policies identyAndGetUsagePolicy(String leftExpVal, String rightExpVal) {
+        constraints.forEach(constraint -> {
+            String leftExpVal = null;
+            if (constraint.getLeftOperand() != null) {
+                leftExpVal =  ConstraintRequest.getConstraintLeftOperator(constraint);
+            }
+
+            String rightExpVal = constraint.getRightOperand() != null
+                    ? constraint.getRightOperand().toString()
+                    : null;
+
+            Policies policyResponse = identyAndGetUsagePolicy(leftExpVal, rightExpVal);
+            if (policyResponse != null) {
+                policies.add(policyResponse);
+            }
+        });
+
+        return policies;
+    }
+
+
+
+    public static Policies identyAndGetUsagePolicy(String leftExpVal, String rightExpVal) {
 		return Policies.builder().technicalKey(leftExpVal).value(List.of(rightExpVal)).build();
 	}
 

@@ -1,7 +1,8 @@
 /********************************************************************************
  * Copyright (c) 2022 BMW GmbH
  * Copyright (c) 2022,2024 T-Systems International GmbH
- * Copyright (c) 2022,2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2022,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -21,6 +22,7 @@
 
 package org.eclipse.tractusx.sde.edc.gateways.external;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -59,9 +61,9 @@ public class EDCGateway {
 		return true;
 	}
 	
-	public boolean assetExistsLookupBasedOnType(ObjectNode requestBody) {
+	public boolean containsAssetsByFilterExpression(ObjectNode requestBody) {
 		try {
-			JsonNode result = edcFeignClientApi.getAssetByType(requestBody);
+			JsonNode result = edcFeignClientApi.getAssetByFilterExpression(requestBody);
 			if (result.isArray() && result.isEmpty())
 				return false;
 		} catch (FeignException e) {
@@ -73,9 +75,20 @@ public class EDCGateway {
 		return true;
 	}
 	
-	public JsonNode assetExistsLookupBasedOnTypeGetAsAsset(ObjectNode requestBody) {
+	public JsonNode getAssetsByFilterExpression(ObjectNode requestBody) {
 		try {
-			return edcFeignClientApi.getAssetByType(requestBody);
+			return edcFeignClientApi.getAssetByFilterExpression(requestBody);
+		} catch (FeignException e) {
+			if (e.status() == HttpStatus.NOT_FOUND.value()) {
+				return null;
+			}
+			throw e;
+		}
+	}
+
+	public JsonNode getContractDefinitionsByFilterExpression(ObjectNode requestBody) {
+		try {
+			return edcFeignClientApi.getContractDefinitionsByFilterExpression(requestBody);
 		} catch (FeignException e) {
 			if (e.status() == HttpStatus.NOT_FOUND.value()) {
 				return null;
@@ -99,8 +112,8 @@ public class EDCGateway {
 		try {
 			edcFeignClientApi.updateAsset(request);
 		} catch (FeignException e) {
-			if (e.status() == HttpStatus.CONFLICT.value()) {
-				throw new EDCGatewayException("Asset already exists");
+			if (e.status() == HttpStatus.NOT_FOUND.value()) {
+				throw new EDCGatewayException("Asset to update doesn't exists");
 			}
 			throw new EDCGatewayException(e.getMessage());
 		}
@@ -120,18 +133,33 @@ public class EDCGateway {
 	}
 	
 	@SneakyThrows
-	public JsonNode createPolicyDefinition(JsonNode request) {
-		try {
-			return edcFeignClientApi.createPolicy(request);
-		} catch (FeignException e) {
-			throw new EDCGatewayException(e.getMessage());
-		}
-	}
+    public JsonNode createPolicyDefinition(JsonNode request) {
+        try {
+            return edcFeignClientApi.createPolicy(request);
+        } catch (FeignException fe) {
+            log.error("Exception Request: {}", fe.request());
+            log.error("Exception Status: {}", fe.status());
+            log.error("Exception Message: {}", fe.getMessage());
+
+            if (fe.responseBody().isPresent()) {
+                try {
+                    String body = StandardCharsets.UTF_8.decode(fe.responseBody().get()).toString();
+                    log.error("Full EDC Response Body:\n{}", body);
+                } catch (Exception ex) {
+                    log.error("Failed to read response body", ex);
+                }
+            } else {
+                log.error("No response body from EDC");
+            }
+
+            throw new EDCGatewayException("EDC error: " + fe.getMessage());
+        }
+    }
 	
 	@SneakyThrows
-	public void updatePolicyDefinition(String policyUUId, JsonNode request) {
+	public JsonNode updatePolicyDefinition(String policyUUId, JsonNode request) {
 		try {
-			edcFeignClientApi.updatePolicy(policyUUId, request);
+			return edcFeignClientApi.updatePolicy(policyUUId, request);
 		} catch (FeignException e) {
 			throw new EDCGatewayException(e.getMessage());
 		}

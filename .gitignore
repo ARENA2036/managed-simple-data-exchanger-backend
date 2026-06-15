@@ -4,6 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 temp/
+/.run/
 ### STS ###
 .apt_generated
 .classpath
@@ -34,3 +35,6 @@ temp/
 
 /helm/
 /.DS_Store
+
+### AI Agents
+AGENTS.md

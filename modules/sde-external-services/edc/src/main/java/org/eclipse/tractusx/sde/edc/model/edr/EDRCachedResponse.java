@@ -1,6 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2023,2024 T-Systems International GmbH
- * Copyright (c) 2023,2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2023,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -20,6 +21,7 @@
 
 package org.eclipse.tractusx.sde.edc.model.edr;
 
+import lombok.*;
 import org.eclipse.tractusx.sde.edc.constants.EDCAssetConstant;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -27,15 +29,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class EDRCachedResponse {
@@ -60,5 +59,8 @@ public class EDRCachedResponse {
 	
 	@JsonProperty(EDCAssetConstant.ASSET_PREFIX + "contractNegotiationId")
 	private String contractNegotiationId;
+
+	@JsonProperty(EDCAssetConstant.ASSET_PREFIX + "createdAt")
+	private Long createdAt;
 
 }

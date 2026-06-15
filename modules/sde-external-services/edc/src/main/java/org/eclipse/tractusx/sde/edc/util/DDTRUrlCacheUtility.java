@@ -1,6 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2024 T-Systems International GmbH
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -20,6 +21,7 @@
 
 package org.eclipse.tractusx.sde.edc.util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.tractusx.sde.common.utils.LogUtil;
@@ -45,6 +47,7 @@ public class DDTRUrlCacheUtility {
 	@Cacheable(value = "bpn-ddtr", key = "#bpnNumber")
 	public List<QueryDataOfferModel> getDDTRUrl(String bpnNumber) {
 		return edcAssetLookUp.getEDCAssetsByType(bpnNumber, getFilterCriteria());
+
 	}
 
 	@CacheEvict(value = "bpn-ddtr", key = "#bpnNumber")
@@ -63,7 +66,7 @@ public class DDTRUrlCacheUtility {
 				Criterion.builder()
 				.operandLeft("'http://purl.org/dc/terms/type'.'@id'")
 				.operator("=")
-				.operandRight("https://w3id.org/catenax/taxonomy#" + edcAssetConfigurableConstant.getAssetPropTypeDigitalTwin())
+				.operandRight("https://w3id.org/catenax/taxonomy#DigitalTwinRegistry")
 				.build());
 	}
 }
