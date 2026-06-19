@@ -1,0 +1,35 @@
+flowchart LR
+  root["root pom.xml\norg.eclipse.tractusx:sde"]
+  core["modules/sde-core\nSpring Boot App"]
+  common["modules/sde-common\nshared entities, utils, exceptions"]
+  pcfExchange["modules/pcf-exchange\nPCF request/response workflow"]
+  external["modules/sde-external-services\nexternal API clients"]
+  submods["modules/sde-submodules\nsemantic submodels"]
+
+  root --> core
+  root --> common
+  root --> pcfExchange
+  root --> external
+  root --> submods
+
+  core --> common
+  core --> pcfExchange
+  core --> external
+  core --> submods
+
+  external --> edc["edc"]
+  external --> dtr["digital-twins"]
+  external --> portal["portal"]
+  external --> bpn["bpn-discovery"]
+  external --> policyHub["policy-hub"]
+  external --> submodelServer["submodel-server"]
+
+  submods --> serial["serial-part"]
+  submods --> batch["batch"]
+  submods --> slbab["single-level-bom-as-built"]
+  submods --> pap["part-as-planned"]
+  submods --> pti["part-type-information"]
+  submods --> slbap["single-level-bom-as-planned"]
+  submods --> psiap["part-site-information-as-planned"]
+  submods --> sluab["single-level-usage-as-built"]
+  submods --> pcf["pcf"]

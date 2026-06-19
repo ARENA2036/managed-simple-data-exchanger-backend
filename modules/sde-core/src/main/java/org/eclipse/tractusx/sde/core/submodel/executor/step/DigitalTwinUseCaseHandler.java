@@ -1,7 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2024 T-Systems International GmbH
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
- * Copyright (c) 2025 ARENA2036 e.V.
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -24,7 +24,9 @@ package org.eclipse.tractusx.sde.core.submodel.executor.step;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.common.configuration.properties.PCFAssetStaticPropertyHolder;
 import org.eclipse.tractusx.sde.common.configuration.properties.SDEConfigurationProperties;
@@ -45,7 +47,6 @@ import org.eclipse.tractusx.sde.digitaltwins.entities.response.ShellDescriptorRe
 import org.eclipse.tractusx.sde.digitaltwins.entities.response.SubModelResponse;
 import org.eclipse.tractusx.sde.digitaltwins.facilitator.DigitalTwinsFacilitator;
 import org.eclipse.tractusx.sde.digitaltwins.facilitator.DigitalTwinsUtility;
-import org.eclipse.tractusx.sde.digitaltwins.gateways.external.SubmodelServerClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -58,17 +59,18 @@ import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
+@Slf4j
 @Service("digitalTwinUseCaseHandler")
 @RequiredArgsConstructor
 public class DigitalTwinUseCaseHandler extends Step implements DigitalTwinUsecaseStep {
+	private static final Pattern PATTERN =
+			Pattern.compile("^[a-zA-Z][a-zA-Z0-9_-]*[a-zA-Z0-9_]+$");
 	
 	private static final String FORWARD_SLASH = "/";
 
 	private final DigitalTwinsFacilitator digitalTwinFacilitator;
 
     private final DigitalTwinsUtility digitalTwinsUtility;
-
-    private final SubmodelServerClient submodelServerClient;
 
 	private final SDEConfigurationProperties sdeConfigProperties;
 
@@ -78,7 +80,7 @@ public class DigitalTwinUseCaseHandler extends Step implements DigitalTwinUsecas
 	
 	private final PCFAssetStaticPropertyHolder pcfAssetStaticPropertyHolder;
 	
-	@Value(value = "${edc.hostname}${edc.dataplane.endpointpath:/api/public}")
+	@Value(value = "${edc.dataplane.hostname}${edc.dataplane.endpointpath:/api}")
 	public String digitalTwinEdcDataplaneEndpoint;
 	
 	public void delete(Integer rowIndex, JsonObject jsonObject, String delProcessId, String refProcessId) {
@@ -94,9 +96,10 @@ public class DigitalTwinUseCaseHandler extends Step implements DigitalTwinUsecas
 			String identifier = getIdentifier(jsonObject, getIdentifierOfModel());
 
 			String shortIdForShell = generateShortId(jsonObject, getShortIdSpecsOfModel());
-			System.out.println("shortId %%%"+ shortIdForShell );
-			System.out.println("shortId identifier %%%"+  identifier);
-			Map<String, String> specificAssetIds = generateSpecificAssetIds(jsonObject,
+            log.debug("shortId: {}", shortIdForShell);
+            log.debug("shell identifier: {}", identifier);
+
+            Map<String, String> specificAssetIds = generateSpecificAssetIds(jsonObject,
 					getSpecificAssetIdsSpecsOfModel());
 
 			addManufactureIdInSpecificAssetIds(specificAssetIds, sdeConfigProperties.getManufacturerId());
@@ -107,12 +110,12 @@ public class DigitalTwinUseCaseHandler extends Step implements DigitalTwinUsecas
 			String shellId = checkShellAndGetIdIfExist(jsonObject, specificAssetIds);
 
 			if (StringUtils.isBlank(shellId)) {
-				specificAssetIds = generateSpecificAssetIds(jsonObject, getCreateShellSpecificAssetIdsSpecsOfModel());
+				specificAssetIds = generateSpecificAssetIds(jsonObject, getCreateShellSpecificAssetIdsSpecsOfModel()); 	//TODO why do it twice???
 				addManufactureIdInSpecificAssetIds(specificAssetIds, sdeConfigProperties.getManufacturerId());
 				aasDescriptorRequest = digitalTwinsUtility.getShellDescriptorRequest(shortIdForShell, identifier,
 						specificAssetIds, policy);
-				createShell(specificAssetIds, aasDescriptorRequest);
-				shellId = aasDescriptorRequest.getId();
+				shellId = createShell(specificAssetIds, aasDescriptorRequest);
+				shellId = aasDescriptorRequest.getId(); //TODO remove this line
 			}
 
 			jsonObject.put(SubmoduleCommonColumnsConstant.SHELL_ID, shellId);
@@ -124,11 +127,7 @@ public class DigitalTwinUseCaseHandler extends Step implements DigitalTwinUsecas
 			digitalTwinAccessRuleFacilator.init(getSubmodelSchema());
 			digitalTwinAccessRuleFacilator.createAccessRule(rowIndex, jsonObject, specificAssetIds, policy, getsemanticIdOfModel());
 
-            // Upload to submodel server
-            // TODO POTENTIALLY HANDLE MORE THAN ONE SUBMODELDESCRIPTOR
-            String assetId = shellId + "-" + aasDescriptorRequest.getSubmodelDescriptors().get(0).getId();
-            submodelServerClient.createSubModel(assetId, jsonObject);
-            logDebug("%%% SubmodelServer Upload: AssetId: " + assetId + ", Submodel-Content: " + jsonObject);
+
 
 		} catch (Exception e) {
 			throw new CsvHandlerUseCaseException(rowIndex, ": DigitalTwins: " + e.getMessage());
@@ -413,6 +412,9 @@ public class DigitalTwinUseCaseHandler extends Step implements DigitalTwinUsecas
 
 		return digitalTwinsUtility.getShellDescriptorRequest(nameAtManufacturer, manufacturerPartId, uuid,
 				specificAssetIds, policy);
+	}
+	public static boolean isValid(String value) {
+		return value != null && PATTERN.matcher(value).matches();
 	}
 
 }

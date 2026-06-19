@@ -1,8 +1,8 @@
 /********************************************************************************
  * Copyright (c) 2022 BMW GmbH
  * Copyright (c) 2022,2024 T-Systems International GmbH
- * Copyright (c) 2022,2024 Contributors to the Eclipse Foundation
- * Copyright (c) 2025 ARENA2036 e.V.
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2022,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -22,45 +22,50 @@
 
 package org.eclipse.tractusx.sde.edc.entities.request.policies;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = Include.NON_NULL)
+@JsonSerialize(using = PolicyDefinitionRequestSerializer.class)
 public class PolicyDefinitionRequest {
+    @JsonIgnore
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-	@JsonProperty("@context")
+    @JsonIgnore
+    @Builder.Default
+    private boolean useNameSpacePrefix = false;
+
+	@JsonAlias("@context")
 	private Object context;
 
-	@JsonProperty("@type")
+	@JsonAlias("@type")
 	@Builder.Default
 	private String polityRootType = "PolicyDefinition";
 
-    @JsonProperty("odrl:profile") //odrl
+    @JsonAlias("odrl:profile") //odrl
     private String profile;
 
 	@JsonProperty("@id")
     private String id;
 	
-    @JsonProperty("edc:policy")
-    private Object policyRequest;
+    @JsonAlias("edc:policy")
+    private PolicyRequest policy;
 
     @SneakyThrows
     public String toJsonString() {
-        final ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(this);
+        return MAPPER.writeValueAsString(this);
     }
 }

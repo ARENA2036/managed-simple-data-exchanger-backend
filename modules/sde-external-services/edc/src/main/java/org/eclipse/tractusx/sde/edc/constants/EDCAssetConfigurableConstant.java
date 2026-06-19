@@ -1,7 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2023,2024 T-Systems International GmbH
- * Copyright (c) 2023,2024 Contributors to the Eclipse Foundation
- * Copyright (c) 2025 ARENA2036 e.V.
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2023,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -32,7 +32,7 @@ import lombok.Getter;
 @Getter
 public class EDCAssetConfigurableConstant {
 
-	@Value("${edc.asset.prop.common.version:1.0.0}")
+	@Value("${edc.asset.prop.common.version:3.0}")
 	private String assetPropCommonVersion;
 
 	@Value("${edc.asset.prop.dcat.version:1.0.0}")
@@ -59,7 +59,7 @@ public class EDCAssetConfigurableConstant {
 	@Value("${edc.policy.digital-twin.access:Membership@active}")
 	private String digitalTwinExchangeAccessPolicy;
 	
-	@Value("${edc.policy.digital-twin.usage:Membership@active}")
+	@Value("${edc.policy.digital-twin.usage:Membership@active;FrameworkAgreement@DataExchangeGovernance:1.0;UsagePurpose@isAnyOf@cx.core.digitalTwinRegistry:1}")
 	private String digitalTwinExchangeUsagePolicy;
 	
 	@Value("#{'${edc.bpdm.asset.search.criteria:https://purl.org/dc/terms/subject@cx-taxo:ReadAccessPoolForCatenaXMember;https://w3id.org/catenax/ontology/common/version@6.0}'.split(';')}")

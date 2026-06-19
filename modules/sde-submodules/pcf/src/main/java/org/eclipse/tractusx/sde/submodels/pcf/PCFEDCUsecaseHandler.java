@@ -1,6 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2024 T-Systems International GmbH
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -80,7 +81,7 @@ public class PCFEDCUsecaseHandler extends Step implements EDCUsecaseStep {
 
         // Create access policy
         JsonNode accessPolicyDefinitionRequest = policyConstraintBuilderService.getAccessPolicy(newOfferId, assetId, policy);
-        System.out.println("Access Policy:\n" + accessPolicyDefinitionRequest.toPrettyString());
+        log.debug("Access Policy:\n{}", accessPolicyDefinitionRequest.toPrettyString());
         String accessPolicyUUId = accessPolicyDefinitionRequest.get("@id").asText();
         if (!edcGateway.policyExistsLookup(accessPolicyUUId)) {
             edcGateway.createPolicyDefinition(accessPolicyDefinitionRequest);
@@ -91,7 +92,7 @@ public class PCFEDCUsecaseHandler extends Step implements EDCUsecaseStep {
 
         // Create usage policy
         JsonNode usagePolicyDefinitionRequest = policyConstraintBuilderService.getUsagePolicy(newOfferId, assetId, policy);
-        System.out.println("Usage Policy:\n" + usagePolicyDefinitionRequest.toPrettyString());
+        log.debug("Usage Policy:\n{}", usagePolicyDefinitionRequest.toPrettyString());
         String usagePolicyUUId = usagePolicyDefinitionRequest.get("@id").asText();
         if (!edcGateway.policyExistsLookup(usagePolicyUUId)) {
             edcGateway.createPolicyDefinition(usagePolicyDefinitionRequest);
@@ -102,7 +103,7 @@ public class PCFEDCUsecaseHandler extends Step implements EDCUsecaseStep {
 
         // Create contract definition
         ContractDefinitionRequest contractDefinitionRequest = contractFactory
-                .getContractDefinitionRequest(newOfferId, assetId, accessPolicyUUId, usagePolicyUUId);
+                .createContractDefinitionRequest(newOfferId, assetId, accessPolicyUUId, usagePolicyUUId);
 
         String contractDefinitionId = contractDefinitionRequest.getId();
         if (!edcGateway.contractDefinitionExistsLookup(contractDefinitionId)) {

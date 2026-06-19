@@ -1,7 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2022,2024 T-Systems International GmbH
- * Copyright (c) 2022,2024 Contributors to the Eclipse Foundation
- * Copyright (c) 2025 ARENA2036 e.V.
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2022,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -21,17 +21,13 @@
 
 package org.eclipse.tractusx.sde.edc.entities.request.policies;
 
-import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,18 +40,24 @@ import lombok.SneakyThrows;
 @Builder
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonSerialize(using = PermissionRequestSerializer.class)
 public class PermissionRequest {
+	@JsonIgnore
+	private static final ObjectMapper MAPPER = new ObjectMapper();
 
-	@JsonProperty("odrl:action") //odrl
-	private Map<String, String> action;
+	@JsonIgnore
+	@Builder.Default
+	private boolean useNameSpacePrefix = false;
 
-    @JsonProperty("odrl:constraint")
+	@JsonAlias("odrl:action")
+	private Object action;
+
+    @JsonAlias("odrl:constraint")
     private Map<String, Object> constraint;
 
 	@SneakyThrows
 	public String toJsonString() {
-		final ObjectMapper mapper = new ObjectMapper();
-		return mapper.writeValueAsString(this);
+		return MAPPER.writeValueAsString(this);
 	}
 
 }
