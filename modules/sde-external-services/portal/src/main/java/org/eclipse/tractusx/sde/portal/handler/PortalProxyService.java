@@ -1,7 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2023,2024 T-Systems International GmbH
- * Copyright (c) 2023,2024 Contributors to the Eclipse Foundation
- * Copyright (c) 2025 ARENA2036 e.V.
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2023,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -18,6 +18,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
+
 package org.eclipse.tractusx.sde.portal.handler;
 
 import java.util.List;
@@ -27,6 +28,7 @@ import org.eclipse.tractusx.sde.portal.model.ConnectorInfo;
 import org.eclipse.tractusx.sde.portal.model.response.UnifiedBPNValidationStatusEnum;
 import org.eclipse.tractusx.sde.portal.model.response.UnifiedBpnValidationResponse;
 import org.eclipse.tractusx.sde.portal.utils.MemberCompanyBPNCacheUtilityService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -40,6 +42,8 @@ public class PortalProxyService {
 	private final MemberCompanyBPNCacheUtilityService cacheUtilityService;
 
 	private final IPortalExternalServiceApi portalExternalServiceApi;
+	@Value("${bpdm.provider.bpnl:BPNL00000003AYRE}")
+	private String providerBPNL;
 
 	@SneakyThrows
 	public List<ConnectorInfo> fetchConnectorInfo(List<String> bpns) {
@@ -47,6 +51,7 @@ public class PortalProxyService {
 		List<ConnectorInfo> response = portalExternalServiceApi.fetchConnectorInfo(bpns);
 
 		log.info("⬅️ Received ConnectorInfo from portalExternalServiceApi for {} : {}", bpns, response);
+		response.stream().filter(entry -> providerBPNL.equals(entry.getBpn())).forEach(connector -> connector.setConnectorEndpoint(List.of("https://dataprovider-edc-controlplane.staging.arena2036-x.de/api/v1/dsp")));
 
 		return response;
 	}

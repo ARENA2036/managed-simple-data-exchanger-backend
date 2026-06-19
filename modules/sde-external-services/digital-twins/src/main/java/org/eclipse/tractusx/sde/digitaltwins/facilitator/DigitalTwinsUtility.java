@@ -1,7 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2022,2024 T-Systems International GmbH
- * Copyright (c) 2022,2024 Contributors to the Eclipse Foundation
- * Copyright (c) 2025 ARENA2036 e.V.
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2022,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -18,6 +18,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
+
 package org.eclipse.tractusx.sde.digitaltwins.facilitator;
 
 import static org.eclipse.tractusx.sde.common.constants.CommonConstants.ASSET_LIFECYCLE_PHASE;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.common.constants.CommonConstants;
 import org.eclipse.tractusx.sde.common.entities.PolicyModel;
@@ -60,6 +62,7 @@ import lombok.SneakyThrows;
 
 @Component
 @Getter
+@Slf4j
 public class DigitalTwinsUtility {
 
 	private static final String PUBLIC_READABLE = "PUBLIC_READABLE";
@@ -131,17 +134,12 @@ public class DigitalTwinsUtility {
 						.endpointProtocolVersion(List.of(CommonConstants.ENDPOINT_PROTOCOL_VERSION))
 						.subprotocol(CommonConstants.SUB_PROTOCOL)
 						.subprotocolBody("id=" + edcAssetId + ";dspEndpoint=" + digitalTwinEdcDspEndpoint)
-					//	.subprotocolBody(truncateToMaxLength("id=" + edcAssetId + ";dspEndpoint=" + digitalTwinEdcDspEndpoint, 128))
 						.subprotocolBodyEncoding(CommonConstants.BODY_ENCODING)
 						.securityAttributes(List.of(new SecurityAttributes("NONE", "NONE", "NONE"))).build())
 				.build());
 		return endpoints;
 	}
 
-	//check
-	private String truncateToMaxLength(String input, int maxLength) {
-		return input.length() <= maxLength ? input : input.substring(0, maxLength);
-	}
 	public String createAccessRuleMandatorySpecificAssetIds(Map<String, String> specificAssetIds) {
 		StringBuilder sb= new StringBuilder();
 		specificAssetIds.entrySet().stream().forEach(ele->{
@@ -190,7 +188,7 @@ public class DigitalTwinsUtility {
 
 		List<Object> specificIdentifiers = new ArrayList<>();
 
-		List<Keys> keyList = bpnKeyRefrence(PolicyOperationUtil.getAccessBPNList(policy));
+		List<Keys> keyList = bpnKeyReference(PolicyOperationUtil.getAccessBPNList(policy));
 
 		specificAssetIds.entrySet().stream().forEach(entry -> {
 
@@ -219,11 +217,9 @@ public class DigitalTwinsUtility {
 		return specificIdentifiers;
 	}
 
-	private List<Keys> bpnKeyRefrence(List<String> bpns) {
+	private List<Keys> bpnKeyReference(List<String> bpns) {
 		if (bpns != null && !(bpns.size() == 1 && bpns.contains(manufacturerId))) {
-			System.out.println("bpns: " + bpns);
-			System.out.println("manufacturerId: " + manufacturerId);
-
+			log.debug("bpns:  {} \nmanufacturerId: {}", bpns, manufacturerId);
 			return bpns.stream().map(bpn -> Keys.builder().type("GlobalReference").value(bpn).build()).toList();
 		}
 		return Collections.emptyList();

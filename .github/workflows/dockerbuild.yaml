@@ -1,7 +1,7 @@
 #################################################################################
 # Copyright (c) 2023,2024 T-Systems International GmbH
-# Copyright (c) 2023,2024 Contributors to the Eclipse Foundation
 # Copyright (c) 2025 ARENA2036 e.V.
+# Copyright (c) 2023,2024 Contributors to the Eclipse Foundation
 #
 # See the NOTICE file(s) distributed with this work for additional
 # information regarding copyright ownership.
@@ -39,6 +39,9 @@ on:
 env:
   IMAGE_NAMESPACE: "tractusx"
   IMAGE_NAME: "managed-simple-data-exchanger-backend"
+  SERVER_URL: '${{ github.server_url }}'
+  REPOSITORY: '${{ github.repository }}'
+  REF_NAME: '${{ github.ref_name }}'
 
 jobs:
   docker:
@@ -51,13 +54,13 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up JDK 18
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
         with:
           java-version: '18'
           distribution: 'temurin'
-        
+
       - name: Build
-        run: mvn -B package
+        run: mvn -B package -DskipTests
 
       # Create SemVer or ref tags dependent of trigger event
       - name: Docker meta
@@ -72,6 +75,7 @@ jobs:
               type=raw,value=main
               type=raw,value=${{ github.sha }}
               type=raw,value=${{ github.event.inputs.image_tag }}
+             tags: ${{ steps.meta.outputs.tags }}, ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest
            flavor: |
               latest=true
 

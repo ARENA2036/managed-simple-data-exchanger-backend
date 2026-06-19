@@ -1,7 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2023,2024 T-Systems International GmbH
- * Copyright (c) 2023,2024 Contributors to the Eclipse Foundation
- * Copyright (c) 2025 ARENA2036 e.V.
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2023,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -52,6 +52,11 @@ public interface EDRApiProxy {
 
 	@GetMapping(path = "/v3/edrs/{transferProcessId}/dataaddress")
 	EDRCachedByIdResponse getEDRCachedByTransferProcessId(URI url,
+			@PathVariable("transferProcessId") String transferProcessId, @RequestParam("auto_refresh") boolean autoRefresh,
+			@RequestHeader Map<String, String> requestHeader);
+
+	@GetMapping(path = "/v3/edrs/{transferProcessId}/dataaddress")
+	JsonNode getEDRCachedByTransferProcessIdTest(URI url,
 			@PathVariable("transferProcessId") String transferProcessId, @RequestParam("auto_refresh") boolean autoRefresh,
 			@RequestHeader Map<String, String> requestHeader);
 

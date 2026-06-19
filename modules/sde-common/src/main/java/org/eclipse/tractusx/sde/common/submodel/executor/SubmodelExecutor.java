@@ -1,6 +1,7 @@
 /********************************************************************************
- * Copyright (c) 2022, 2024 T-Systems International GmbH
- * Copyright (c) 2022, 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2022,2024 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2022,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -51,10 +52,10 @@ public abstract class SubmodelExecutor {
 		return submodelSchema.get("items").getAsJsonObject();
 	}
 
-	public abstract void executeCsvRecord(RowData rowData, ObjectNode jsonObject, String processId, PolicyModel policy);
+	public abstract void executeCsvRecord(RowData rowData, ObjectNode assetInfo, String processId, PolicyModel policy, ObjectNode submodelData);
 
-	public abstract void executeJsonRecord(Integer rowIndex, ObjectNode jsonObject, String processId,
-			PolicyModel policy);
+	public abstract void executeJsonRecord(Integer rowIndex, ObjectNode assetInfo, String processId,
+										   PolicyModel policy, ObjectNode submodelData);
 
 	public abstract List<JsonObject> readCreatedTwinsforDelete(String refProcessId);
 

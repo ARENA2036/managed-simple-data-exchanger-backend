@@ -1,7 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2022,2024 T-Systems International GmbH
- * Copyright (c) 2022,2024 Contributors to the Eclipse Foundation
- * Copyright (c) 2025 ARENA2036 e.V.
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2022,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.tractusx.sde.bpndiscovery.handler.BpnDiscoveryProxyService;
@@ -62,6 +61,7 @@ import org.eclipse.tractusx.sde.edc.model.request.QueryDataOfferRequest;
 import org.eclipse.tractusx.sde.edc.model.response.QueryDataOfferModel;
 import org.eclipse.tractusx.sde.edc.util.EDCAssetUrlCacheService;
 import org.eclipse.tractusx.sde.edc.util.UtilityFunctions;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -87,6 +87,8 @@ public class ConsumerControlPanelService {
 	private final EDCAssetUrlCacheService edcAssetUrlCacheService;
 	private final ContractNegotiationService contractNegotiationService;
 	private final LookUpDTTwin lookUpDTTwin;
+	@Value("${edr.refresh.enable:false}")
+	private boolean withEdrRefresh;
 
 	public Set<QueryDataOfferModel> queryOnDataOffers(String manufacturerPartId, String searchBpnNumber,
 			String submodel, Integer offset, Integer limit) {
@@ -116,24 +118,27 @@ public class ConsumerControlPanelService {
 			List<QueryDataOfferModel> ddTROffers = edcAssetUrlCacheService.getDDTRUrl(bpnNumber);
 
 			// 3 lookup shell for PCF sub model
-			for (QueryDataOfferModel dtOffer : ddTROffers) {
-
-				EDRCachedByIdResponse edrToken = edcAssetUrlCacheService.verifyAndGetToken(bpnNumber, dtOffer);
+			ddTROffers.stream().distinct().forEach(dtOffer ->{
+				EDRCachedByIdResponse edrToken;
+				if(withEdrRefresh){
+					edrToken = edcAssetUrlCacheService.verifyAndGetToken(bpnNumber, dtOffer);
+				}else{
+					edrToken = edcAssetUrlCacheService.getTokenWithoutRefresh(bpnNumber, dtOffer);
+				}
 				if (edrToken != null) {
 
 					queryOnDataOffers.addAll(lookUpDTTwin.lookUpTwin(edrToken, dtOffer, manufacturerPartId, bpnNumber,
 							submodel, offset, limit));
 
 				} else {
-                    log.warn("EDR token is null, unable to look Up Digital Twin for :" + dtOffer);
-                    // Print JSON Object to console
-                    try {
-                        log.warn(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(dtOffer));
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-			}
+					log.warn("EDR token is null, unable to look Up Digital Twin for : {}",  dtOffer);
+					try {
+						log.warn(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(dtOffer));
+					} catch (JsonProcessingException e) {
+						log.error("Can't parse the following Digital Twin to JSON \n {}", dtOffer);
+					}
+				}
+			});
 		}
 		return new HashSet<>(queryOnDataOffers);
 

@@ -1,7 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2024 T-Systems International GmbH
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
- * Copyright (c) 2025 ARENA2036 e.V.
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -64,9 +64,9 @@ public class DDTRUrlCacheUtility {
 
 		return List.of(
 				Criterion.builder()
-				.operandLeft("https://w3id.org/edc/v0.0.1/ns/type")
+				.operandLeft("'http://purl.org/dc/terms/type'.'@id'")
 				.operator("=")
-				.operandRight("DigitalTwinRegistry")
+				.operandRight("https://w3id.org/catenax/taxonomy#DigitalTwinRegistry")
 				.build());
 	}
 }

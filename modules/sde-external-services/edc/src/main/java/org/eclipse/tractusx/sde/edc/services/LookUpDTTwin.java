@@ -1,7 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2024 T-Systems International GmbH
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
- * Copyright (c) 2025 ARENA2036 e.V.
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -22,6 +22,7 @@
 package org.eclipse.tractusx.sde.edc.services;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.tractusx.sde.common.configuration.properties.SDEConfigurationProperties;
@@ -69,8 +71,9 @@ public class LookUpDTTwin {
 
 	private final SDEConfigurationProperties sdeConfigurationProperties;
 	
-	private ObjectMapper mapper= new ObjectMapper();
-	
+	private final ObjectMapper mapper= new ObjectMapper();
+
+	//TODO: Check
 	String filterExpressionTemplate = """
 			"filterExpression": [
 				    {
@@ -160,19 +163,36 @@ public class LookUpDTTwin {
 	}
 
 	@SneakyThrows
-	private List<QueryDataOfferModel> getSubmodelDetails(ShellLookupRequest shellLookupRequest, String endpoint,
-			Map<String, String> header, String dtOfferUrl, List<String> shellIds, String submodel, String searchBPN) {
+	private List<QueryDataOfferModel> getSubmodelDetails(
+			ShellLookupRequest shellLookupRequest,
+			String endpoint,
+			Map<String, String> header,
+			String dtOfferUrl,
+			List<String> shellIds,
+			String submodel,
+			String searchBPN) {
 		List<QueryDataOfferModel> queryOnDataOffers = new ArrayList<>();
+        shellIds.stream().distinct()
+				.map(shellId -> {
+                    try {
+                        return eDCDigitalTwinProxyForLookUp.getShellDescriptorByShellId(new URI(endpoint), digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), header);
+                    } catch (URISyntaxException e) {
+						log.error("Digitial Twin lookup- Can't create URI for shellId:{} with enpoint: {}",shellId, endpoint);
+                        throw new RuntimeException(e);
+                    }
+                }).forEach(shellDescriptorResponseStr -> {
+					log.debug(LogUtil.encode("The sehll information for " + shellLookupRequest.toJsonString() + ", response :"
+							+ shellDescriptorResponseStr));
+                    ShellDescriptorResponse shellDescriptorResponse = null;
+                    try {
+                        shellDescriptorResponse = mapper.readValue(shellDescriptorResponseStr, ShellDescriptorResponse.class);
+                    } catch (JsonProcessingException e) {
+						log.error("Digitial Twin lookup- Can't create ShellDescriptorResponse from shellDescriptorResponseStr:\n{}",shellDescriptorResponseStr);
+						throw new RuntimeException(e);
+                    }
+                    preapreSubmodelResult(submodel, queryOnDataOffers, shellDescriptorResponse, searchBPN);
+        });
 
-		for (String shellId : shellIds) {
-			String shellDescriptorResponseStr = eDCDigitalTwinProxyForLookUp.getShellDescriptorByShellId(
-					new URI(endpoint), digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), header);
-			log.debug(LogUtil.encode("The sehll information for " + shellLookupRequest.toJsonString() + ", response :"
-					+ shellDescriptorResponseStr));
-			ShellDescriptorResponse shellDescriptorResponse = mapper.readValue(shellDescriptorResponseStr,
-					ShellDescriptorResponse.class); 
-			preapreSubmodelResult(submodel, queryOnDataOffers, shellDescriptorResponse, searchBPN);
-		}
 		return queryOnDataOffers;
 	}
 
@@ -206,10 +226,9 @@ public class LookUpDTTwin {
 			ProtocolInformation protocolInformation = subModelResponse.getEndpoints().get(0).getProtocolInformation();
 			
 			String subprotocolBody = protocolInformation.getSubprotocolBody();
-			System.out.println("subprotocolBody: " + subprotocolBody);
+            log.debug("subprotocolBody: {}", subprotocolBody);
 
-			
-			String submodelIdShort = subModelResponse.getIdShort();
+            String submodelIdShort = subModelResponse.getIdShort();
 			
 			String href = "";
 			if(submodelIdShort.equals("PCFExchangeEndpoint")) {

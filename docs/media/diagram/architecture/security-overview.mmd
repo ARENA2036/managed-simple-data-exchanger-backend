@@ -1,0 +1,15 @@
+flowchart LR
+  client["Frontend / API Client"]
+  keycloak["Keycloak / OAuth2 Issuer"]
+  backend["SDE Backend\nSecurityFilterChain"]
+  jwt["JWT Claims\nrealm_access.roles\nresource_access.client.roles"]
+  evaluator["CustomPermissionEvaluator"]
+  roleDb[("sde_role\nsde_permission\nsde_role_permission_mapping")]
+  controller["Controller Method\n@PreAuthorize"]
+
+  client -->|"Bearer JWT"| backend
+  backend -->|"validates issuer/signature"| keycloak
+  backend -->|"extract roles"| jwt
+  jwt --> evaluator
+  evaluator -->|"load permissions for roles"| roleDb
+  evaluator -->|"allow/deny"| controller

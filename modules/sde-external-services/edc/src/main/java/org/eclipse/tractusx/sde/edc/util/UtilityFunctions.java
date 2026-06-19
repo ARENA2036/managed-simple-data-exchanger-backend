@@ -1,7 +1,7 @@
 /********************************************************************************
- * Copyright (c) 2022, 2024 T-Systems International GmbH
- * Copyright (c) 2022, 2024 Contributors to the Eclipse Foundation
- * Copyright (c) 2025 ARENA2036 e.V.
+ * Copyright (c) 2022,2024 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
+ * Copyright (c) 2022,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -52,15 +52,15 @@ public class UtilityFunctions {
 		}
 	}
 
-    public static List<Policies> getUsagePolicies(List<Policies> usagePolicies, List<ConstraintRequest> constraints) {
+    public static List<Policies> mapPolicies(List<Policies> policies, List<ConstraintRequest> constraints) {
         if (constraints == null || constraints.isEmpty()) {
-            return usagePolicies;
+            return policies;
         }
 
         constraints.forEach(constraint -> {
             String leftExpVal = null;
             if (constraint.getLeftOperand() != null) {
-                leftExpVal = constraint.getLeftOperand().get("@id");
+                leftExpVal =  ConstraintRequest.getConstraintLeftOperator(constraint);
             }
 
             String rightExpVal = constraint.getRightOperand() != null
@@ -69,11 +69,11 @@ public class UtilityFunctions {
 
             Policies policyResponse = identyAndGetUsagePolicy(leftExpVal, rightExpVal);
             if (policyResponse != null) {
-                usagePolicies.add(policyResponse);
+                policies.add(policyResponse);
             }
         });
 
-        return usagePolicies;
+        return policies;
     }
 
 

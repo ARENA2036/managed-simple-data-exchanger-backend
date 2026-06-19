@@ -1,0 +1,22 @@
+flowchart LR
+  backend["SDE Backend"]
+  edcProvider["Provider EDC"]
+  edcConsumer["Consumer EDC"]
+  dtr["Digital Twin Registry"]
+  portal["Portal / Partner Pool"]
+  bpn["BPN Discovery"]
+  policyHub["Policy Hub"]
+  submodelServer["Submodel Server"]
+  keycloak["Keycloak / OAuth2"]
+  postgres[("PostgreSQL")]
+
+  backend -->|"provider management:\nassets, policies, contracts"| edcProvider
+  backend -->|"consumer management:\ncatalog, negotiation, EDR"| edcConsumer
+  backend -->|"dataplane downloads"| edcConsumer
+  backend -->|"shell lookup/create/update\nsubmodel descriptors\naccess rules"| dtr
+  backend -->|"legal entities\nconnector discovery\nBPN validation"| portal
+  backend -->|"register/search\nmanufacturerPartId"| bpn
+  backend -->|"policy attributes/types/content"| policyHub
+  backend -->|"payload upload/download"| submodelServer
+  backend -->|"validate JWT issuer\nmap roles"| keycloak
+  backend -->|"process reports\nhistory\npolicies\nroles\nsubmodel data"| postgres

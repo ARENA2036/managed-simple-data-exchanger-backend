@@ -42,7 +42,6 @@
 			<artifactId>sde-common</artifactId>
 			<version>0.0.1</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -85,15 +84,15 @@
 			<artifactId>flyway-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>42.7.3</version>
 		</dependency>
-		<dependency>
-			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>2.6.0</version>
-		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
@@ -119,10 +118,11 @@
 			<artifactId>commons-csv</artifactId>
 			<version>1.11.0</version>
 		</dependency>
- 		<dependency>  
-            <groupId>org.springframework.boot</groupId>  
-            <artifactId>spring-boot-starter-cache</artifactId>  
-        </dependency>  
+ 		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+
 		<dependency>
 			<groupId>org.eclipse.tractusx</groupId>
 			<artifactId>portal</artifactId>
@@ -139,25 +139,31 @@
 			<artifactId>digital-twins</artifactId>
 			<version>0.0.1</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.eclipse.tractusx</groupId>
 			<artifactId>policy-hub</artifactId>
 			<version>0.0.1</version>
 		</dependency>
 
-	<dependency>
+		<dependency>
+			<groupId>org.eclipse.tractusx</groupId>
+			<artifactId>submodel-server</artifactId>
+			<version>0.0.1</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.eclipse.tractusx</groupId>
 			<artifactId>serial-part</artifactId>
 			<version>0.0.1</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.eclipse.tractusx</groupId>
 			<artifactId>single-level-bom-as-built</artifactId>
 			<version>0.0.1</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.eclipse.tractusx</groupId>
 			<artifactId>batch</artifactId>
@@ -169,7 +175,7 @@
 			<artifactId>part-as-planned</artifactId>
 			<version>0.0.1</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.eclipse.tractusx</groupId>
 			<artifactId>part-type-information</artifactId>
@@ -187,13 +193,13 @@
 			<artifactId>part-site-information-as-planned</artifactId>
 			<version>0.0.1</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.eclipse.tractusx</groupId>
 			<artifactId>single-level-usage-as-built</artifactId>
 			<version>0.0.1</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.eclipse.tractusx</groupId>
 			<artifactId>pcf</artifactId>
@@ -238,6 +244,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot</artifactId>
 		</dependency>
+
 
 	</dependencies>
 
