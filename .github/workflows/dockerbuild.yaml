@@ -37,7 +37,7 @@ on:
         required: true
         default: 'latest'
 env:
-  IMAGE_NAMESPACE: "tractusx"
+  IMAGE_NAMESPACE: "harbor-hub-shared.arena.3ascloud.de/arena2036"
   IMAGE_NAME: "managed-simple-data-exchanger-backend"
   SERVER_URL: '${{ github.server_url }}'
   REPOSITORY: '${{ github.repository }}'
