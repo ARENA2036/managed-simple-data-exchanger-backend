@@ -177,7 +177,7 @@ class EDCUsecaseHandlerCoreLogicTest {
 		private String lastAssetLookupId;
 
 		private FakeEDCGateway(boolean assetExists) {
-			super(null);
+			super(null, null);
 			this.assetExists = assetExists;
 		}
 

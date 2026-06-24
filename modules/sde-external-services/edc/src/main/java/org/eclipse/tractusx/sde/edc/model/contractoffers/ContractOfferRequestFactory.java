@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.sde.edc.model.contractoffers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.SneakyThrows;
 
 @Component
+@Slf4j
 public class ContractOfferRequestFactory {
 
 
@@ -63,7 +65,14 @@ public class ContractOfferRequestFactory {
 		String jsonString = String.format(formatSchema, providerUrl, counterPartyId, offset, limit,
 				filterExpression);
 
-		return (ObjectNode) new ObjectMapper().readTree(jsonString);
+		ObjectNode request = (ObjectNode) new ObjectMapper().readTree(jsonString);
+
+		log.info("Catalog Request Payload:\n{}",
+				new ObjectMapper()
+						.writerWithDefaultPrettyPrinter()
+						.writeValueAsString(request));
+
+		return request;
 	}
 
 }

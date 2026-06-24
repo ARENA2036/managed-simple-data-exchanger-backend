@@ -25,6 +25,8 @@ package org.eclipse.tractusx.sde.edc.gateways.external;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.edc.api.EDCFeignClientApi;
 import org.eclipse.tractusx.sde.edc.entities.request.asset.AssetEntryRequest;
@@ -32,6 +34,7 @@ import org.eclipse.tractusx.sde.edc.entities.request.businesspartnergroup.Busine
 import org.eclipse.tractusx.sde.edc.entities.request.contractdefinition.ContractDefinitionRequest;
 import org.eclipse.tractusx.sde.edc.exceptions.EDCGatewayException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -48,6 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 public class EDCGateway {
 
 	private final EDCFeignClientApi edcFeignClientApi;
+	private final ObjectMapper objectMapper;
 	
 	public boolean assetExistsLookup(String id) {
 		try {
@@ -77,14 +81,26 @@ public class EDCGateway {
 	
 	public JsonNode getAssetsByFilterExpression(ObjectNode requestBody) {
 		try {
-			return edcFeignClientApi.getAssetByFilterExpression(requestBody);
+			log.info("=== ASSET FILTER REQUEST ===");
+			log.info(objectMapper.writerWithDefaultPrettyPrinter()
+					.writeValueAsString(requestBody));
+
+			JsonNode result =
+					edcFeignClientApi.getAssetByFilterExpression(requestBody);
+
+			log.info("=== ASSET FILTER RESPONSE ===");
+			log.info(objectMapper.writerWithDefaultPrettyPrinter()
+					.writeValueAsString(result));
 		} catch (FeignException e) {
 			if (e.status() == HttpStatus.NOT_FOUND.value()) {
 				return null;
 			}
 			throw e;
-		}
-	}
+		} catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
 
 	public JsonNode getContractDefinitionsByFilterExpression(ObjectNode requestBody) {
 		try {
@@ -99,14 +115,35 @@ public class EDCGateway {
 
 	public String createAsset(AssetEntryRequest request) {
 		try {
-			return edcFeignClientApi.createAsset(request);
+
+			log.info("=== EDC ASSET CREATE REQUEST ===");
+			log.info("Asset Request: {}", objectMapper.writeValueAsString(request));
+
+			String result = edcFeignClientApi.createAsset(request);
+
+			log.info("=== EDC ASSET CREATE RESPONSE ===");
+			log.info("Asset Created: {}", result);
+
+			try {
+				ResponseEntity<Object> createdAsset = edcFeignClientApi.getAsset(result);
+				log.info("=== EDC ASSET READ BACK ===");
+				log.info(objectMapper.writerWithDefaultPrettyPrinter()
+						.writeValueAsString(createdAsset));
+			} catch (Exception ex) {
+				log.warn("Unable to read asset back {}", result);
+			}
+
+			return result;
+
 		} catch (FeignException e) {
 			if (e.status() == HttpStatus.CONFLICT.value()) {
 				throw new EDCGatewayException("Asset already exists");
 			}
 			throw new EDCGatewayException(e.getMessage());
-		}
-	}
+		} catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 	
 	public void updateAsset(AssetEntryRequest request) {
 		try {
@@ -134,8 +171,18 @@ public class EDCGateway {
 	
 	@SneakyThrows
     public JsonNode createPolicyDefinition(JsonNode request) {
+		log.info("=== EDC POLICY CREATE REQUEST ===");
+		log.info(objectMapper.writerWithDefaultPrettyPrinter()
+				.writeValueAsString(request));
         try {
-            return edcFeignClientApi.createPolicy(request);
+
+			JsonNode response = edcFeignClientApi.createPolicy(request);
+
+			log.info("=== EDC POLICY CREATE RESPONSE ===");
+			log.info(objectMapper.writerWithDefaultPrettyPrinter()
+					.writeValueAsString(response));
+
+			return response;
         } catch (FeignException fe) {
             log.error("Exception Request: {}", fe.request());
             log.error("Exception Status: {}", fe.status());
@@ -179,9 +226,21 @@ public class EDCGateway {
 	}
 	
 	public String createContractDefinition(ContractDefinitionRequest request) {
+
 		try {
-			return edcFeignClientApi.createContractDefination(request);
-		} catch (FeignException e) {
+
+			log.info("=== EDC CONTRACT CREATE REQUEST ===");
+			log.info(objectMapper.writeValueAsString(request));
+
+			String result =
+					edcFeignClientApi.createContractDefination(request);
+
+			log.info("=== EDC CONTRACT CREATE RESPONSE ===");
+			log.info("Contract Definition Created: {}", result);
+
+			return result;
+
+		} catch (FeignException | JsonProcessingException e) {
 			throw new EDCGatewayException(e.getMessage());
 		}
 	}
