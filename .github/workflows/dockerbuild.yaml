@@ -74,7 +74,7 @@ jobs:
            tags: |
               type=raw,value=main
               type=raw,value=${{ github.sha }}
-              type=raw,value=${{ github.event.inputs.image_tag }}
+              type=raw,value=${{ github.event.inputs.image_tag || 'latest' }}
               tags: ${{ steps.meta.outputs.tags }}, ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest
            flavor: |
               latest=true
