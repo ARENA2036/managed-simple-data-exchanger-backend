@@ -69,7 +69,7 @@ public class PortalProxyController {
 		log.info("Request received : /api/connectors-discovery");
 //		log.info("➡️ API /connectors-discovery called with BPNs: {}", bpns);
 		List<ConnectorInfo> fetchConnectorInfoResponse = portalProxyService.fetchConnectorInfo(bpns);
-		log.info("⬅️ API /connectors-discovery response: {}", fetchConnectorInfoResponse);
+//		log.info("⬅️ API /connectors-discovery response: {}", fetchConnectorInfoResponse);
 		return ok().body(fetchConnectorInfoResponse);
 	}
 	

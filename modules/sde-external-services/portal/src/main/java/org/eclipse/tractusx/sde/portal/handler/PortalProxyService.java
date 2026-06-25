@@ -47,10 +47,10 @@ public class PortalProxyService {
 
 	@SneakyThrows
 	public List<ConnectorInfo> fetchConnectorInfo(List<String> bpns) {
-		log.info("➡️ Calling portalExternalServiceApi.fetchConnectorInfo with: {}", bpns);
+//		log.info("➡️ Calling portalExternalServiceApi.fetchConnectorInfo with: {}", bpns);
 		List<ConnectorInfo> response = portalExternalServiceApi.fetchConnectorInfo(bpns);
 
-		log.info("⬅️ Received ConnectorInfo from portalExternalServiceApi for {} : {}", bpns, response);
+//		log.info("⬅️ Received ConnectorInfo from portalExternalServiceApi for {} : {}", bpns, response);
 		response.stream().filter(entry -> providerBPNL.equals(entry.getBpn())).forEach(connector -> connector.setConnectorEndpoint(List.of("https://dataprovider-edc-controlplane.staging.arena2036-x.de/api/v1/dsp")));
 
 		return response;

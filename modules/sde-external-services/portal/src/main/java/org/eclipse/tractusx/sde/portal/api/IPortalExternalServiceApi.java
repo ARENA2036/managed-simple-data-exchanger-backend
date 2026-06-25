@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface IPortalExternalServiceApi {
 	@Bean
     default Logger.Level feignLoggerLevel() {
-		return Logger.Level.FULL; // logs request & response completely
+		return Logger.Level.BASIC; // logs request & response completely
 	}
 
 	@PostMapping(path = "/api/administration/connectors/discovery")

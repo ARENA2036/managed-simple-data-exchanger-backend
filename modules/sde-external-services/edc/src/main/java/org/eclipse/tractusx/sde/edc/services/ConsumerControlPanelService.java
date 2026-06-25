@@ -174,9 +174,9 @@ public class ConsumerControlPanelService {
 
 			}
 			catch(FeignException fe){
-				log.error("Exception Request " + fe.request());
+//				log.error("Exception Request " + fe.request());
 				log.error("Exception Message " + fe.getMessage());
-				log.error("Exception Message " + fe.responseBody());
+//				log.error("Exception Message " + fe.responseBody());
 			}
 			catch (InterruptedException ie) {
 				log.error("Exception in subscribeDataOffers" + ie.getMessage());
@@ -220,7 +220,7 @@ public class ConsumerControlPanelService {
 			resultFields.put(STATUS, "SUCCESS");
 
 		} catch (FeignException e) {
-			log.error("Feign RequestBody: " + e.request());
+//			log.error("Feign RequestBody: " + e.request());
 			String errorMsg = "Unable to complete subscribeAndDownloadDataOffers because: " + e.contentUTF8();
 			log.error(errorMsg);
 			prepareErrorMap(resultFields, errorMsg);
@@ -290,7 +290,7 @@ public class ConsumerControlPanelService {
 				String endpoint = authorizationToken.getEndpoint() + "?type=" + downloadDataAs;
 				return edrRequestHelper.getDataFromProvider(authorizationToken, endpoint);
 			} catch (FeignException e) {
-				log.error("FeignException Download RequestBody: " + e.request());
+//				log.error("FeignException Download RequestBody: " + e.request());
 				String errorMsg = "Unable to download subcribe data offer because: " + e.contentUTF8();
 				throw new ServiceException(errorMsg);
 			} catch (Exception e) {

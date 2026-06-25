@@ -21,7 +21,6 @@
 
 package org.eclipse.tractusx.sde.edc.util;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.tractusx.sde.common.utils.LogUtil;

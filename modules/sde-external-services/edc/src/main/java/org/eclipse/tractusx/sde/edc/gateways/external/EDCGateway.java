@@ -144,7 +144,7 @@ public class EDCGateway {
             if (fe.responseBody().isPresent()) {
                 try {
                     String body = StandardCharsets.UTF_8.decode(fe.responseBody().get()).toString();
-                    log.error("Full EDC Response Body:\n{}", body);
+//                    log.error("Full EDC Response Body:\n{}", body);
                 } catch (Exception ex) {
                     log.error("Failed to read response body", ex);
                 }
