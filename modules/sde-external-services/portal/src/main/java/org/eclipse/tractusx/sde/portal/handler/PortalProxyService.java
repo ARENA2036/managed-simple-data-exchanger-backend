@@ -51,7 +51,7 @@ public class PortalProxyService {
 		List<ConnectorInfo> response = portalExternalServiceApi.fetchConnectorInfo(bpns);
 
 		log.info("⬅️ Received ConnectorInfo from portalExternalServiceApi for {} : {}", bpns, response);
-		response.stream().filter(entry -> providerBPNL.equals(entry.getBpn())).forEach(connector -> connector.setConnectorEndpoint(List.of("https://connector-1-controlplane.services.construct-x.net/api/v1/dsp")));
+		response.stream().filter(entry -> providerBPNL.equals(entry.getBpn())).forEach(connector -> connector.setConnectorEndpoint(List.of("https://connector-4-controlplane.services.construct-x.net/api/v1/dsp")));
 
 		return response;
 	}
