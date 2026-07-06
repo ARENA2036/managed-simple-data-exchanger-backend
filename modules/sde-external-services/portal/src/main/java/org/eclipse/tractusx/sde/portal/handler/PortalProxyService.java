@@ -23,6 +23,7 @@ package org.eclipse.tractusx.sde.portal.handler;
 
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.tractusx.sde.common.configuration.properties.DigitalTwinConfigurationProperties;
 import org.eclipse.tractusx.sde.portal.api.IPortalExternalServiceApi;
 import org.eclipse.tractusx.sde.portal.model.ConnectorInfo;
 import org.eclipse.tractusx.sde.portal.model.response.UnifiedBPNValidationStatusEnum;
@@ -40,6 +41,7 @@ import lombok.SneakyThrows;
 public class PortalProxyService {
 
 	private final MemberCompanyBPNCacheUtilityService cacheUtilityService;
+	private final DigitalTwinConfigurationProperties properties;
 
 	private final IPortalExternalServiceApi portalExternalServiceApi;
 	@Value("${bpdm.provider.bpnl:BPNL00000003AYRE}")
@@ -51,7 +53,13 @@ public class PortalProxyService {
 		List<ConnectorInfo> response = portalExternalServiceApi.fetchConnectorInfo(bpns);
 
 //		log.info("⬅️ Received ConnectorInfo from portalExternalServiceApi for {} : {}", bpns, response);
-		response.stream().filter(entry -> providerBPNL.equals(entry.getBpn())).forEach(connector -> connector.setConnectorEndpoint(List.of("https://dataprovider-edc-controlplane.staging.arena2036-x.de/api/v1/dsp")));
+		String connectorEndpoint =
+				properties.getEdcHostname().replaceAll("/$", "")
+						+ "/"
+						+ properties.getEdcDspEndpointpath().replaceAll("^/", "");
+		response.stream()
+				.filter(entry -> providerBPNL.equals(entry.getBpn()))
+				.forEach(connector -> connector.setConnectorEndpoint(List.of(connectorEndpoint)));
 
 		return response;
 	}
