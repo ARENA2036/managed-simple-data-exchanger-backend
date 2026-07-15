@@ -1,6 +1,5 @@
 /********************************************************************************
  * Copyright (c) 2024 T-Systems International GmbH
- * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -46,7 +45,6 @@ public class DDTRUrlCacheUtility {
 	@Cacheable(value = "bpn-ddtr", key = "#bpnNumber")
 	public List<QueryDataOfferModel> getDDTRUrl(String bpnNumber) {
 		return edcAssetLookUp.getEDCAssetsByType(bpnNumber, getFilterCriteria());
-
 	}
 
 	@CacheEvict(value = "bpn-ddtr", key = "#bpnNumber")

@@ -1,6 +1,5 @@
 /********************************************************************************
  * Copyright (c) 2023 T-Systems International GmbH
- * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2023,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -103,6 +102,5 @@ public class ContractManagementController {
 	public ResponseEntity<Object> cancelContractConsumer(@PathVariable("negotiationId") String negotiationId) {
 		contractNegotiateManagement.cancelContract(Type.CONSUMER.name(), negotiationId);
 		return new ResponseEntity<>(HttpStatus.CREATED);
-		
 	}
 }

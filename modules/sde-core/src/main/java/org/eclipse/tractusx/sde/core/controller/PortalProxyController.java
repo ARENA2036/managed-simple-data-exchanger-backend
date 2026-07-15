@@ -1,6 +1,5 @@
 /********************************************************************************
  * Copyright (c) 2023,2024 T-Systems International GmbH
- * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2023,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -18,7 +17,6 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
-
 package org.eclipse.tractusx.sde.core.controller;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -67,9 +65,7 @@ public class PortalProxyController {
 	@PreAuthorize("hasPermission('','consumer_search_connectors')")
 	public ResponseEntity<List<ConnectorInfo>> fetchConnectorInfo(@RequestBody List<String> bpns) throws Exception {
 		log.info("Request received : /api/connectors-discovery");
-//		log.info("➡️ API /connectors-discovery called with BPNs: {}", bpns);
 		List<ConnectorInfo> fetchConnectorInfoResponse = portalProxyService.fetchConnectorInfo(bpns);
-//		log.info("⬅️ API /connectors-discovery response: {}", fetchConnectorInfoResponse);
 		return ok().body(fetchConnectorInfoResponse);
 	}
 	

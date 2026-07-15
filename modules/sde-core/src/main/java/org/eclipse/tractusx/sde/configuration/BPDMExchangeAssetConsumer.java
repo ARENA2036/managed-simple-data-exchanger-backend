@@ -1,6 +1,5 @@
 /********************************************************************************
  * Copyright (c) 2023,2024 T-Systems International GmbH
- * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2023,2024,2026 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -45,10 +44,7 @@ public class BPDMExchangeAssetConsumer {
 	@SneakyThrows
 	public void init() {
 		try {
-			List<LegalEntityResponse> legalEntitiesResponse = partnerPoolService.fetchLegalEntitiesData(
-					null,
-					"test",
-					0,
+			List<LegalEntityResponse> legalEntitiesResponse = partnerPoolService.fetchLegalEntitiesData(null, "test", 0,
 					10);
 			log.info("BPDM service ready to use, 'test' company found leagal entity =>" + legalEntitiesResponse.size());
 		} catch (Exception e) {
