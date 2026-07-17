@@ -193,12 +193,29 @@ public class EDCAssetUrlCacheService {
 		List<ActionRequest> action = policyConstraintBuilderService
 				.getUsagePoliciesConstraints(dtOffer.getPolicy().getUsagePolicies());
 
-		// initiate Negotiation -> create edr cache
-		String agreementId = contractNegotiationService.initiateContractNegotiation(dtOffer, action);
-		// get tranfer process id
-		EDRCachedResponse edrCachedResponse = contractNegotiationService.getEDRCachedByContractNegotiationId(agreementId);
-		// get Authorization Details
-		return contractNegotiationService
-				.getAuthorizationTokenForDataDownload(edrCachedResponse.getTransferProcessId());
+		try {
+			// initiate Negotiation -> create edr cache
+			String agreementId = contractNegotiationService.initiateContractNegotiation(dtOffer, action);
+			// get tranfer process id
+			EDRCachedResponse edrCachedResponse = contractNegotiationService
+					.getEDRCachedByContractNegotiationId(agreementId);
+
+			if (edrCachedResponse == null || StringUtils.isBlank(edrCachedResponse.getTransferProcessId())) {
+				log.error("Time out!! to get EDC EDR status to lookup '" + dtOffer.getConnectorOfferUrl() + ", "
+						+ dtOffer.getAssetId() + "', The current status is null");
+				return null;
+			}
+
+			// get Authorization Details
+			return contractNegotiationService
+					.getAuthorizationTokenForDataDownload(edrCachedResponse.getTransferProcessId());
+
+		} catch (FeignException e) {
+			log.error("FeignException Request: {} \n  Content: {}", e.request(), e.contentUTF8());
+		} catch (Exception e) {
+			log.error("Exception: Unable to get token without refresh because: {}", e.getMessage());
+		}
+
+		return null;
     }
 }
