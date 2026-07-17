@@ -1,7 +1,6 @@
 /********************************************************************************
- * Copyright (c) 2022,2024 T-Systems International GmbH
- * Copyright (c) 2026 ARENA2036 e.V.
- * Copyright (c) 2022,2024,2026 Contributors to the Eclipse Foundation
+ * Copyright (c) 2022, 2024 T-Systems International GmbH
+ * Copyright (c) 2022, 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -45,7 +44,7 @@ public interface ContractApi {
 
 	@PostMapping(path = "/contractnegotiations", consumes = MediaType.APPLICATION_JSON_VALUE)
 	AcknowledgementId contractnegotiations(URI url, @RequestBody ContractNegotiations requestBody,
-										   @RequestHeader Map<String, String> requestHeader);
+			@RequestHeader Map<String, String> requestHeader);
 
 	@GetMapping(path = "/contractnegotiations/{contractnegotiationsId}")
 	ContractNegotiationDto getContractDetails(URI url,
@@ -82,4 +81,5 @@ public interface ContractApi {
 	@PostMapping(path = "/transferprocesses/request", consumes = MediaType.APPLICATION_JSON_VALUE)
 	List<JsonNode> getAllTransfer(URI uri, @RequestHeader Map<String, String> providerAuthHeader,
 			@RequestBody JsonNode body);
+
 }

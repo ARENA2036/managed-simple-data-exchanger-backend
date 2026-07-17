@@ -1,7 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2022,2024 T-Systems International GmbH
  * Copyright (c) 2026 ARENA2036 e.V.
- * Copyright (c) 2022,2024,2026 Contributors to the Eclipse Foundation
+ * Copyright (c) 2022,2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -36,7 +36,6 @@ public class ContractOfferRequestFactory {
 	@SneakyThrows
 	public ObjectNode getContractOfferRequest(String providerUrl, String counterPartyId, Integer limit, Integer offset,
 			String filterExpression) {
-        // TODO DBK: create an edc version related formatSchema for the filterexpression
 		if (!StringUtils.isBlank(filterExpression))
 			filterExpression = String.format(", %s", filterExpression);
 		else

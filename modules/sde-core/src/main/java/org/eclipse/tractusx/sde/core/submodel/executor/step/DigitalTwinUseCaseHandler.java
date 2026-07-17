@@ -1,7 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2024 T-Systems International GmbH
  * Copyright (c) 2026 ARENA2036 e.V.
- * Copyright (c) 2024,2026 Contributors to the Eclipse Foundation
+ * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -127,8 +127,6 @@ public class DigitalTwinUseCaseHandler extends Step implements DigitalTwinUsecas
 			digitalTwinAccessRuleFacilator.init(getSubmodelSchema());
 			digitalTwinAccessRuleFacilator.createAccessRule(rowIndex, jsonObject, specificAssetIds, policy, getsemanticIdOfModel());
 
-
-
 		} catch (Exception e) {
 			throw new CsvHandlerUseCaseException(rowIndex, ": DigitalTwins: " + e.getMessage());
 		}
@@ -177,8 +175,6 @@ public class DigitalTwinUseCaseHandler extends Step implements DigitalTwinUsecas
 		}
 
 		return shellId;
-
-
 	}
 
 	public JsonNode checkAndCreateSubmodulIfNotExist(Integer rowIndex, ObjectNode jsonObject, String shellId,

@@ -1,7 +1,7 @@
 /********************************************************************************
  * Copyright (c) 2024 T-Systems International GmbH
  * Copyright (c) 2026 ARENA2036 e.V.
- * Copyright (c) 2024,2026 Contributors to the Eclipse Foundation
+ * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -74,7 +74,6 @@ public class EDCUsecaseHandler extends Step implements EDCUsecaseStep {
 				eDCAsset = createEDCAssetFacilitator.updateAssetWithPoliciesAndContract(assetEntryRequest, policy);
 			}
 			eDCAsset.entrySet().forEach(entry -> objectNode.put(entry.getKey(), entry.getValue()));
-
 			return objectNode;
 		} catch (Exception e) {
 			throw new CsvHandlerUseCaseException(rowNumber, "EDC: " + e.getMessage());
