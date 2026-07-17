@@ -47,7 +47,7 @@ public class SubmodelCsvController {
 	@SneakyThrows
 	@GetMapping(value = "/submodels/csvfile/{submodelName}")
 	public ResponseEntity<Resource> getSubmodelCSV(@PathVariable String submodelName,
-			@RequestParam("type") String type) {
+	                                               @RequestParam("type") String type) {
 
 		String filename = submodelName + type + CSV_FILE_EXTENSION;
 		return csvUtil.generateCSV(filename, submodelCsvService.findSubmodelCsv(submodelName, type));
@@ -56,7 +56,8 @@ public class SubmodelCsvController {
 	@GetMapping(value = "/{submodel}/download/{processId}/csv")
 	@PreAuthorize("hasPermission('','provider_download_own_data')")
 	public ResponseEntity<Resource> getDownloadFileByProcessId(@PathVariable("processId") String processId,
-			@PathVariable("submodel") String submodel) {
+	                                                           @PathVariable("submodel") String submodel) {
+
 		String filename = submodel + "_" + processId + CSV_FILE_EXTENSION;
 		return csvUtil.generateCSV(filename, submodelCsvService.findAllSubmodelCsvHistory(submodel, processId));
 	}

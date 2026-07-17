@@ -1,7 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2022,2024 T-Systems International GmbH
- * Copyright (c) 2026 ARENA2036 e.V.
- * Copyright (c) 2022,2024,2026 Contributors to the Eclipse Foundation
+ * Copyright (c) 2022,2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -21,11 +20,10 @@
 
 package org.eclipse.tractusx.sde.digitaltwins.facilitator;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import feign.FeignException;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.common.exception.ServiceException;
 import org.eclipse.tractusx.sde.digitaltwins.entities.request.CreateSubModelRequest;
@@ -41,9 +39,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import feign.FeignException;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -51,17 +52,17 @@ import java.util.Optional;
 public class DigitalTwinsFacilitator {
 
 	private final DigitalTwinsFeignClient digitalTwinsFeignClient;
-	
+
 	@Value(value = "${manufacturerId}")
 	private String manufacturerId;
 
 	@Value(value = "${digital-twins.managed.thirdparty:false}")
 	private boolean managedThirdParty;
-	
+
 	private final DigitalTwinsUtility digitalTwinsUtility;
-	
+
 	private final IAccessRuleManagementApi iAccessRuleManagementApi;
-	
+
 
 	@SneakyThrows
 	public List<String> shellLookup(ShellLookupRequest request) throws ServiceException {
@@ -69,7 +70,7 @@ public class DigitalTwinsFacilitator {
 		List<String> shellIds = List.of();
 		try {
 			List<String> assetIds =  digitalTwinsUtility.encodeAssetIdsObject(request);
-			
+
 			ResponseEntity<ShellLookupResponse> response = digitalTwinsFeignClient.shellLookup(assetIds,
 					manufacturerId);
 
@@ -153,66 +154,66 @@ public class DigitalTwinsFacilitator {
 		}
 		return responseBody;
 	}
-	
+
 	public JsonNode createAccessControlsRule(String edcBpn, JsonNode request) {
 		return iAccessRuleManagementApi.createAccessControlsRule(edcBpn, request);
 	}
-	
+
 	public void updateAccessControlsRule(String ruleId, String edcBpn, JsonNode request) {
 		iAccessRuleManagementApi.updateAccessControlsRule(ruleId, edcBpn, request);
 	}
-	
+
 	public JsonNode getAccessControlsRule(String ruleId, String edcBpn) {
 		return iAccessRuleManagementApi.getAccessControlsRuleById(ruleId, edcBpn);
 	}
-	
+
 	public void deleteAccessControlsRule(String ruleId, String edcBpn) {
 		iAccessRuleManagementApi.deleteAccessControlsRule(ruleId, edcBpn);
 	}
 
 	public void updateShellDetails(String shellId, ShellDescriptorRequest aasDescriptorRequest,
-			CreateSubModelRequest createSubModelRequest) {
+	                               CreateSubModelRequest createSubModelRequest) {
 
 		ResponseEntity<ShellDescriptorResponse> shellDescriptorByShellId = digitalTwinsFeignClient
 				.getShellDescriptorByShellId(digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), manufacturerId);
-		
+
 		if(shellDescriptorByShellId.getStatusCode().is2xxSuccessful()) {
 			ShellDescriptorResponse shellDescriptorResponse = shellDescriptorByShellId.getBody();
-			
+
 			if (aasDescriptorRequest.getSubmodelDescriptors() == null) {
 				List<CreateSubModelRequest> arrayList = new ArrayList<>();
-				
+
 				if (createSubModelRequest != null)
 					arrayList.add(createSubModelRequest);
-				
+
 				aasDescriptorRequest.setSubmodelDescriptors(arrayList);
 			}
-			
+
 			if (shellDescriptorResponse != null) {
-				
+
 				shellDescriptorResponse.getSubmodelDescriptors()
-				.stream()
+						.stream()
 						.filter(ele -> createSubModelRequest == null || (createSubModelRequest != null
 								&& !ele.getIdShort().equals(createSubModelRequest.getIdShort())))
-				.forEach(e -> 
-					aasDescriptorRequest.getSubmodelDescriptors().add(CreateSubModelRequest.builder()
-							.id(e.getId())
-							.idShort(e.getIdShort())
-							.semanticId(e.getSemanticId())
-							.endpoints(e.getEndpoints())
-							.description(e.getDescription())
-							.build())
-				);
+						.forEach(e ->
+								aasDescriptorRequest.getSubmodelDescriptors().add(CreateSubModelRequest.builder()
+										.id(e.getId())
+										.idShort(e.getIdShort())
+										.semanticId(e.getSemanticId())
+										.endpoints(e.getEndpoints())
+										.description(e.getDescription())
+										.build())
+						);
 			}
-			
+
 			if (StringUtils.isBlank(aasDescriptorRequest.getIdShort()) && (shellDescriptorResponse != null
 					&& StringUtils.isNotBlank(shellDescriptorResponse.getIdShort()))) {
 				aasDescriptorRequest.setIdShort(shellDescriptorResponse.getIdShort());
 			}
-				
+
 			aasDescriptorRequest.setId(shellId);
 			log.debug(aasDescriptorRequest.toJsonString());
-			
+
 			ResponseEntity<Void> updateShellDescriptorByShellId = digitalTwinsFeignClient
 					.updateShellDescriptorByShellId(digitalTwinsUtility.encodeValueAsBase64Utf8(shellId),
 							manufacturerId, aasDescriptorRequest);
@@ -221,12 +222,12 @@ public class DigitalTwinsFacilitator {
 			} else {
 				log.error("Uanble to update Shell  : " + aasDescriptorRequest.toJsonString());
 			}
-			
+
 		}else {
 			log.error("Shell not found in DT for shell : " + shellId);
 		}
 	}
-	
+
 	public void updateShellSpecificAssetIdentifiers(String shellId, List<Object> specificAssetIds) {
 
 		ResponseEntity<Object> deleteShellSpecificAttributes = digitalTwinsFeignClient
@@ -256,7 +257,7 @@ public class DigitalTwinsFacilitator {
 		}
 
 	}
-	
+
 	public void updateSubModel(String shellId, String existingId, CreateSubModelRequest request) {
 
 		if(Optional.ofNullable(request.getDescription()).isEmpty()) {

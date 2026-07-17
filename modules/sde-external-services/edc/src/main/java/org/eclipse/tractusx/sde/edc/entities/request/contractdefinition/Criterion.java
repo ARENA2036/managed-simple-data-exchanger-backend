@@ -1,8 +1,8 @@
 /********************************************************************************
  * Copyright (c) 2022 BMW GmbH
- * Copyright (c) 2022,2023 T-Systems International GmbH
+ * Copyright (c) 2022, 2023 T-Systems International GmbH
  * Copyright (c) 2026 ARENA2036 e.V.
- * Copyright (c) 2022,2023,2026 Contributors to the Eclipse Foundation
+ * Copyright (c) 2022, 2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.

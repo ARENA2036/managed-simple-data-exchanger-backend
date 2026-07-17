@@ -1,7 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2024 T-Systems International GmbH
- * Copyright (c) 2026 ARENA2036 e.V.
- * Copyright (c) 2024,2026 Contributors to the Eclipse Foundation
+ * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -61,14 +60,14 @@ class PolicyControllerTest {
 
     @Autowired
     private PolicyRepository policyRepository;
-    
+
     @Autowired
     private PolicyService policyService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
-    void init() {
+    public void init() {
         policyRepository.deleteAll();
     }
 
@@ -110,18 +109,18 @@ class PolicyControllerTest {
         Assertions.assertEquals(1, policyRepository.findAll().size());
 
     }
-    
+
     @Test
     void findMatchingPolicyBasedOnFileName() throws Exception {
-    	
-    	String fileName = "Mysubmodel_new_policy.csv";
-    	mvc.perform(MockMvcRequestBuilders
-                .post("/policy")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(getPolicy("new_policy"))))
-        .andExpect(status().isOk());
-    	
-    	List<PolicyModel> findMatchingPolicyBasedOnFileName = policyService.findMatchingPolicyBasedOnFileName(fileName);
+
+        String fileName = "Mysubmodel_new_policy.csv";
+        mvc.perform(MockMvcRequestBuilders
+                        .post("/policy")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(getPolicy("new_policy"))))
+                .andExpect(status().isOk());
+
+        List<PolicyModel> findMatchingPolicyBasedOnFileName = policyService.findMatchingPolicyBasedOnFileName(fileName);
         Assertions.assertEquals(1, findMatchingPolicyBasedOnFileName.size());
         Assertions.assertEquals("new_policy", findMatchingPolicyBasedOnFileName.get(0).getPolicyName());
 
@@ -129,26 +128,24 @@ class PolicyControllerTest {
 
 
     private PolicyModel getPolicy(String policyName) {
-       
-    	List<Policies> accessPolicies = List.of(
-                Policies.builder()
-                        .technicalKey("BusinessPartnerNumber")
-                        .value(List.of("BPNL00000005PROV", "BPNL00000005PROW", "BPNL00000005PROB"))
-                        .build(),
-                Policies.builder()
-                        .technicalKey("Membership")
-                        .value(List.of("active"))
-                        .build());
-        
+
+        List<Policies> accessPolicies = List.of(Policies.builder()
+                .technicalKey("BusinessPartnerNumber")
+                .value(List.of("BPNL00000005PROV", "BPNL00000005PROW", "BPNL00000005PROB"))
+                .build(),Policies.builder()
+                .technicalKey("Membership")
+                .value(List.of("active"))
+                .build());
+
         Policies usagePolicies = Policies.builder()
-        		.technicalKey("Membership")
-        		.value(List.of("active"))
-        		.build();
-              
+                .technicalKey("Membership")
+                .value(List.of("active"))
+                .build();
+
         return PolicyModel.builder()
-        		.policyName(policyName)
-        		.accessPolicies(accessPolicies)
-        		.usagePolicies(List.of(usagePolicies))
-        		.build();
+                .policyName(policyName)
+                .accessPolicies(accessPolicies)
+                .usagePolicies(List.of(usagePolicies))
+                .build();
     }
 }

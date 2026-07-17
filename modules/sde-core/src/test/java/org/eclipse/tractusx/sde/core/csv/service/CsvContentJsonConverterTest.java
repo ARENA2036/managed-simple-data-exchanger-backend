@@ -1,5 +1,4 @@
 /********************************************************************************
- * Copyright (c) 2026 T-Systems International GmbH
  * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2026 Contributors to the Eclipse Foundation
  *
