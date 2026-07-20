@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [3.0.0] - 2026-07-20
+
+### Added
+- Introduced consumer contract creation and negotiation workflow improvements in the Consumer Control Panel.
+- Added new functionality to download contracts as a .zip file.
+- Made assigner ID and manufacturer ID configurable, replacing the hardcoded BpdmProviderBpnl constant.
+
+### Fixed
+- Refactored policy and EDC constraint/permission builder logic for more reliable contract policy handling.
+- Fixed provider-side bugs in digital twin access rule and submodel processing.
+
 ## [2.4.3] - 2024-05-31
 
 ### Fixed
@@ -406,6 +417,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The DFT registers the data in the Digital Twin Registry and makes it accessible via an EDC
 - Compliance with Catena-X Guidelines
 - Integration with Digital Twin registry service.
+
+[3.0.0]: https://github.com/eclipse-tractusx/managed-simple-data-exchanger-backend/compare/main...v3.0.0
 
 [unreleased]: https://github.com/eclipse-tractusx/managed-simple-data-exchanger-backend/compare/v2.4.1...main
 
