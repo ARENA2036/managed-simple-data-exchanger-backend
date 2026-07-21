@@ -14,11 +14,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Refactored policy and EDC constraint/permission builder logic for more reliable contract policy handling.
 - Fixed provider-side bugs in digital twin access rule and submodel processing.
 
-## [Unreleased]
-
-### Fixed
-- Trivy issue fixed.
-
 
 ## [2.4.3] - 2024-05-31
 
