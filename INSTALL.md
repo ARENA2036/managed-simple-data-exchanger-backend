@@ -57,7 +57,7 @@ SDE-backend use Maven for building process. To build a service from sources one 
 Then fat jar file can be found in modules/sde-core/target folder as well as in local Maven repository. it can be run with this command: 
 
  ``` shell
-  java -jar target/sde-core-0.0.1.jar 
+  java -jar target/sde-core-3.0.0.jar 
  ```
 
 ## Upload a file:
