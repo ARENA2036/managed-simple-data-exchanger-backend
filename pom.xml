@@ -34,7 +34,7 @@
 
 	<groupId>org.eclipse.tractusx</groupId>
 	<artifactId>sde</artifactId>
-	<version>0.0.1</version>
+	<version>3.0.0</version>
 	<packaging>pom</packaging>
 	<name>sde</name>
 	<description>SDE for CatenaX</description>
