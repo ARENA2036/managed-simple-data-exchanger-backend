@@ -176,17 +176,17 @@ public class LookUpDTTwin {
                     try {
                         return eDCDigitalTwinProxyForLookUp.getShellDescriptorByShellId(new URI(endpoint), digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), header);
                     } catch (URISyntaxException e) {
-						log.error("Digitial Twin lookup- Can't create URI for shellId:{} with enpoint: {}",shellId, endpoint);
+						log.error("Digital Twin lookup- Can't create URI for shellId:{} with endpoint: {}",shellId, endpoint);
                         throw new RuntimeException(e);
                     }
                 }).forEach(shellDescriptorResponseStr -> {
-					log.debug(LogUtil.encode("The sehll information for " + shellLookupRequest.toJsonString() + ", response :"
+					log.debug(LogUtil.encode("The shell information for " + shellLookupRequest.toJsonString() + ", response :"
 							+ shellDescriptorResponseStr));
                     ShellDescriptorResponse shellDescriptorResponse = null;
                     try {
                         shellDescriptorResponse = mapper.readValue(shellDescriptorResponseStr, ShellDescriptorResponse.class);
                     } catch (JsonProcessingException e) {
-						log.error("Digitial Twin lookup- Can't create ShellDescriptorResponse from shellDescriptorResponseStr:\n{}",shellDescriptorResponseStr);
+						log.error("Digital Twin lookup- Can't create ShellDescriptorResponse from shellDescriptorResponseStr:\n{}",shellDescriptorResponseStr);
 						throw new RuntimeException(e);
                     }
                     preapreSubmodelResult(submodel, queryOnDataOffers, shellDescriptorResponse, searchBPN);

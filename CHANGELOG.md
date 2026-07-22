@@ -5,15 +5,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [3.0.0] - 2026-07-21
 
 ### Added
-- Introduced consumer contract creation and negotiation workflow improvements in the Consumer Control Panel.
 - Added new functionality to download contracts as a .zip file.
-- Made assigner ID and manufacturer ID configurable, replacing the hardcoded BpdmProviderBpnl constant.
-- Unit and regression tests
+- Added Unit and Regression tests
+- Added assigner ID and manufacturer ID configurable, replacing the fixed BpdmProviderBpnl constant.
+
+### Updated
+- Updated consumer contract creation and negotiation workflow improvements in the Consumer Control Panel.
+- Updated policy and EDC constraint/permission builder logic for more reliable contract policy handling.
+- Updated pinned versions to the full length commit SHA in GitHub workflows
 
 ### Fixed
-- Refactored policy and EDC constraint/permission builder logic for more reliable contract policy handling.
-- Fixed provider-side bugs in digital twin access rule and submodel processing.
-
+- Fixed issues in digital twin access rule and submodel processing at the provider end.
 
 ## [2.4.3] - 2024-05-31
 
