@@ -29,7 +29,7 @@ import java.io.IOException;
 @UtilityClass
 public class OdrlFieldWriter {
     public static final String ODRL_PREFIX = "odrl:";
-    public static final String EDC_PREFIX = "odrl:";
+    public static final String EDC_PREFIX = "edc:";
 
     public static void writeOdrlField(JsonGenerator gen, SerializerProvider provider, boolean withPrefix, String baseName, Object fieldValue)
             throws IOException {

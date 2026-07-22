@@ -39,8 +39,9 @@ public class PolicyDefinitionRequestSerializer extends StdSerializer<PolicyDefin
     public void serialize(PolicyDefinitionRequest value, JsonGenerator gen, SerializerProvider provider) throws IOException {
         boolean useNameSpacePrefix = value.isUseNameSpacePrefix();
 
-        value.getPolicy().setUseNameSpacePrefix(useNameSpacePrefix);
-
+        if (value.getPolicy() != null) {
+            value.getPolicy().setUseNameSpacePrefix(useNameSpacePrefix);
+        }
 
         gen.writeStartObject();
 
@@ -53,7 +54,7 @@ public class PolicyDefinitionRequestSerializer extends StdSerializer<PolicyDefin
             gen.writeStringField("@id", value.getId());
         }
 
-        if (value.getId() != null) {
+        if (value.getPolityRootType() != null) {
             gen.writeStringField("@type", value.getPolityRootType());
         }
 

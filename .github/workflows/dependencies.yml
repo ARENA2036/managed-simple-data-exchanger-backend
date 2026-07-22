@@ -41,9 +41,9 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          
+
       - name: Cache maven packages
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/cache@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}

@@ -86,9 +86,12 @@ public class BPNDiscoveryUseCaseHandler extends Step implements BPNDiscoveryUsec
 				bpnDiscoveryProxyService.bpnDiscoveryBatchData(bpnDiscoveryKeyList);
 
 			} catch (Exception e) {
-				//throw new ServiceException("Exception in BPN Discovery creation : " + e.getMessage());
-				//only log the error because the application will still work even without the new generated
-				log.error(e.getMessage());
+				log.error(
+						"Failed to perform BPN discovery for processId={}, rowIndex={}. Continuing processing.",
+						processId,
+						rowIndex,
+						e
+				);
 			}
 		}
 		return jsonObject;

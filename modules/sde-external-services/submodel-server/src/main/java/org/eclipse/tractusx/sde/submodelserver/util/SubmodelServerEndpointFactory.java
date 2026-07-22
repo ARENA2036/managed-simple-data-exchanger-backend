@@ -24,12 +24,15 @@ import java.net.URI;
 
 public class SubmodelServerEndpointFactory implements SubmodelEndpointFactory{
 
+    @Override
     public String createAsString() {
-        return "";
+        throw new UnsupportedOperationException(
+                "SubmodelServerEndpointFactory is not implemented");
     }
 
-
+    @Override
     public URI createURI() {
-        return null;
+        throw new UnsupportedOperationException(
+                "SubmodelServerEndpointFactory is not implemented");
     }
 }
