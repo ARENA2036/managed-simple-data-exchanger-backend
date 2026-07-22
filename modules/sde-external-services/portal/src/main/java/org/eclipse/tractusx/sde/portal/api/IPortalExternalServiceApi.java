@@ -1,5 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2022, 2023 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2022, 2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -22,16 +23,22 @@ package org.eclipse.tractusx.sde.portal.api;
 
 import java.util.List;
 
+import feign.Logger;
 import org.eclipse.tractusx.sde.portal.model.ConnectorInfo;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(value = "IPortalExternalServiceApi", url = "${portal.backend.hostname}" , configuration = PortalExternalServiceApi.class)
 public interface IPortalExternalServiceApi {
+	@Bean
+    default Logger.Level feignLoggerLevel() {
+		return Logger.Level.BASIC; // logs request & response completely
+	}
 
-	@PostMapping(path = "/api/administration/Connectors/discovery")
+	@PostMapping(path = "/api/administration/connectors/discovery")
 	List<ConnectorInfo> fetchConnectorInfo(@RequestBody List<String> bpns);
 
 	@GetMapping(path = "/api/administration/partnernetwork/memberCompanies")

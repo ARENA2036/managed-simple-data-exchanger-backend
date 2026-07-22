@@ -1,5 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2024 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.common.constants.CommonConstants;
 import org.eclipse.tractusx.sde.common.entities.PolicyModel;
+import org.eclipse.tractusx.sde.common.exception.NoDataFoundException;
 import org.eclipse.tractusx.sde.common.utils.JsonObjectUtility;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -48,9 +50,13 @@ public interface DigitalTwinUsecaseStep {
 	}
 
 	default String generateShortId(JsonNode jsonObject, JsonArray shortIdSpecsOfModel) {
-		return shortIdSpecsOfModel.asList().stream().map(ele -> JsonObjectUtility
-				.getValueFromJsonObjectAsString(jsonObject, extractExactFieldName(ele.getAsString())))
-				.collect(Collectors.joining("_"));
+		if(shortIdSpecsOfModel.isEmpty()){
+			throw new NoDataFoundException("No data found for the given shortIdSpecsOfModel object");
+		}
+		return shortIdSpecsOfModel.asList().stream()
+				.map(ele -> JsonObjectUtility.getValueFromJsonObjectAsString(jsonObject, extractExactFieldName(ele.getAsString())))
+				.collect(Collectors.joining("_"))
+				.replace(" ", "");
 	}
 
 	default Map<String, String> generateSpecificAssetIds(JsonNode jsonObject, JsonObject specificAssetIdsSpecsOfModel) {

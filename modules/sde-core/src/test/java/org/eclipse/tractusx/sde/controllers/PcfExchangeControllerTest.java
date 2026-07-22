@@ -1,5 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2024 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -32,8 +33,8 @@ import org.eclipse.tractusx.sde.pcfexchange.service.IPCFExchangeService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -45,7 +46,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 @ExtendWith(SpringExtension.class)
 class PcfExchangeControllerTest {
 
-	@MockBean
+	@MockitoBean
     private IPCFExchangeService pcfExchangeService;
     
 	@Autowired
@@ -157,7 +158,7 @@ class PcfExchangeControllerTest {
 		
 		MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/pcf/actionsonrequest")
 				.contentType("application/json")
-				.content(new PcfRequestModel().toString());;
+				.content(new PcfRequestModel().toString());
 		ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(pcfExchangeController).build()
 				.perform(requestBuilder);
 		actualPerformResult.andExpect(MockMvcResultMatchers.status().is(400));
@@ -166,136 +167,136 @@ class PcfExchangeControllerTest {
 	
 	
 	private String getPCFJsonResponse() {
-		String bodyRequest = "{\n"
-				+ "    \"row_data\": [\n"
-				+ "        {\n"
-				+ "            \"id\": \"3893bb5d-da16-4dc1-9185-11d97476c7a7\",\n"
-				+ "            \"specVersion\": \"2.0.1-20230314\",\n"
-				+ "            \"partialFullPcf\": \"Cradle-to-gate\",\n"
-				+ "            \"precedingPfId\": \"3893bb5d-da16-4dc1-9185-11d97476c7b7\",\n"
-				+ "            \"version\": 0,\n"
-				+ "            \"created\": \"2022-05-22T21:47:32Z\",\n"
-				+ "            \"extWBCSD_pfStatus\": \"Active\",\n"
-				+ "            \"validityPeriodStart\": \"\",\n"
-				+ "            \"validityPeriodEnd\": \"\",\n"
-				+ "            \"comment\": \"Comment for version 42.\",\n"
-				+ "            \"pcfLegalStatement\": \"This PCF (Product Carbon Footprint) is for information purposes only. It is based upon the standards mentioned above.\",\n"
-				+ "            \"companyName\": \"My Corp\",\n"
-				+ "            \"companyId\": \"urn:uuid:51131FB5-42A2-4267-A402-0ECFEFAD16A9\",\n"
-				+ "            \"productDescription\": \"Ethanol, 95% solution\",\n"
-				+ "            \"productId\": \"urn:gtin:47123450605077\",\n"
-				+ "            \"extWBCSD_productCodeCpc\": \"011-99000\",\n"
-				+ "            \"productName\": \"My Product Name\",\n"
-				+ "            \"declaredUnit\": \"liter\",\n"
-				+ "            \"unitaryProductAmount\": 1000.0,\n"
-				+ "            \"productMassPerDeclaredUnit\": 0.456,\n"
-				+ "            \"exemptedEmissionsPercent\": 0.0,\n"
-				+ "            \"exemptedEmissionsDescription\": \"No exemption\",\n"
-				+ "            \"extWBCSD_packagingEmissionsIncluded\": \"true\",\n"
-				+ "            \"boundaryProcessesDescription\": \"Electricity consumption included as an input in the production phase\",\n"
-				+ "            \"geographyCountrySubdivision\": \"US-NY\",\n"
-				+ "            \"geographyCountry\": \"DE\",\n"
-				+ "            \"geographyRegionOrSubregion\": \"Africa\",\n"
-				+ "            \"referencePeriodStart\": \"2022-01-01T00:00:01Z\",\n"
-				+ "            \"referencePeriodEnd\": \"2022-12-31T23:59:59Z\",\n"
-				+ "            \"crossSectoralStandard\": \"GHG Protocol Product standard\",\n"
-				+ "            \"extWBCSD_operator\": \"PEF\",\n"
-				+ "            \"ruleName\": \"urn:tfs-initiative.com:PCR:The Product Carbon Footprint Guideline for the Chemical Industry:version:v2.0\",\n"
-				+ "            \"extWBCSD_otherOperatorName\": \"NSF\",\n"
-				+ "            \"extWBCSD_characterizationFactors\": \"AR5\",\n"
-				+ "            \"extWBCSD_allocationRulesDescription\": \"In accordance with Catena-X PCF Rulebook\",\n"
-				+ "            \"extTFS_allocationWasteIncineration\": \"cut-off\",\n"
-				+ "            \"primaryDataShare\": 56.12,\n"
-				+ "            \"secondaryEmissionFactorSource\": \"ecoinvent 3.8\",\n"
-				+ "            \"coveragePercent\": 100,\n"
-				+ "            \"technologicalDQR\": 2.0,\n"
-				+ "            \"temporalDQR\": 2.0,\n"
-				+ "            \"geographicalDQR\": 2.0,\n"
-				+ "            \"completenessDQR\": 2.0,\n"
-				+ "            \"reliabilityDQR\": 2.0,\n"
-				+ "            \"pcfExcludingBiogenic\": 2.0,\n"
-				+ "            \"pcfIncludingBiogenic\": 1.0,\n"
-				+ "            \"fossilGhgEmissions\": 0.5,\n"
-				+ "            \"biogenicCarbonEmissionsOtherThanCO2\": 1.0,\n"
-				+ "            \"biogenicCarbonWithdrawal\": 0.0,\n"
-				+ "            \"dlucGhgEmissions\": 0.4,\n"
-				+ "            \"extTFS_luGhgEmissions\": 0.3,\n"
-				+ "            \"aircraftGhgEmissions\": 0.0,\n"
-				+ "            \"extWBCSD_packagingGhgEmissions\": 0,\n"
-				+ "            \"distributionStagePcfExcludingBiogenic\": 1.5,\n"
-				+ "            \"distributionStagePcfIncludingBiogenic\": 0.0,\n"
-				+ "            \"distributionStageFossilGhgEmissions\": 0.5,\n"
-				+ "            \"distributionStageBiogenicCarbonEmissionsOtherThanCO2\": 1.0,\n"
-				+ "            \"distributionStageBiogenicCarbonWithdrawal\": 0.5,\n"
-				+ "            \"extTFS_distributionStageDlucGhgEmissions\": 1.0,\n"
-				+ "            \"extTFS_distributionStageLuGhgEmissions\": 1.1,\n"
-				+ "            \"carbonContentTotal\": 2.5,\n"
-				+ "            \"extWBCSD_fossilCarbonContent\": 0.1,\n"
-				+ "            \"carbonContentBiogenic\": 0.0,\n"
-				+ "            \"assetLifeCyclePhase\": \"AsPlanned\"\n"
-				+ "        }\n"
-				+ "    ],\n"
-				+ "    \"access_policies\": [\n"
-				+ "        {\n"
-				+ "            \"technicalKey\": \"BusinessPartnerNumber\",\n"
-				+ "            \"value\": [\n"
-				+ "                \"BPNL001000TS0100\"\n"
-				+ "            ]\n"
-				+ "        },\n"
-				+ "        {\n"
-				+ "            \"technicalKey\": \"Membership\",\n"
-				+ "            \"value\": [\n"
-				+ "                \"active\"\n"
-				+ "            ]\n"
-				+ "        },\n"
-				+ "        {\n"
-				+ "            \"technicalKey\": \"companyRole.dismantler\",\n"
-				+ "            \"value\": [\n"
-				+ "                \"active\"\n"
-				+ "            ]\n"
-				+ "        }\n"
-				+ "    ],\n"
-				+ "    \"usage_policies\": [\n"
-				+ "        {\n"
-				+ "            \"technicalKey\": \"Membership\",\n"
-				+ "            \"value\": [\n"
-				+ "                \"active\"\n"
-				+ "            ]\n"
-				+ "        },\n"
-				+ "        {\n"
-				+ "            \"technicalKey\": \"companyRole.dismantler\",\n"
-				+ "            \"value\": [\n"
-				+ "                \"active\"\n"
-				+ "            ]\n"
-				+ "        },\n"
-				+ "        {\n"
-				+ "            \"technicalKey\": \"FrameworkAgreement.pcf\",\n"
-				+ "            \"value\": [\n"
-				+ "                \"active:v1.0.0\"\n"
-				+ "            ]\n"
-				+ "        },\n"
-				+ "        {\n"
-				+ "            \"technicalKey\": \"FrameworkAgreement.sustainability\",\n"
-				+ "            \"value\": [\n"
-				+ "                \"active:v1.0.0\"\n"
-				+ "            ]\n"
-				+ "        },\n"
-				+ "        {\n"
-				+ "            \"technicalKey\": \"PURPOSE\",\n"
-				+ "            \"value\": []\n"
-				+ "        },\n"
-				+ "        {\n"
-				+ "            \"technicalKey\": \"PURPOSE\",\n"
-				+ "            \"value\": []\n"
-				+ "        },\n"
-				+ "        {\n"
-				+ "            \"technicalKey\": \"CUSTOM\",\n"
-				+ "            \"value\": []\n"
-				+ "        }\n"
-				+ "    ]\n"
-				+ "}";
-		
-		return bodyRequest;
+		return """
+				{
+				    "row_data": [
+				        {
+				            "id": "3893bb5d-da16-4dc1-9185-11d97476c7a7",
+				            "specVersion": "2.0.1-20230314",
+				            "partialFullPcf": "Cradle-to-gate",
+				            "precedingPfId": "3893bb5d-da16-4dc1-9185-11d97476c7b7",
+				            "version": 0,
+				            "created": "2022-05-22T21:47:32Z",
+				            "extWBCSD_pfStatus": "Active",
+				            "validityPeriodStart": "",
+				            "validityPeriodEnd": "",
+				            "comment": "Comment for version 42.",
+				            "pcfLegalStatement": "This PCF (Product Carbon Footprint) is for information purposes only. It is based upon the standards mentioned above.",
+				            "companyName": "My Corp",
+				            "companyId": "urn:uuid:51131FB5-42A2-4267-A402-0ECFEFAD16A9",
+				            "productDescription": "Ethanol, 95% solution",
+				            "productId": "urn:gtin:47123450605077",
+				            "extWBCSD_productCodeCpc": "011-99000",
+				            "productName": "My Product Name",
+				            "declaredUnit": "liter",
+				            "unitaryProductAmount": 1000.0,
+				            "productMassPerDeclaredUnit": 0.456,
+				            "exemptedEmissionsPercent": 0.0,
+				            "exemptedEmissionsDescription": "No exemption",
+				            "extWBCSD_packagingEmissionsIncluded": "true",
+				            "boundaryProcessesDescription": "Electricity consumption included as an input in the production phase",
+				            "geographyCountrySubdivision": "US-NY",
+				            "geographyCountry": "DE",
+				            "geographyRegionOrSubregion": "Africa",
+				            "referencePeriodStart": "2022-01-01T00:00:01Z",
+				            "referencePeriodEnd": "2022-12-31T23:59:59Z",
+				            "crossSectoralStandard": "GHG Protocol Product standard",
+				            "extWBCSD_operator": "PEF",
+				            "ruleName": "urn:tfs-initiative.com:PCR:The Product Carbon Footprint Guideline for the Chemical Industry:version:v2.0",
+				            "extWBCSD_otherOperatorName": "NSF",
+				            "extWBCSD_characterizationFactors": "AR5",
+				            "extWBCSD_allocationRulesDescription": "In accordance with Catena-X PCF Rulebook",
+				            "extTFS_allocationWasteIncineration": "cut-off",
+				            "primaryDataShare": 56.12,
+				            "secondaryEmissionFactorSource": "ecoinvent 3.8",
+				            "coveragePercent": 100,
+				            "technologicalDQR": 2.0,
+				            "temporalDQR": 2.0,
+				            "geographicalDQR": 2.0,
+				            "completenessDQR": 2.0,
+				            "reliabilityDQR": 2.0,
+				            "pcfExcludingBiogenic": 2.0,
+				            "pcfIncludingBiogenic": 1.0,
+				            "fossilGhgEmissions": 0.5,
+				            "biogenicCarbonEmissionsOtherThanCO2": 1.0,
+				            "biogenicCarbonWithdrawal": 0.0,
+				            "dlucGhgEmissions": 0.4,
+				            "extTFS_luGhgEmissions": 0.3,
+				            "aircraftGhgEmissions": 0.0,
+				            "extWBCSD_packagingGhgEmissions": 0,
+				            "distributionStagePcfExcludingBiogenic": 1.5,
+				            "distributionStagePcfIncludingBiogenic": 0.0,
+				            "distributionStageFossilGhgEmissions": 0.5,
+				            "distributionStageBiogenicCarbonEmissionsOtherThanCO2": 1.0,
+				            "distributionStageBiogenicCarbonWithdrawal": 0.5,
+				            "extTFS_distributionStageDlucGhgEmissions": 1.0,
+				            "extTFS_distributionStageLuGhgEmissions": 1.1,
+				            "carbonContentTotal": 2.5,
+				            "extWBCSD_fossilCarbonContent": 0.1,
+				            "carbonContentBiogenic": 0.0,
+				            "assetLifeCyclePhase": "AsPlanned"
+				        }
+				    ],
+				    "access_policies": [
+				        {
+				            "technicalKey": "BusinessPartnerNumber",
+				            "value": [
+				                "BPNL001000TS0100"
+				            ]
+				        },
+				        {
+				            "technicalKey": "Membership",
+				            "value": [
+				                "active"
+				            ]
+				        },
+				        {
+				            "technicalKey": "companyRole.dismantler",
+				            "value": [
+				                "active"
+				            ]
+				        }
+				    ],
+				    "usage_policies": [
+				        {
+				            "technicalKey": "Membership",
+				            "value": [
+				                "active"
+				            ]
+				        },
+				        {
+				            "technicalKey": "companyRole.dismantler",
+				            "value": [
+				                "active"
+				            ]
+				        },
+				        {
+				            "technicalKey": "FrameworkAgreement.pcf",
+				            "value": [
+				                "active:v1.0.0"
+				            ]
+				        },
+				        {
+				            "technicalKey": "FrameworkAgreement.sustainability",
+				            "value": [
+				                "active:v1.0.0"
+				            ]
+				        },
+				        {
+				            "technicalKey": "PURPOSE",
+				            "value": []
+				        },
+				        {
+				            "technicalKey": "PURPOSE",
+				            "value": []
+				        },
+				        {
+				            "technicalKey": "CUSTOM",
+				            "value": []
+				        }
+				    ]
+				}\
+				""";
 	}
 	
 }

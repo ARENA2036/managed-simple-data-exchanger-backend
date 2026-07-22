@@ -2,11 +2,20 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
-## [Unreleased]
+## [3.0.0] - 2026-07-22
+
+### Added
+- Added new functionality to download contracts as a .zip file.
+- Added Unit and Regression tests
+- Added assigner ID and manufacturer ID configurable, replacing the fixed BpdmProviderBpnl constant.
+
+### Updated
+- Updated consumer contract creation and negotiation workflow improvements in the Consumer Control Panel.
+- Updated policy and EDC constraint/permission builder logic for more reliable contract policy handling.
+- Updated pinned versions to the full length commit SHA in GitHub workflows
 
 ### Fixed
-- Trivy issue fixed.
-
+- Fixed issues in digital twin access rule and submodel processing at the provider end.
 
 ## [2.4.3] - 2024-05-31
 
@@ -14,18 +23,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New changes for PCF v7.0.0 support.
 - Security config changes.
 - Updated changelog and dependency file.
-- Dependencies jar versions updated. 
+- Dependencies jar versions updated.
 - PCF exchange changes for 2408 version.
+
 
 ### Fixed
 - Dependabot bump jar version fixed.
 - Trivy high security issue fixed for CVE-2024-34750.
 
-### Fixed
-- Dependabot bump jar version fixed.
-- Trivy high security issue fixed for CVE-2024-34750.  
-
-## [2.4.2] - 2024-05-30 [deprecated] 
+## [2.4.2] - 2024-05-30 [deprecated]
 
 ## [2.4.1] - 2024-05-24
 
@@ -54,9 +60,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Added refactor code changes for external services.
 - Added different usecase Handler for multi version support.
 - Added usecase handle implementation for multiple submodel support.
-- Supported new serial part submodel with multi version support. 
+- Supported new serial part submodel with multi version support.
 - Supported new single level bom as built submodel with multi version support.
-- Removed maven modules  serial-part-typization and assembly-part-relationship for update. 
+- Removed maven modules  serial-part-typization and assembly-part-relationship for update.
 - New maven module for part type information submodel support.
 - Refactored/Updated batch maven module to support multi version.
 - Refactored/Updated PartAsPlanned and SingleLevelBoMAsPlanned maven module to support multi version.
@@ -67,8 +73,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Supporting new submodel Singlelevelbomasplanned.
 - Support EDC 7.
 - Added new files for digital twin access rule support.
-- Refactor code for pcf, dt access API, EDC 7. 
-- Dt access api use in digital twin processing.  
+- Refactor code for pcf, dt access API, EDC 7.
+- Dt access api use in digital twin processing.
 - Added test cases for PCF and policy controller.
 - Refactor code to make stable release
 - Documentation updated
@@ -79,7 +85,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Dockerfile image update. [#117](https://github.com/eclipse-tractusx/managed-simple-data-exchanger-backend/pull/117)
 - Dependabot bump version fixes for 24/05
 
-## [2.3.7] - 2024-05-09 
+## [2.3.7] - 2024-05-09
 ### Fixed
 - Rename edc_request_template directory.
 - This is fixed for issue #147.
@@ -104,7 +110,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Add controller interface for download data.
 - Add test cases for consumer interface.
 - update open api docs.
- 
+
 ### Fixed
 - Fix new dDTR support changes.
 - Fixed Vulnerability logback issue of CVE-2023-6481.
@@ -126,13 +132,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [2.3.1] - 2023-11-29
 ### Fixed
 - docker cmd updated,removed r from run command.
-- fixed veracode security CVE-2023-33202(Bouncy Castle Denial of Service). 
+- fixed veracode security CVE-2023-33202(Bouncy Castle Denial of Service).
 - Updated assembly-part-relationship csv and .md file.
 
 ## [2.3.0] - 2023-11-29
 ### Added
 - DT use refactor for look up twin.
- 
+
 ## [2.2.2] - non-released
 ### Added
 - Added oauth security for sde public api.
@@ -141,7 +147,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixed
 - Correct dataplane endpoint for digital twin.
 - DSP endpoint path for digital-twin edc url.
-- Trivy workflow update. 
+- Trivy workflow update.
 
 ## [2.2.1] - non-released
 ### Fixed
@@ -165,7 +171,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Feign Client changes updated for child aspect relationship.
 
 ## [2.0.11] - 2023-08-29
-### Changed 
+### Changed
 - Docker image name changed.
 
 ## [2.0.10] - 2023-08-23
@@ -211,7 +217,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [2.0.6] - non-released
 ### Added
 - Renamed SerialPartTypization aspect submodel to SerialPart.
-- Renamed AssemblyPartRelationship aspect submodel to SingleLevelBoMAsBuilt. 
+- Renamed AssemblyPartRelationship aspect submodel to SingleLevelBoMAsBuilt.
 
 ## [2.0.5] - non-released
 ### Added
@@ -295,11 +301,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [1.8.0] - 2022-12-12
 ### Added
 - Uploaded submodel data update/delete.
-- SDE Backend code Stabilization for easy to add new submodels. 
+- SDE Backend code Stabilization for easy to add new submodels.
 - Added new submodel PartAsPlanned aspect.
 - Added new submodel SingleLevelBoMAsPlanned aspect.
 - Added new submodel PartSiteInformationAsPlanned aspect.
-- Added new functionality update and Delete with exists aspect. 
+- Added new functionality update and Delete with exists aspect.
 - Added new api for user role permission access management.
 - Enabled api level permissions.
 
@@ -333,34 +339,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Removed existing api security to access API's(Provided Keycloak Security based Authentication).
 
 ### Fixed
-- Fix for duplicate data upload handling. 
+- Fix for duplicate data upload handling.
 - Fix for Sonar issues.
 
 ## [1.5.0] - 2022-10-11
 ### Added
 - Created user guideline and installation documentation.
 - Created umbrella helm charts.
-- Integrated trivy, kicks. 
+- Integrated trivy, kicks.
 
-### Changed 
-- Updated helm charts secrets. 
-- Updated jar versions. 
+### Changed
+- Updated helm charts secrets.
+- Updated jar versions.
 
 ## [1.3.0] - 2022-09-21
 ### Fixed
 - Fix for edc api call.
 
-### Changed 
+### Changed
 - keycloack properties file changed.
 
 ## [1.2.0] - 2022-08-29
 ### Added
 - Integrated EDC connector to create assets, policies as a data offer.
 
-### Changed 
+### Changed
 - Moved helm charts from helm/ to charts.
-- Created workflows. 
-- Updated digital twin url in vault. 
+- Created workflows.
+- Updated digital twin url in vault.
 
 ## [1.1.0] - 2022-08-24
 ### Added
@@ -368,6 +374,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The DFT registers the data in the Digital Twin Registry and makes it accessible via an EDC
 - Compliance with Catena-X Guidelines
 - Integration with Digital Twin registry service.
+
+[3.0.0]: https://github.com/eclipse-tractusx/managed-simple-data-exchanger-backend/compare/main...v3.0.0
 
 [unreleased]: https://github.com/eclipse-tractusx/managed-simple-data-exchanger-backend/compare/v2.4.1...main
 

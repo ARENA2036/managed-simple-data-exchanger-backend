@@ -1,12 +1,15 @@
 HELP.md
 target/
+bin/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 temp/
+/.run/
 ### STS ###
 .apt_generated
 .classpath
+*.class
 .factorypath
 .project
 .settings
@@ -34,3 +37,6 @@ temp/
 
 /helm/
 /.DS_Store
+
+### AI Agents
+AGENTS.md

@@ -15,6 +15,7 @@ This module use for PCF submodel specification and descriptors. It's contain the
 #### Semantic Id: urn:samm:io.catenax.pcf:7.0.0
 ---
 
+
 ### Schema
 
 Please find below links for schema details:

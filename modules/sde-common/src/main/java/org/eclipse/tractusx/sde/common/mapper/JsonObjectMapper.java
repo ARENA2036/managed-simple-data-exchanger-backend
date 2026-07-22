@@ -1,5 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2022, 2024 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2022, 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -66,5 +67,10 @@ public abstract class JsonObjectMapper {
 	@SneakyThrows
 	public JsonNode objectToJsonNode(Object jobj) {
 		return mapper.convertValue(jobj, JsonNode.class);
+	}
+
+	@SneakyThrows
+	public <T> T jsonNodeToObject(JsonNode node, Class<T> clazz) {
+		return mapper.treeToValue(node, clazz);
 	}
 }

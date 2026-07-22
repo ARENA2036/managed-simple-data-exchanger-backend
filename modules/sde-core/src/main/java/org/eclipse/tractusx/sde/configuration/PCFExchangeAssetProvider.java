@@ -1,5 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2023,2024 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2023,2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -34,7 +35,7 @@ import org.eclipse.tractusx.sde.core.utils.ValueReplacerUtility;
 import org.eclipse.tractusx.sde.edc.constants.EDCAssetConstant;
 import org.eclipse.tractusx.sde.edc.entities.request.asset.AssetEntryRequest;
 import org.eclipse.tractusx.sde.edc.entities.request.asset.AssetEntryRequestFactory;
-import org.eclipse.tractusx.sde.edc.facilitator.CreateEDCAssetFacilator;
+import org.eclipse.tractusx.sde.edc.facilitator.CreateEDCAssetFacilitator;
 import org.eclipse.tractusx.sde.edc.gateways.external.EDCGateway;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -57,7 +58,7 @@ public class PCFExchangeAssetProvider {
 	private static final String REGISTRY_TYPE = "registryType";
 	private final AssetEntryRequestFactory assetFactory;
 	private final EDCGateway edcGateway;
-	private final CreateEDCAssetFacilator createEDCAssetFacilator;
+	private final CreateEDCAssetFacilitator createEDCAssetFacilator;
 	private final ValueReplacerUtility valueReplacerUtility;
 	private final SDEConfigurationProperties sdeConfigurationProperties;
 	private final PCFAssetStaticPropertyHolder pcfAssetStaticPropertyHolder;
@@ -67,10 +68,10 @@ public class PCFExchangeAssetProvider {
 	public void init() {
 
 		String assetId = UUIdGenerator.getUuid();
-		AssetEntryRequest assetEntryRequest = assetFactory.getAssetRequest("", "PCF Exchange endpoint information",
+		AssetEntryRequest assetEntryRequest = assetFactory.createAssetRequest("", "PCF Exchange endpoint information",
 				assetId, "1", "", "", pcfAssetStaticPropertyHolder.getSematicId(), pcfAssetStaticPropertyHolder.getAssetPropTypePCFExchangeType());
 
-		String baseUrl = sdeConfigurationProperties.getSdeHostname() + "/pcf";
+		String baseUrl = sdeConfigurationProperties.getSubmodelServerHostname() + "/pcf";
 		assetEntryRequest.getDataAddress().getProperties().put("baseUrl", baseUrl);
 		assetEntryRequest.getProperties().put(REGISTRY_TYPE, baseUrl);
 		assetEntryRequest.getProperties().put(EDCAssetConstant.CX_COMMON_VERSION, "1.1");
@@ -84,7 +85,7 @@ public class PCFExchangeAssetProvider {
 		ObjectNode requestBody = (ObjectNode) new ObjectMapper().readTree(valueReplacerUtility
 				.valueReplacerUsingFileTemplate("/edc_request_template/edc_asset_lookup.json", inputData));
 
-		JsonNode assetExistsLookupBasedOnTypeGetAsAsset = edcGateway.assetExistsLookupBasedOnTypeGetAsAsset(requestBody);
+		JsonNode assetExistsLookupBasedOnTypeGetAsAsset = edcGateway.getAssetsByFilterExpression(requestBody);
 		
 		if (assetExistsLookupBasedOnTypeGetAsAsset == null || 
 				assetExistsLookupBasedOnTypeGetAsAsset.isNull() || 
@@ -108,7 +109,7 @@ public class PCFExchangeAssetProvider {
 					.usagePolicies(usagePolicy)
 					.build();
 			
-			Map<String, String> createEDCAsset = createEDCAssetFacilator.createEDCAsset(assetEntryRequest, policy);
+			Map<String, String> createEDCAsset = createEDCAssetFacilator.createAssetWithPoliciesAndContract(assetEntryRequest, policy);
 			
 			pcfAssetStaticPropertyHolder.setPcfExchangeAssetId(assetEntryRequest.getId());
 			log.info("PCF Exchange asset creates :" + createEDCAsset.toString());

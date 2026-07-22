@@ -1,5 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2022, 2023 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2022, 2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -52,7 +53,8 @@ public class UsecaseRegistration {
 	@SuppressWarnings("unchecked")
 	public Set<String> neededSubmodelList(List<String> selectedUsecases) {
 		Set<String> listofsubmodel = new LinkedHashSet<>();
-		this.useCases.stream().filter(usecase -> selectedUsecases.contains(usecase.get("id").toString())).toList()
+		this.useCases.stream()
+				.filter(usecase -> selectedUsecases.contains(usecase.get("id").toString()))
 				.forEach(obj -> listofsubmodel.addAll((ArrayList<String>) obj.get("submodules")));
 		return listofsubmodel;
 	}

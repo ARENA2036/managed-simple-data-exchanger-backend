@@ -1,5 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2022,2024 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2022,2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -20,6 +21,7 @@
 
 package org.eclipse.tractusx.sde.edc.model.contractnegotiation;
 
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -44,8 +46,11 @@ public class ContractNegotiations {
 
 	@JsonProperty("@context")
 	@Builder.Default
-	private Map<String, String> context = Map.of("odrl", "http://www.w3.org/ns/odrl/2/",  
-			"edc", "https://w3id.org/edc/v0.0.1/ns/");
+	private Object context = List.of(
+			"http://www.w3.org/ns/odrl.jsonld",
+			"https://w3id.org/catenax/2025/9/policy/context.jsonld",
+			Map.of("@vocab", "https://w3id.org/edc/v0.0.1/ns/")
+	);
 
 	@JsonProperty("@type")
 	@Builder.Default
