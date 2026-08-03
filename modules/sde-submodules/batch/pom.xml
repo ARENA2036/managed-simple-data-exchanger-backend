@@ -28,7 +28,7 @@
 	<parent>
 		<groupId>org.eclipse.tractusx</groupId>
 		<artifactId>sde</artifactId>
-		<version>0.0.1</version>
+		<version>3.0.0</version>
 		<relativePath>../../../</relativePath>
 	</parent>
 	<artifactId>batch</artifactId>
@@ -39,23 +39,23 @@
 		<dependency>
 			<groupId>org.eclipse.tractusx</groupId>
 			<artifactId>sde-common</artifactId>
-			<version>0.0.1</version>
+			<version>3.0.0</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.eclipse.tractusx</groupId>
 			<artifactId>edc</artifactId>
-			<version>0.0.1</version>
+			<version>3.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.tractusx</groupId>
 			<artifactId>digital-twins</artifactId>
-			<version>0.0.1</version>
+			<version>3.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.tractusx</groupId>
 			<artifactId>bpn-discovery</artifactId>
-			<version>0.0.1</version>
+			<version>3.0.0</version>
 		</dependency>
 	</dependencies>
 	

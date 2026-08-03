@@ -1,0 +1,44 @@
+@startuml
+<style>
+root {
+  FontColor #?black:white
+}
+</style>
+skinparam actorStyle awesome
+skinparam SequenceGroupFontColor black
+skinparam SequenceGroupBodyBackgroundColor DarkGrey
+skinparam SequenceGroupBackgroundColor DimGrey
+skinparam BackgroundColor #SlateGray
+title Consumer Search, Subscribe and Download Flow
+autonumber
+
+actor Consumer
+participant "SDE Backend\nConsumerController" as api
+participant "ConsumerService / ConsumerControlPanelService" as service
+participant "BPN Discovery" as bpn
+participant "Portal / Partner Pool" as portal
+participant "Consumer EDC" as cedc
+participant "Remote DTR" as dtr
+participant "Provider Dataplane" as dataplane
+database "PostgreSQL" as db
+
+Consumer -> api: GET /api/query-data-offers
+api -> service: queryOnDataOffers(manufacturerPartId, bpnNumber, submodel)
+alt bpnNumber missing
+  service -> bpn: search BPN by manufacturerPartId
+end
+service -> portal: discover connectors / legal entities
+service -> cedc: catalog query for offers
+service -> cedc: contract negotiation / EDR lookup
+service -> dtr: read shell and submodel descriptors
+service --> api: offers
+api --> Consumer: offer list
+
+Consumer -> api: POST /api/subscribe-download-data-offers
+api -> service: subscribe and download
+service -> cedc: negotiate or reuse agreement
+service -> cedc: resolve EDR
+service -> dataplane: GET submodel data with EDR authorization
+service -> db: persist download history
+api --> Consumer: ZIP response or processId
+@enduml

@@ -1,5 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2024 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -59,7 +60,6 @@ public class DigitalTwinAccessRuleFacilator extends Step {
 
 	private final SDEConfigurationProperties sdeConfigProperties;
 
-	@Qualifier("DatabaseUsecaseHandler")
 	private final DatabaseUsecaseStep databaseUseCaseStep;
 
 	private static final String PUBLIC_READABLE = "PUBLIC_READABLE";
@@ -70,7 +70,7 @@ public class DigitalTwinAccessRuleFacilator extends Step {
 			    "validTo": "4999-01-02T03:04:05Z",
 			    "description": "ACME policy within set validity period",
 			    "policyType": "AAS",
-			    "profiles": "[]",
+			    "profile": "default",
 			    "policy": {
 			        "accessRules": [
 			            {

@@ -22,29 +22,29 @@
  ********************************************************************************/
 -->
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.5</version>
+		<version>3.4.13</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
 	<groupId>org.eclipse.tractusx</groupId>
 	<artifactId>sde</artifactId>
-	<version>0.0.1</version>
+	<version>3.0.0</version>
 	<packaging>pom</packaging>
 	<name>sde</name>
 	<description>SDE for CatenaX</description>
 
 	<properties>
 		<java.version>17</java.version>
-		<spring-cloud.version>2023.0.1</spring-cloud.version>
+		<spring-cloud.version>2024.0.0</spring-cloud.version>
 		<org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
 		<org.mapstruct.processor.version>1.5.5.Final</org.mapstruct.processor.version>
-		 <tomcat.version>10.1.25</tomcat.version>
+		<!--		 <tomcat.version>10.1.25</tomcat.version>-->
 	</properties>
 
 	<modules>
@@ -53,6 +53,7 @@
 		<module>modules/sde-external-services/portal</module>
 		<module>modules/sde-external-services/bpn-discovery</module>
 		<module>modules/sde-external-services/policy-hub</module>
+		<module>modules/sde-external-services/submodel-server</module>
 
 		<module>modules/sde-common</module>
 		<module>modules/sde-core</module>
@@ -94,22 +95,9 @@
 					<groupId>logback-classic</groupId>
 					<artifactId>slf4j-log4j12</artifactId>
 				</exclusion>
-				<exclusion>
-					<groupId>ch.qos.logback</groupId>
-					<artifactId>logback-classic</artifactId>
-				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
- 			<groupId>ch.qos.logback</groupId>
- 			<artifactId>logback-classic</artifactId>
- 			<version>1.5.6</version>
- 		</dependency>
- 		<dependency>
- 			<groupId>ch.qos.logback</groupId>
- 			<artifactId>logback-core</artifactId>
- 			<version>1.5.6</version>
- 		</dependency>
+
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -198,6 +186,21 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-actuator</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry.instrumentation</groupId>
+				<artifactId>opentelemetry-spring-boot-autoconfigure</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-registry-prometheus</artifactId>
+			</dependency>
+
+
+
 		</dependencies>
 	</dependencyManagement>
 
@@ -251,9 +254,14 @@
 						</compilerArgs>
 					</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+				</plugin>
+
 			</plugins>
 		</pluginManagement>
-    <resources>
+		<resources>
 			<resource>
 				<directory>${project.basedir}/src/main/resources</directory>
 			</resource>

@@ -1,5 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2024 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -30,7 +31,7 @@ import org.eclipse.tractusx.sde.common.submodel.executor.Step;
 import org.eclipse.tractusx.sde.common.utils.JsonObjectUtility;
 import org.eclipse.tractusx.sde.edc.entities.request.asset.AssetEntryRequest;
 import org.eclipse.tractusx.sde.edc.entities.request.asset.AssetEntryRequestFactory;
-import org.eclipse.tractusx.sde.edc.facilitator.CreateEDCAssetFacilator;
+import org.eclipse.tractusx.sde.edc.facilitator.CreateEDCAssetFacilitator;
 import org.eclipse.tractusx.sde.edc.facilitator.DeleteEDCFacilitator;
 import org.eclipse.tractusx.sde.edc.gateways.external.EDCGateway;
 import org.springframework.stereotype.Service;
@@ -47,7 +48,7 @@ public class EDCUsecaseHandler extends Step implements EDCUsecaseStep {
 
 	private final AssetEntryRequestFactory assetFactory;
 	private final EDCGateway edcGateway;
-	private final CreateEDCAssetFacilator createEDCAssetFacilator;
+	private final CreateEDCAssetFacilitator createEDCAssetFacilitator;
 	private final DeleteEDCFacilitator deleteEDCFacilitator;
 
 	@SneakyThrows
@@ -61,16 +62,16 @@ public class EDCUsecaseHandler extends Step implements EDCUsecaseStep {
 			
 			String uuid = getDatabaseIdentifierValues(objectNode, getDatabaseIdentifierSpecsOfModel());
 
-			AssetEntryRequest assetEntryRequest = assetFactory.getAssetRequest(submodule,
+			AssetEntryRequest assetEntryRequest = assetFactory.createAssetRequest(submodule,
 					getSubmodelShortDescriptionOfModel(), shellId, subModelId, getUriPathOfSubmodule(), uuid,
 					getsemanticIdOfModel(), "");
 
 			Map<String, String> eDCAsset = null;
 
 			if (!edcGateway.assetExistsLookup(assetEntryRequest.getId())) {
-				eDCAsset = createEDCAssetFacilator.createEDCAsset(assetEntryRequest, policy);
+				eDCAsset = createEDCAssetFacilitator.createAssetWithPoliciesAndContract(assetEntryRequest, policy);
 			} else {
-				eDCAsset = createEDCAssetFacilator.updateEDCAsset(assetEntryRequest, policy);
+				eDCAsset = createEDCAssetFacilitator.updateAssetWithPoliciesAndContract(assetEntryRequest, policy);
 			}
 			eDCAsset.entrySet().forEach(entry -> objectNode.put(entry.getKey(), entry.getValue()));
 			return objectNode;

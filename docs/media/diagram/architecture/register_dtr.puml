@@ -1,0 +1,53 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+<style>
+root {
+  FontColor #?black:white
+}
+</style>
+skinparam actorStyle awesome
+skinparam SequenceGroupFontColor black
+skinparam SequenceGroupBodyBackgroundColor DarkGrey
+skinparam SequenceGroupBackgroundColor DimGrey
+skinparam BackgroundColor #SlateGray
+autonumber
+actor User as user
+participant "SDE\nBackend" as be
+participant "Tractus-x\nEDC" as edc
+title Registration of the Digital Twin Registry to EDC
+
+user -> be++: start application
+be -> be++: registerDigitalTwinRegistryToEdc
+    be -> edc++: lookup for dtr asset
+    return list of all dtr assets
+
+    alt "Asset is not present"
+        be -> edc++: <<create dtr asset>>
+            return response
+        be -> edc++: <<create access policy>>
+            return response
+        be -> edc++: <<create dtr usage policy>>
+            return response
+        be -> edc++: <<create contract definition>>
+            return response
+
+    autonumber 5
+    else #SlateGray **"Asset is already present"**
+        be -> edc++: lookup for dtr contract
+        return list of all contracts for the dtr assets
+        alt "Contract is not present"
+             be -> edc++: <<create access policy>>
+                return response
+             be -> edc++: <<create dtr usage policy>>
+                return response
+             be -> edc++: <<create contract definition>>
+                return response
+
+        end
+    end
+    be -> be--: log result
+return
+
+
+
+@enduml

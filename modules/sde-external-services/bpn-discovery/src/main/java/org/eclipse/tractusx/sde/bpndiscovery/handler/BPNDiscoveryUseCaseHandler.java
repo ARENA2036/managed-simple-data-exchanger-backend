@@ -1,5 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2023,2024 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2023,2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -17,6 +18,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
+
 package org.eclipse.tractusx.sde.bpndiscovery.handler;
 
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.bpndiscovery.model.request.BpnDiscoveryRequest;
 import org.eclipse.tractusx.sde.common.constants.SubmoduleCommonColumnsConstant;
@@ -42,6 +45,7 @@ import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
+@Slf4j
 @Service("bPNDiscoveryUseCaseHandler")
 @RequiredArgsConstructor
 public class BPNDiscoveryUseCaseHandler extends Step implements BPNDiscoveryUsecaseStep {
@@ -82,7 +86,12 @@ public class BPNDiscoveryUseCaseHandler extends Step implements BPNDiscoveryUsec
 				bpnDiscoveryProxyService.bpnDiscoveryBatchData(bpnDiscoveryKeyList);
 
 			} catch (Exception e) {
-				throw new ServiceException("Exception in BPN Discovery creation : " + e.getMessage());
+				log.error(
+						"Failed to perform BPN discovery for processId={}, rowIndex={}. Continuing processing.",
+						processId,
+						rowIndex,
+						e
+				);
 			}
 		}
 		return jsonObject;

@@ -1,5 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2022, 2023 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2022, 2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -26,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-@FeignClient(value = "ContractOfferCatalogApi", url = "${edc.consumer.hostname}${edc.consumer.managementpath:/data}${edc.consumer.managementpath.apiversion:/v2}", configuration = EDCDataConsumerConfiguration.class)
+@FeignClient(value = "ContractOfferCatalogApi", url = "${edc.consumer.hostname}${edc.consumer.managementpath:/data}${edc.consumer.managementpath.apiversion:/v3}", configuration = EDCDataConsumerConfiguration.class)
 public interface ContractOfferCatalogApi {
 
 	@PostMapping(value = "/catalog/request")

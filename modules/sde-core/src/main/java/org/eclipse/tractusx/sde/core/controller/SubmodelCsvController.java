@@ -57,6 +57,7 @@ public class SubmodelCsvController {
 	@PreAuthorize("hasPermission('','provider_download_own_data')")
 	public ResponseEntity<Resource> getDownloadFileByProcessId(@PathVariable("processId") String processId,
 			@PathVariable("submodel") String submodel) {
+
 		String filename = submodel + "_" + processId + CSV_FILE_EXTENSION;
 		return csvUtil.generateCSV(filename, submodelCsvService.findAllSubmodelCsvHistory(submodel, processId));
 	}

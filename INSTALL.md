@@ -28,7 +28,15 @@ For more details, please refer configuration section from [README.md](README.md)
 ### RUN SDE Backend Locally
 #### Prerequisites
 - JDK17
-- Postgres 12.12.10
+- Postgres >= 12.12.10
+  - ```shell 
+    docker run --name sde-db \
+     -e POSTGRES_USER=postgres \
+     -e POSTGRES_PASSWORD=admin \
+     -e POSTGRES_DB=sdedb \
+     -p 5432:5432 \
+     -d postgres:16-alpine
+     ``` 
 
 #### Steps
 1. Clone the GitHub Repository - https://github.com/eclipse-tractusx/managed-simple-data-exchanger-backend.
@@ -49,7 +57,7 @@ SDE-backend use Maven for building process. To build a service from sources one 
 Then fat jar file can be found in modules/sde-core/target folder as well as in local Maven repository. it can be run with this command: 
 
  ``` shell
-  java -jar target/sde-core-0.0.1.jar 
+  java -jar target/sde-core-3.0.0.jar 
  ```
 
 ## Upload a file:

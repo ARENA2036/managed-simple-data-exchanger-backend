@@ -14,11 +14,7 @@ This module use for PCF submodel specification and descriptors. It's contain the
 #### PCF Aspect Model URN: urn:samm:io.catenax.pcf:7.0.0#Pcf
 #### Semantic Id: urn:samm:io.catenax.pcf:7.0.0
 ---
----
-#### Version: 7.0.0
-#### PCF Aspect Model URN: urn:samm:io.catenax.pcf:7.0.0#Pcf
-#### Semantic Id: urn:samm:io.catenax.pcf:7.0.0
----
+
 
 ### Schema
 
