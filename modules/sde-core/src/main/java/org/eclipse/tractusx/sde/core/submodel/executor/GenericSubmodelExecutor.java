@@ -1,5 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2024 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -37,6 +38,7 @@ import org.eclipse.tractusx.sde.common.submodel.executor.create.steps.impl.CsvPa
 import org.eclipse.tractusx.sde.common.submodel.executor.create.steps.impl.GenerateUrnUUID;
 import org.eclipse.tractusx.sde.common.submodel.executor.create.steps.impl.JsonRecordFormating;
 import org.eclipse.tractusx.sde.common.submodel.executor.create.steps.impl.JsonRecordValidate;
+import org.eclipse.tractusx.sde.submodelserver.handler.SubmodelServerHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -63,15 +65,17 @@ public class GenericSubmodelExecutor extends SubmodelExecutor {
 
 	private final SubmoduleMapperUsecaseStep submodelMapperUseCaseStep;
 
-	public GenericSubmodelExecutor(CsvParse csvParseStep, JsonRecordFormating jsonRecordformater,
-			GenerateUrnUUID generateUrnUUID, JsonRecordValidate jsonRecordValidate,
+	private final SubmodelServerHandler submodelServerStep;
+
+	public GenericSubmodelExecutor(CsvParse csvParseStep, JsonRecordFormating jsonRecordFormater,
+			GenerateUrnUUID generateUrnUUID, JsonRecordValidate jsonRecordValidate, SubmodelServerHandler submodelServerStep,
 			@Qualifier("digitalTwinUseCaseHandler") DigitalTwinUsecaseStep digitalTwinUseCaseStep,
 			@Qualifier("eDCUsecaseHandler") EDCUsecaseStep edcUseCaseStep,
 			@Qualifier("bPNDiscoveryUseCaseHandler") BPNDiscoveryUsecaseStep bpnUseCaseTwinStep,
 			@Qualifier("databaseUsecaseHandler") DatabaseUsecaseStep databaseUseCaseStep,
 			@Qualifier("submoduleResponseHandler") SubmoduleMapperUsecaseStep submodelMapperUseCaseStep) {
 		this.csvParseStep = csvParseStep;
-		this.jsonRecordformater = jsonRecordformater;
+		this.jsonRecordformater = jsonRecordFormater;
 		this.generateUrnUUID = generateUrnUUID;
 		this.jsonRecordValidate = jsonRecordValidate;
 		this.digitalTwinUseCaseStep = digitalTwinUseCaseStep;
@@ -79,50 +83,54 @@ public class GenericSubmodelExecutor extends SubmodelExecutor {
 		this.bpnUseCaseTwinStep = bpnUseCaseTwinStep;
 		this.databaseUseCaseStep = databaseUseCaseStep;
 		this.submodelMapperUseCaseStep = submodelMapperUseCaseStep;
+		this.submodelServerStep = submodelServerStep;
 	}
 
 	@SneakyThrows
 	@Override
-	public void executeCsvRecord(RowData rowData, ObjectNode jsonObject, String processId, PolicyModel policy) {
+	public void executeCsvRecord(RowData rowData, ObjectNode assetInfo, String processId, PolicyModel policy, ObjectNode submodelData) {
 
 		csvParseStep.init(getSubmodelSchema());
-		csvParseStep.run(rowData, jsonObject, processId);
+		csvParseStep.run(rowData, assetInfo, processId);
 
-		nextSteps(rowData.position(), jsonObject, processId, policy);
+		nextSteps(rowData.position(), assetInfo, processId, policy,  submodelData);
 
 	}
 
 	@SneakyThrows
 	@Override
-	public void executeJsonRecord(Integer rowIndex, ObjectNode jsonObject, String processId, PolicyModel policy) {
+	public void executeJsonRecord(Integer rowIndex, ObjectNode assetInfo, String processId, PolicyModel policy, ObjectNode submodelData) {
 
 		jsonRecordformater.init(getSubmodelSchema());
-		jsonRecordformater.run(rowIndex, jsonObject, processId);
+		jsonRecordformater.run(rowIndex, assetInfo, processId);
 
-		nextSteps(rowIndex, jsonObject, processId, policy);
+		nextSteps(rowIndex, assetInfo, processId, policy, submodelData);
 
 	}
 
 	@SneakyThrows
-	private void nextSteps(Integer rowIndex, ObjectNode jsonObject, String processId, PolicyModel policy) {
+	private void nextSteps(Integer rowIndex, ObjectNode assetInfo, String processId, PolicyModel policy, ObjectNode submodelData) {
 
 		generateUrnUUID.init(getSubmodelSchema());
-		generateUrnUUID.run(jsonObject, processId);
+		generateUrnUUID.run(assetInfo, processId);
 
 		jsonRecordValidate.init(getSubmodelSchema());
-		jsonRecordValidate.run(rowIndex, jsonObject);
+		jsonRecordValidate.run(rowIndex, assetInfo);
 
 		getDtExecutorStep().init(getSubmodelSchema());
-		getDtExecutorStep().run(rowIndex, jsonObject, processId, policy);
+		getDtExecutorStep().run(rowIndex, assetInfo, processId, policy);
 
 		getEDCExecutorStep().init(getSubmodelSchema());
-		getEDCExecutorStep().run(rowIndex, jsonObject, processId, policy);
+		getEDCExecutorStep().run(rowIndex, assetInfo, processId, policy);
 
 		getBpnExecutorStep().init(getSubmodelSchema());
-		getBpnExecutorStep().run(rowIndex, jsonObject, processId, policy);
+		getBpnExecutorStep().run(rowIndex, assetInfo, processId, policy);
 
 		getDatabaseExecutorStep().init(getSubmodelSchema());
-		getDatabaseExecutorStep().run(rowIndex, jsonObject, processId, policy);
+		getDatabaseExecutorStep().run(rowIndex, assetInfo, processId, policy);
+
+		submodelServerStep.init(getSubmodelSchema());
+		submodelServerStep.run(rowIndex, assetInfo, submodelData, policy, processId);
 	}
 
 	@Override

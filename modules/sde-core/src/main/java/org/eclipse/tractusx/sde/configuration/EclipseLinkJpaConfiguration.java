@@ -2,6 +2,7 @@
  * Copyright (c) 2022 Critical TechWorks GmbH
  * Copyright (c) 2022 BMW GmbH
  * Copyright (c) 2022, 2023 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2022, 2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -50,11 +51,11 @@ public class EclipseLinkJpaConfiguration extends JpaBaseConfiguration {
     }
 
     @Override
-    protected Map<String, Object> getVendorProperties() {
-        HashMap<String, Object> map = new HashMap<>();
-        map.put(PersistenceUnitProperties.WEAVING, detectWeavingMode());
-        map.put(PersistenceUnitProperties.DDL_GENERATION, PersistenceUnitProperties.CREATE_ONLY);
-        return map;
+    protected Map<String, Object> getVendorProperties(DataSource dataSource) {
+        return Map.of(
+                PersistenceUnitProperties.WEAVING, detectWeavingMode(),
+                PersistenceUnitProperties.DDL_GENERATION, PersistenceUnitProperties.CREATE_ONLY
+        );
     }
 
     private String detectWeavingMode() {

@@ -1,0 +1,19 @@
+{
+	"@context": {
+		"@vocab": "https://w3id.org/edc/v0.0.1/ns/",
+		"dct": "http://purl.org/dc/terms/"
+	},
+	"@type": "QuerySpec",
+	"offset": 0,
+	"limit": 10,
+	"sortOrder": "DESC",
+	"sortField": "id",
+	"filterExpression": [
+		{
+			"@type": "Criterion",
+			"operandLeft": "'http://purl.org/dc/terms/type'.'@id'",
+			"operator": "=",
+			"operandRight": "https://w3id.org/catenax/taxonomy#DigitalTwinRegistry"
+		}
+	]
+}

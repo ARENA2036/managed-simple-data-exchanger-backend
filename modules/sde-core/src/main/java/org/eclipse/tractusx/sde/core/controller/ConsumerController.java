@@ -1,5 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2022, 2024 T-Systems International GmbH
+ * Copyright (c) 2026 ARENA2036 e.V.
  * Copyright (c) 2022, 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -29,6 +30,7 @@ import org.eclipse.tractusx.sde.common.exception.ValidationException;
 import org.eclipse.tractusx.sde.core.service.ConsumerService;
 import org.eclipse.tractusx.sde.edc.model.request.ConsumerRequest;
 import org.eclipse.tractusx.sde.edc.model.request.QueryDataOfferRequest;
+import org.eclipse.tractusx.sde.edc.model.response.QueryDataOfferModel;
 import org.eclipse.tractusx.sde.edc.services.ConsumerControlPanelService;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
@@ -85,9 +87,10 @@ public class ConsumerController {
 	public ResponseEntity<Object> getEDCPolicy(@RequestBody List<QueryDataOfferRequest> queryDataOfferRequest)
 			throws Exception {
 		log.info("Request received : /api/offer-policy-details");
-		return ok().body(consumerControlPanelService.getEDCPolicy(queryDataOfferRequest));
+		List<QueryDataOfferModel> edcPolicy = consumerControlPanelService.getEDCPolicy(queryDataOfferRequest);
+		return ok().body(edcPolicy);
 	}
-	
+
 	@PostMapping(value = "/subscribe-data-offers")
 	@PreAuthorize("hasPermission('','consumer_establish_contract_agreement')")
 	public ResponseEntity<Object> subscribeDataOffers(@Valid @RequestBody ConsumerRequest consumerRequest) {

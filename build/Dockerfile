@@ -1,7 +1,7 @@
 #################################################################################
 # Copyright (c) 2022,2024 T-Systems International GmbH
 # Copyright (c) 2025 ARENA2036 e.V.
-# Copyright (c) 2022,2025 Contributors to the Eclipse Foundation
+# Copyright (c) 2022,2024 Contributors to the Eclipse Foundation
 #
 # See the NOTICE file(s) distributed with this work for additional
 # information regarding copyright ownership.
@@ -54,4 +54,4 @@ COPY --from=build modules/sde-core/target/*.jar ./app.jar
 EXPOSE 8080
 
 # set the startup command to run your binary
-CMD ["java", "-jar", "./app.jar"]
+CMD ["java", "-jar", "./app.jar", "--spring.config.additional-location=file:/home/sdeuser/sdeapp/configuration.properties"]
