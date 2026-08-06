@@ -59,70 +59,45 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+     
+     #Setup Java 17
 
-      # Setup Java 17
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v4 
         with:
           java-version: '17'
           distribution: 'adopt'
-          cache: 'maven'
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@181d5eefc20863364f96762470ba6f862bdef56b # v2.227
         with:
           languages: ${{ matrix.language }}
-          build-mode: manual
-
           # If you wish to specify custom queries, you can do so here or in a config file
           # By default, queries listed here will override any specified in a config file
           # Prefix the list here with "+" to use these queries and those in the config file
 
-          # For more details on CodeQL's query packs, refer to:
-          # https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+          # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
           # Use +security-extended,security-and-quality for wider security and better code quality
           queries: +security-extended,security-and-quality
 
-      # Build the Java project manually because CodeQL autobuild cannot
-      # resolve the Maven project automatically.
-      - name: Build application with Maven
-        shell: bash
-        run: |
-          set -euo pipefail
+      # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift)
+      # Automates dependency installation for Python, Ruby, and JavaScript, optimizing the CodeQL analysis setup
+      # If this step fails, then you should remove it and run the build manually (see below)
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@181d5eefc20863364f96762470ba6f862bdef56b # v2.227
 
-          if [[ -f "./mvnw" ]]; then
-            echo "Building with Maven Wrapper"
+      # ℹ️ Command-line programs to run using the OS shell.
+      # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
 
-            chmod +x ./mvnw
+      # If the Autobuild fails above, remove it and uncomment the following three lines modify them (or add more) to build your code if your project, please refer to the EXAMPLE below for guidance
 
-            ./mvnw \
-              --batch-mode \
-              --show-version \
-              --errors \
-              --no-transfer-progress \
-              clean package \
-              -DskipTests
-
-          elif [[ -f "./pom.xml" ]]; then
-            echo "Building with system Maven"
-
-            mvn \
-              --batch-mode \
-              --show-version \
-              --errors \
-              --no-transfer-progress \
-              clean package \
-              -DskipTests
-
-          else
-            echo "Maven project was not found"
-            echo "Expected ./mvnw or ./pom.xml"
-            exit 1
-          fi
+      # - run: |
+      #     echo "Run, Build Application using script"
+      #     ./location_of_script_within_repo/buildscript.sh
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@181d5eefc20863364f96762470ba6f862bdef56b # v2.227
         with:
-          category: "/language:${{ matrix.language }}"
+          category: "/language:${{matrix.language}}"
           fail-on: error
