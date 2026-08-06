@@ -1,4 +1,4 @@
-name: SDE Backend CI Pipeline
+name: SDE Backend CI
 
 on:
 #   push:
@@ -14,10 +14,10 @@ on:
 #       - "release/**"
 #       - ci-cd-branch
 
-  pull_request:
-    branches:
-      - main
-      - develop
+  # pull_request:
+  #   branches:
+  #     - main
+  #     - develop
 
   workflow_dispatch:
     inputs:
@@ -61,7 +61,7 @@ jobs:
 
   secret-scan:
     name: Secret Scan
-    uses: ./.github/workflows/truffleHog.yml
+    uses: ./.github/workflows/trufflehog.yml
     secrets: inherit
 
   kics:
