@@ -24,12 +24,15 @@ on:
   push:
     branches:
       - 'main'
+      - develop
     tags:
       - 'v*.*.*'
       - 'v*.*.*-*'
   pull_request:
     branches:
-      - main
+      - 'main'
+      - develop
+  workflow_call:
   workflow_dispatch:
     inputs:
       image_tag:
@@ -72,12 +75,14 @@ jobs:
           # Automatically prepare image tags; See action docs for more examples.
           # semver patter will generate tags like these for example :1 :1.2 :1.2.3
           tags: |
+            type=ref,event=branch
+            type=ref,event=pr
             type=raw,value=main
+            type=semver,pattern={{major}}
+            type=semver,pattern={{major}}.{{minor}}
             type=raw,value=${{ github.sha }}
             type=raw,value=${{ github.event.inputs.image_tag }}
-            tags: ${{ steps.meta.outputs.tags }}, ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest
-          flavor: |
-            latest=true
+
 
       - name: Docker Login
         if: github.event_name != 'pull_request'
@@ -95,7 +100,7 @@ jobs:
           file: ./build/Dockerfile
           # Build image for verification purposes on every trigger event. Only push if event is not a PR
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}, ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest
+          tags: ${{ steps.meta.outputs.tags }}, ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}
           labels: ${{ steps.meta.outputs.labels }}
 
 #       # https://github.com/peter-evans/dockerhub-description
