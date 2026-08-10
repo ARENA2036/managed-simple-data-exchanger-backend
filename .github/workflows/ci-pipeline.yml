@@ -20,7 +20,7 @@
 # SPDX-License-Identifier: Apache-2.0
 ###############################################################
 ---
-  
+
 name: SDE Backend CI
 
 on:
@@ -193,6 +193,8 @@ jobs:
     if: github.event_name != 'pull_request'
 
     uses: ./.github/workflows/dockerbuild.yaml
+    with:
+      image_tag: ${{ needs.resolve-image-tag.outputs.backend_image_tag }}
     secrets: inherit
 
   # Verify the image exists in Harbor.
