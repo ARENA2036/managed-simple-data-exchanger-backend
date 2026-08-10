@@ -147,7 +147,7 @@ class ConsumerControlPanelServiceDownloadTest {
 
         assertEquals("FAILED", resultFields.get(STATUS));
         assertEquals(edrWithoutTransfer, resultFields.get("edr"));
-        assertTrue(resultFields.get("error").toString().contains("intiate data transfer is not completed"));
+        assertTrue(resultFields.get("error").toString().contains("data transfer is not completed"));
         assertFalse(resultFields.containsKey("data"));
         verify(eDRRequestHelper, never()).getDataFromProvider(any(), any());
     }
