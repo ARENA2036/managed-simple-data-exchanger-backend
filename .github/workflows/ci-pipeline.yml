@@ -71,7 +71,7 @@ jobs:
 
   # Resolve the backend image tag.
   resolve-image-tag:
-    name: Create Backend Docker Image Tag
+    name: Start Backend CI Pipeline
     runs-on: ubuntu-latest
 
     outputs:
