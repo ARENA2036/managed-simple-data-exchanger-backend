@@ -1,6 +1,6 @@
 ###############################################################
 # Copyright (c) 2024 Contributors to the Eclipse Foundation
-# Copyright (c) 2025 ARENA2036 e.V.
+# Copyright (c) 2026 ARENA2036 e.V.
 # Copyright (c) 2024 T-Systems International GmbH
 #
 # See the NOTICE file(s) distributed with this work for additional
@@ -26,6 +26,7 @@ on:
     branches: [main]
   pull_request:
     types: [opened, synchronize, reopened]
+  workflow_call:
   workflow_dispatch:
 
 jobs:

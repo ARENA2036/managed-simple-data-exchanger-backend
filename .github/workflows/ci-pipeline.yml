@@ -1,0 +1,376 @@
+###############################################################
+# Tractus-X - EDC Management Console
+#
+# Copyright (c) 2026 ARENA2036 e.V.
+# Copyright (c) 2026 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License, Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0.
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+###############################################################
+---
+
+name: SDE Backend CI
+
+on:
+#   push:
+#     branches:
+#       - main
+#       - develop
+#       - "feature/**"
+#       - "bugfix/**"
+#       - "hotfix/**"
+#       - "chore/**"
+#       - "feat/**"
+#       - "docs/**"
+#       - "release/**"
+#       - ci-cd-branch
+
+  # pull_request:
+  #   branches:
+  #     - main
+  #     - develop
+
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Optional: New Docker image tag for backend. Leave empty to use the current Git SHA"
+        required: false
+        type: string
+
+      backend_image_tag:
+        description: "Backend: Optional existing Docker image tag, e.g. latest-v1"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+  actions: read
+  security-events: write
+  id-token: write
+  issues: write
+
+concurrency:
+  group: sde-backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE_REPOSITORY: harbor-hub-shared.arena.3ascloud.de/arena2036/managed-simple-data-exchanger-backend
+
+jobs:
+  # Run existing CI checks.
+
+  dependencies:
+    name: Check Dependencies
+    uses: ./.github/workflows/dependencies.yml
+    secrets: inherit
+
+  codeql:
+    name: CodeQL
+    uses: ./.github/workflows/code-ql.yaml
+    secrets: inherit
+
+  secret-scan:
+    name: Secret Scan
+    uses: ./.github/workflows/trufflehog.yml
+    secrets: inherit
+
+  kics:
+    name: KICS
+    uses: ./.github/workflows/kics.yml
+    secrets: inherit
+
+  # Resolve the backend image tag.
+  resolve-image-tag:
+    name: Start Backend CI Pipeline
+    runs-on: ubuntu-latest
+
+    outputs:
+      image_tag: ${{ steps.resolve.outputs.image_tag }}
+      backend_image_tag: ${{ steps.resolve.outputs.backend_image_tag }}
+
+    steps:
+      - name: Resolve image tags
+        id: resolve
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          EVENT_NAME="${{ github.event_name }}"
+
+          COMMON_TAG="${{ inputs.image_tag }}"
+          BACKEND_TAG="${{ inputs.backend_image_tag }}"
+
+          # ---------------------------------------------------------
+          # Manual workflow.
+          # When no tag is supplied, use the current backend Git SHA.
+          # ---------------------------------------------------------
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            if [[ -z "$COMMON_TAG" ]]; then
+              COMMON_TAG="${{ github.sha }}"
+            fi
+
+            if [[ -z "$BACKEND_TAG" ]]; then
+              BACKEND_TAG="$COMMON_TAG"
+            fi
+
+            IMAGE_TAG="$BACKEND_TAG"
+
+          # ---------------------------------------------------------
+          # Pull request image tag.
+          # ---------------------------------------------------------
+          elif [[ "$EVENT_NAME" == "pull_request" ]]; then
+            IMAGE_TAG="pr-${{ github.event.pull_request.number }}"
+            BACKEND_TAG="$IMAGE_TAG"
+
+          # ---------------------------------------------------------
+          # Automatic push image tag.
+          # ---------------------------------------------------------
+          else
+            IMAGE_TAG="$(printf '%s' "${{ github.ref_name }}" \
+              | tr '[:upper:]' '[:lower:]' \
+              | sed 's#[^a-z0-9._-]#-#g' \
+              | sed 's/--*/-/g' \
+              | sed 's/^-//' \
+              | sed 's/-$//' \
+              | cut -c1-100)"
+
+            BACKEND_TAG="$IMAGE_TAG"
+          fi
+
+          if [[ -z "$IMAGE_TAG" ||
+                -z "$BACKEND_TAG" ]]; then
+
+            echo "One or more image tags could not be resolved"
+            exit 1
+          fi
+
+          {
+            echo "image_tag=$IMAGE_TAG"
+            echo "backend_image_tag=$BACKEND_TAG"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Backend build tag: $IMAGE_TAG"
+          echo "Backend deployment tag: $BACKEND_TAG"
+
+      - name: Write image summary
+        shell: bash
+        run: |
+          {
+            echo "## Backend image configuration"
+            echo
+            echo "| Property | Value |"
+            echo "|---|---|"
+            echo "| Branch | \`${{ github.ref_name }}\` |"
+            echo "| Backend build tag | \`${{ steps.resolve.outputs.image_tag }}\` |"
+            echo "| Backend deployment tag | \`${{ steps.resolve.outputs.backend_image_tag }}\` |"
+            echo "| Repository | \`${IMAGE_REPOSITORY}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Build the backend image.
+  docker:
+    name: Build Backend Docker Image
+
+    needs:
+      - resolve-image-tag    
+      - dependencies
+      - codeql
+      - secret-scan
+      - kics
+
+    if: github.event_name != 'pull_request'
+
+    uses: ./.github/workflows/dockerbuild.yaml
+    with:
+      image_tag: ${{ needs.resolve-image-tag.outputs.backend_image_tag }}
+    secrets: inherit
+
+  # Verify the image exists in Harbor.
+  verify-image:
+    name: Verify Backend Image in Harbor Registry
+
+    needs:
+      - resolve-image-tag
+      - docker
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install skopeo
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          sudo apt-get update
+          sudo apt-get install -y skopeo
+
+          skopeo --version
+
+      - name: Verify backend image in Harbor
+        env:
+          HBR_USERNAME: ${{ secrets.HBR_USERNAME }}
+          HBR_PASSWORD: ${{ secrets.HBR_PASSWORD }}
+          IMAGE_TAG: ${{ needs.resolve-image-tag.outputs.backend_image_tag }}
+
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          IMAGE="${IMAGE_REPOSITORY}:${IMAGE_TAG}"
+
+          if [[ -z "$HBR_USERNAME" || -z "$HBR_PASSWORD" ]]; then
+            echo "Harbor credentials are missing"
+            exit 1
+          fi
+
+          if [[ -z "$IMAGE_TAG" ]]; then
+            echo "Backend image tag is empty"
+            exit 1
+          fi
+
+          echo "Checking backend image:"
+          echo "$IMAGE"
+
+          if ! skopeo inspect \
+            --creds "${HBR_USERNAME}:${HBR_PASSWORD}" \
+            "docker://${IMAGE}" \
+            > /tmp/backend-image.json \
+            2> /tmp/backend-image-error.log; then
+
+            echo "Backend image does not exist or cannot be accessed"
+            cat /tmp/backend-image-error.log || true
+            exit 1
+          fi
+
+          echo "Backend image exists in Harbor"
+
+      - name: Write verification summary
+        shell: bash
+        run: |
+          {
+            echo "## Backend image verification"
+            echo
+            echo "| Property | Value |"
+            echo "|---|---|"
+            echo "| Image | \`${IMAGE_REPOSITORY}:${{ needs.resolve-image-tag.outputs.backend_image_tag }}\` |"
+            echo "| Status | \`Found in Harbor\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Scan the backend image with Trivy.
+  trivy:
+    name: Scan Backend Image with Trivy
+
+    needs:
+      - resolve-image-tag
+      - verify-image
+
+    uses: ./.github/workflows/reusable-trivy.yml
+
+    with:
+      image_tag: ${{ needs.resolve-image-tag.outputs.backend_image_tag }}
+
+    secrets: inherit
+
+  # Send a manual preview deployment request to the Helm repository.
+  request-preview-deployment:
+    name: Send Deployment Request to Helm Repository
+
+    needs:
+      - resolve-image-tag
+      - trivy
+
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      (
+        github.ref_name == 'ci-cd-branch' ||
+        startsWith(github.ref_name, 'feature/') ||
+        startsWith(github.ref_name, 'bugfix/') ||
+        startsWith(github.ref_name, 'hotfix/') ||
+        startsWith(github.ref_name, 'chore/') ||
+        startsWith(github.ref_name, 'feat/') ||
+        startsWith(github.ref_name, 'docs/')
+      )
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate Helm repository token
+        env:
+          GH_TOKEN: ${{ secrets.HELM_REPO_PAT }}
+
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "HELM_REPO_PAT is missing"
+            echo "Create it in the backend repository Actions secrets."
+            exit 1
+          fi
+
+          echo "Helm repository token is configured"
+
+      - name: Send deployment request to Helm repository
+        env:
+          GH_TOKEN: ${{ secrets.HELM_REPO_PAT }}
+          BACKEND_TAG: ${{ needs.resolve-image-tag.outputs.backend_image_tag }}
+
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "$BACKEND_TAG" ]]; then
+            echo "Backend image tag is empty"
+            exit 1
+          fi
+
+          gh api \
+            --method POST \
+            "/repos/ARENA2036/managed-simple-data-exchanger/dispatches" \
+            --input - <<EOF
+          {
+            "event_type": "sde-deployment-request",
+            "client_payload": {
+              "source": "backend",
+              "branch": "${{ github.ref_name }}",
+              "environment": "dev-ap6",
+              "image_tag": "${BACKEND_TAG}",
+              "backend_image_tag": "${BACKEND_TAG}"
+            }
+          }
+          EOF
+
+          echo "Developer Preview deployment was requested"
+          echo "Source repository: backend"
+          echo "Source branch: ${{ github.ref_name }}"
+          echo "Environment: dev-ap6"
+          echo "Backend image tag: $BACKEND_TAG"
+
+      - name: Write deployment request summary
+        shell: bash
+        run: |
+          {
+            echo "## Developer Preview deployment request"
+            echo
+            echo "| Property | Value |"
+            echo "|---|---|"
+            echo "| Source repository | \`backend\` |"
+            echo "| Source branch | \`${{ github.ref_name }}\` |"
+            echo "| Environment | \`dev-ap6\` |"
+            echo "| Cluster | \`arenax-ap6\` |"
+            echo "| Values file | \`values-dev.yaml\` |"
+            echo "| Argo CD template | \`sde-preview-app.yaml\` |"
+            echo "| Backend image tag | \`${{ needs.resolve-image-tag.outputs.backend_image_tag }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

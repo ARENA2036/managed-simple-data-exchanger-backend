@@ -1,6 +1,6 @@
 #################################################################################
 # Copyright (c) 2023,2024 T-Systems International GmbH
-# Copyright (c) 2025 ARENA2036 e.V.
+# Copyright (c) 2026 ARENA2036 e.V.
 # Copyright (c) 2023,2024 Contributors to the Eclipse Foundation
 #
 # See the NOTICE file(s) distributed with this work for additional
@@ -24,18 +24,30 @@ on:
   push:
     branches:
       - 'main'
+      - develop
     tags:
       - 'v*.*.*'
       - 'v*.*.*-*'
   pull_request:
     branches:
-      - main
+      - 'main'
+      - develop
+
+  workflow_call:
+    inputs:
+      image_tag:
+        description: "Optional Docker image tag"
+        required: false
+        type: string
+        default: ""
+
   workflow_dispatch:
     inputs:
       image_tag:
-        description: 'tag'
-        required: true
-        default: 'latest'
+        description: "Optional Docker image tag. Leave empty to use Git SHA"
+        required: false
+        type: string
+        default: ""
 env:
   IMAGE_NAMESPACE: "harbor-hub-shared.arena.3ascloud.de/arena2036"
   IMAGE_NAME: "managed-simple-data-exchanger-backend"
@@ -72,12 +84,13 @@ jobs:
           # Automatically prepare image tags; See action docs for more examples.
           # semver patter will generate tags like these for example :1 :1.2 :1.2.3
           tags: |
+            type=ref,event=branch
+            type=ref,event=pr
             type=raw,value=main
+            type=semver,pattern={{major}}
+            type=semver,pattern={{major}}.{{minor}}
             type=raw,value=${{ github.sha }}
-            type=raw,value=${{ github.event.inputs.image_tag }}
-            tags: ${{ steps.meta.outputs.tags }}, ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest
-          flavor: |
-            latest=true
+            type=raw,value=${{ inputs.image_tag }},enable=${{ inputs.image_tag != '' }}
 
       - name: Docker Login
         if: github.event_name != 'pull_request'
@@ -95,7 +108,7 @@ jobs:
           file: ./build/Dockerfile
           # Build image for verification purposes on every trigger event. Only push if event is not a PR
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}, ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
 #       # https://github.com/peter-evans/dockerhub-description
