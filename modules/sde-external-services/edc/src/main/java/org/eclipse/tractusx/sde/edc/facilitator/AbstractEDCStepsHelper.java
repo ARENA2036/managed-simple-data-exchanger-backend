@@ -21,6 +21,7 @@
 
 package org.eclipse.tractusx.sde.edc.facilitator;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,6 +75,14 @@ public class AbstractEDCStepsHelper {
 		Map<String, String> requestHeader = new HashMap<>();
 		requestHeader.put(edcProviderApiKeyHeader, edcProviderApiKeyValue);
 		return requestHeader;
+	}
+
+	protected URI providerManagementUri() {
+		return URI.create(providerHostWithManagementPath);
+	}
+
+	protected URI consumerManagementUri() {
+		return URI.create(consumerHost);
 	}
 
 }

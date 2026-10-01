@@ -31,6 +31,7 @@ import org.eclipse.tractusx.sde.edc.entities.request.asset.AssetEntryRequest;
 import org.eclipse.tractusx.sde.edc.entities.request.businesspartnergroup.BusinessPartnerGroupRequest;
 import org.eclipse.tractusx.sde.edc.entities.request.contractdefinition.ContractDefinitionRequest;
 import org.eclipse.tractusx.sde.edc.exceptions.EDCGatewayException;
+import org.eclipse.tractusx.sde.edc.facilitator.AbstractEDCStepsHelper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -45,13 +46,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class EDCGateway {
+public class EDCGateway extends AbstractEDCStepsHelper {
 
 	private final EDCFeignClientApi edcFeignClientApi;
 	
 	public boolean assetExistsLookup(String id) {
 		try {
-			edcFeignClientApi.getAsset(id);
+			edcFeignClientApi.getAsset(providerManagementUri(), id, getProviderAuthHeader());
 		} catch (FeignException e) {
 			if (e.status() == HttpStatus.NOT_FOUND.value()) {
 				return false;
@@ -63,7 +64,7 @@ public class EDCGateway {
 	
 	public boolean containsAssetsByFilterExpression(ObjectNode requestBody) {
 		try {
-			JsonNode result = edcFeignClientApi.getAssetByFilterExpression(requestBody);
+			JsonNode result = edcFeignClientApi.getAssetByFilterExpression(providerManagementUri(), requestBody, getProviderAuthHeader());
 			if (result.isArray() && result.isEmpty())
 				return false;
 		} catch (FeignException e) {
@@ -77,7 +78,7 @@ public class EDCGateway {
 	
 	public JsonNode getAssetsByFilterExpression(ObjectNode requestBody) {
 		try {
-			return edcFeignClientApi.getAssetByFilterExpression(requestBody);
+			return edcFeignClientApi.getAssetByFilterExpression(providerManagementUri(), requestBody, getProviderAuthHeader());
 		} catch (FeignException e) {
 			if (e.status() == HttpStatus.NOT_FOUND.value()) {
 				return null;
@@ -88,7 +89,7 @@ public class EDCGateway {
 
 	public JsonNode getContractDefinitionsByFilterExpression(ObjectNode requestBody) {
 		try {
-			return edcFeignClientApi.getContractDefinitionsByFilterExpression(requestBody);
+			return edcFeignClientApi.getContractDefinitionsByFilterExpression(providerManagementUri(), requestBody, getProviderAuthHeader());
 		} catch (FeignException e) {
 			if (e.status() == HttpStatus.NOT_FOUND.value()) {
 				return null;
@@ -99,7 +100,7 @@ public class EDCGateway {
 
 	public String createAsset(AssetEntryRequest request) {
 		try {
-			return edcFeignClientApi.createAsset(request);
+			return edcFeignClientApi.createAsset(providerManagementUri(), request, getProviderAuthHeader());
 		} catch (FeignException e) {
 			if (e.status() == HttpStatus.CONFLICT.value()) {
 				throw new EDCGatewayException("Asset already exists");
@@ -110,7 +111,7 @@ public class EDCGateway {
 	
 	public void updateAsset(AssetEntryRequest request) {
 		try {
-			edcFeignClientApi.updateAsset(request);
+			edcFeignClientApi.updateAsset(providerManagementUri(), request, getProviderAuthHeader());
 		} catch (FeignException e) {
 			if (e.status() == HttpStatus.NOT_FOUND.value()) {
 				throw new EDCGatewayException("Asset to update doesn't exists");
@@ -122,7 +123,7 @@ public class EDCGateway {
 	
 	public boolean policyExistsLookup(String policyId) {
 		try {
-			edcFeignClientApi.getPolicy(policyId);
+			edcFeignClientApi.getPolicy(providerManagementUri(), policyId, getProviderAuthHeader());
 		} catch (FeignException e) {
 			if (e.status() == HttpStatus.NOT_FOUND.value()) {
 				return false;
@@ -135,7 +136,7 @@ public class EDCGateway {
 	@SneakyThrows
     public JsonNode createPolicyDefinition(JsonNode request) {
         try {
-            return edcFeignClientApi.createPolicy(request);
+            return edcFeignClientApi.createPolicy(providerManagementUri(), request, getProviderAuthHeader());
         } catch (FeignException fe) {
             log.error("Exception Request: {}", fe.request());
             log.error("Exception Status: {}", fe.status());
@@ -159,7 +160,7 @@ public class EDCGateway {
 	@SneakyThrows
 	public JsonNode updatePolicyDefinition(String policyUUId, JsonNode request) {
 		try {
-			return edcFeignClientApi.updatePolicy(policyUUId, request);
+			return edcFeignClientApi.updatePolicy(providerManagementUri(), policyUUId, request, getProviderAuthHeader());
 		} catch (FeignException e) {
 			throw new EDCGatewayException(e.getMessage());
 		}
@@ -168,7 +169,7 @@ public class EDCGateway {
 	
 	public boolean contractDefinitionExistsLookup(String contractDefinitionId) {
 		try {
-			edcFeignClientApi.getContractDefination(contractDefinitionId);
+			edcFeignClientApi.getContractDefination(providerManagementUri(), contractDefinitionId, getProviderAuthHeader());
 		} catch (FeignException e) {
 			if (e.status() == HttpStatus.NOT_FOUND.value()) {
 				return false;
@@ -180,7 +181,7 @@ public class EDCGateway {
 	
 	public String createContractDefinition(ContractDefinitionRequest request) {
 		try {
-			return edcFeignClientApi.createContractDefination(request);
+			return edcFeignClientApi.createContractDefination(providerManagementUri(), request, getProviderAuthHeader());
 		} catch (FeignException e) {
 			throw new EDCGatewayException(e.getMessage());
 		}
@@ -188,7 +189,7 @@ public class EDCGateway {
 	
 	public void updateContractDefinition(ContractDefinitionRequest request) {
 		try {
-			edcFeignClientApi.updateContractDefination(request);
+			edcFeignClientApi.updateContractDefination(providerManagementUri(), request, getProviderAuthHeader());
 		} catch (FeignException e) {
 			throw new EDCGatewayException(e.getMessage());
 		}
@@ -198,15 +199,16 @@ public class EDCGateway {
 		
 		try {
 			if (StringUtils.isNotBlank(bpnNumber)) {
-				edcFeignClientApi.getBusinessPartnerGroups(bpnNumber);
+				edcFeignClientApi.getBusinessPartnerGroups(providerManagementUri(), bpnNumber, getProviderAuthHeader());
 			}else {
 				log.info("BPN found empty not adding in business partner group {}", groupName);
 			}
 		} catch (FeignException e) {
 			log.info("BPN not exist in group so adding business partner group {}, {}", groupName, e.getMessage());
 			if (e.status() == HttpStatus.NOT_FOUND.value()) {
-				edcFeignClientApi.createBusinessPartnerGroups(
-						BusinessPartnerGroupRequest.builder().id(bpnNumber).groups(List.of(groupName)).build());
+				edcFeignClientApi.createBusinessPartnerGroups(providerManagementUri(),
+						BusinessPartnerGroupRequest.builder().id(bpnNumber).groups(List.of(groupName)).build(),
+						getProviderAuthHeader());
 				
 			}
 		}
@@ -215,7 +217,7 @@ public class EDCGateway {
 	public void deleteBPNfromPCFBusinessPartnerGroup(String bpnNumber, String groupName) {
 		try {
 			if (StringUtils.isNotBlank(bpnNumber)) {
-				edcFeignClientApi.deleteBusinessPartnerGroups(bpnNumber);
+				edcFeignClientApi.deleteBusinessPartnerGroups(providerManagementUri(), bpnNumber, getProviderAuthHeader());
 			}else {
 				log.info("BPN found empty not going to delete from business partner group {}", groupName);
 			}

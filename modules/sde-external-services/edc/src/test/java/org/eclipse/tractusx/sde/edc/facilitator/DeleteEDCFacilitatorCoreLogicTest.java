@@ -23,8 +23,10 @@ package org.eclipse.tractusx.sde.edc.facilitator;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.tractusx.sde.common.exception.ServiceException;
 import org.eclipse.tractusx.sde.edc.api.EDCFeignClientApi;
@@ -33,6 +35,7 @@ import org.eclipse.tractusx.sde.edc.entities.request.businesspartnergroup.Busine
 import org.eclipse.tractusx.sde.edc.entities.request.contractdefinition.ContractDefinitionRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,6 +52,12 @@ class DeleteEDCFacilitatorCoreLogicTest {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
+	private static DeleteEDCFacilitator facilitator(EDCFeignClientApi api) {
+		DeleteEDCFacilitator facilitator = new DeleteEDCFacilitator(api);
+		ReflectionTestUtils.setField(facilitator, "providerHostWithManagementPath", "http://localhost/management");
+		return facilitator;
+	}
+
 	@Test
 	void findEDCOfferInformationDeletesContractPoliciesAndAssetFromLookupResult() {
 		FakeEDCFeignClientApi api = new FakeEDCFeignClientApi();
@@ -57,7 +66,7 @@ class DeleteEDCFacilitatorCoreLogicTest {
 				.put("edc:accessPolicyId", "access-policy-id")
 				.put("edc:contractPolicyId", "usage-policy-id");
 
-		new DeleteEDCFacilitator(api).findEDCOfferInformation("shell-1", "submodel-1");
+		facilitator(api).findEDCOfferInformation("shell-1", "submodel-1");
 
 		assertThat(api.calls).containsExactly(
 				"getContract:shell-1-submodel-1",
@@ -71,7 +80,7 @@ class DeleteEDCFacilitatorCoreLogicTest {
 	void deleteUsagePolicySkipsBlankIds() {
 		FakeEDCFeignClientApi api = new FakeEDCFeignClientApi();
 
-		new DeleteEDCFacilitator(api).deleteUsagePolicy(" ");
+		facilitator(api).deleteUsagePolicy(" ");
 
 		assertThat(api.calls).isEmpty();
 	}
@@ -81,7 +90,7 @@ class DeleteEDCFacilitatorCoreLogicTest {
 		FakeEDCFeignClientApi api = new FakeEDCFeignClientApi();
 		api.throwNotFound = true;
 
-		new DeleteEDCFacilitator(api).deleteAssets("missing-asset");
+		facilitator(api).deleteAssets("missing-asset");
 
 		assertThat(api.calls).containsExactly("deleteAsset:missing-asset");
 	}
@@ -91,7 +100,7 @@ class DeleteEDCFacilitatorCoreLogicTest {
 		FakeEDCFeignClientApi api = new FakeEDCFeignClientApi();
 		api.throwFailure = true;
 
-		assertThatThrownBy(() -> new DeleteEDCFacilitator(api).deleteAssets("asset-1"))
+		assertThatThrownBy(() -> facilitator(api).deleteAssets("asset-1"))
 				.isInstanceOf(ServiceException.class)
 				.hasMessageContaining("Exception in EDC delete request process");
 	}
@@ -103,27 +112,27 @@ class DeleteEDCFacilitatorCoreLogicTest {
 		private boolean throwFailure;
 
 		@Override
-		public JsonNode getContractDefination(String id) {
+		public JsonNode getContractDefination(URI url, String id, Map<String, String> requestHeader) {
 			calls.add("getContract:" + id);
 			return contractDefinition;
 		}
 
 		@Override
-		public ResponseEntity<Object> deleteContractDefinition(String contractDefinitionId) {
+		public ResponseEntity<Object> deleteContractDefinition(URI url, String contractDefinitionId, Map<String, String> requestHeader) {
 			calls.add("deleteContract:" + contractDefinitionId);
 			throwIfConfigured();
 			return ResponseEntity.noContent().build();
 		}
 
 		@Override
-		public ResponseEntity<Object> deletePolicyDefinitions(String policydefinitionsId) {
+		public ResponseEntity<Object> deletePolicyDefinitions(URI url, String policydefinitionsId, Map<String, String> requestHeader) {
 			calls.add("deletePolicy:" + policydefinitionsId);
 			throwIfConfigured();
 			return ResponseEntity.noContent().build();
 		}
 
 		@Override
-		public ResponseEntity<Object> deleteAssets(String assetsId) {
+		public ResponseEntity<Object> deleteAssets(URI url, String assetsId, Map<String, String> requestHeader) {
 			calls.add("deleteAsset:" + assetsId);
 			throwIfConfigured();
 			return ResponseEntity.noContent().build();
@@ -138,20 +147,20 @@ class DeleteEDCFacilitatorCoreLogicTest {
 			}
 		}
 
-		@Override public ResponseEntity<Object> getAsset(String assetId) { return null; }
-		@Override public String createAsset(AssetEntryRequest requestBody) { return null; }
-		@Override public String updateAsset(AssetEntryRequest requestBody) { return null; }
-		@Override public JsonNode getAssetByFilterExpression(ObjectNode requestBody) { return null; }
-		@Override public JsonNode getPolicy(String policyId) { return null; }
-		@Override public JsonNode createPolicy(JsonNode requestBody) { return null; }
-		@Override public JsonNode updatePolicy(String policyUUId, JsonNode requestBody) { return null; }
-		@Override public String createContractDefination(ContractDefinitionRequest requestBody) { return null; }
-		@Override public JsonNode updateContractDefination(ContractDefinitionRequest requestBody) { return null; }
-		@Override public JsonNode getContractDefinitionsByFilterExpression(ObjectNode requestBody) { return null; }
-		@Override public JsonNode getBusinessPartnerGroups(String bpn) { return null; }
-		@Override public void updateBusinessPartnerGroups(BusinessPartnerGroupRequest requestBody) { }
-		@Override public void createBusinessPartnerGroups(BusinessPartnerGroupRequest requestBody) { }
-		@Override public void deleteBusinessPartnerGroups(String bpn) { }
+		@Override public ResponseEntity<Object> getAsset(URI url, String assetId, Map<String, String> h) { return null; }
+		@Override public String createAsset(URI url, AssetEntryRequest requestBody, Map<String, String> h) { return null; }
+		@Override public String updateAsset(URI url, AssetEntryRequest requestBody, Map<String, String> h) { return null; }
+		@Override public JsonNode getAssetByFilterExpression(URI url, ObjectNode requestBody, Map<String, String> h) { return null; }
+		@Override public JsonNode getPolicy(URI url, String policyId, Map<String, String> h) { return null; }
+		@Override public JsonNode createPolicy(URI url, JsonNode requestBody, Map<String, String> h) { return null; }
+		@Override public JsonNode updatePolicy(URI url, String policyUUId, JsonNode requestBody, Map<String, String> h) { return null; }
+		@Override public String createContractDefination(URI url, ContractDefinitionRequest requestBody, Map<String, String> h) { return null; }
+		@Override public JsonNode updateContractDefination(URI url, ContractDefinitionRequest requestBody, Map<String, String> h) { return null; }
+		@Override public JsonNode getContractDefinitionsByFilterExpression(URI url, ObjectNode requestBody, Map<String, String> h) { return null; }
+		@Override public JsonNode getBusinessPartnerGroups(URI url, String bpn, Map<String, String> h) { return null; }
+		@Override public void updateBusinessPartnerGroups(URI url, BusinessPartnerGroupRequest requestBody, Map<String, String> h) { }
+		@Override public void createBusinessPartnerGroups(URI url, BusinessPartnerGroupRequest requestBody, Map<String, String> h) { }
+		@Override public void deleteBusinessPartnerGroups(URI url, String bpn, Map<String, String> h) { }
 	}
 
 	private static final class CurrentNotFoundStyleException extends RuntimeException {

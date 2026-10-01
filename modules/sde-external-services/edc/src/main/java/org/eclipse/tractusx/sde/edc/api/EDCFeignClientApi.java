@@ -21,6 +21,9 @@
 
 package org.eclipse.tractusx.sde.edc.api;
 
+import java.net.URI;
+import java.util.Map;
+
 import org.eclipse.tractusx.sde.edc.entities.request.asset.AssetEntryRequest;
 import org.eclipse.tractusx.sde.edc.entities.request.businesspartnergroup.BusinessPartnerGroupRequest;
 import org.eclipse.tractusx.sde.edc.entities.request.contractdefinition.ContractDefinitionRequest;
@@ -32,72 +35,88 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-@FeignClient(value = "EDCFeignClientApi", url = "${edc.hostname}${edc.managementpath:/data}", configuration = EDCDataProviderConfiguration.class)
+@FeignClient(value = "EDCFeignClientApi", url = "placeholder")
 public interface EDCFeignClientApi {
 
-	//Assets
+	// Assets
 	@GetMapping(path = "${edc.managementpath.apiversion.asset:/v3}/assets/{id}")
-	public ResponseEntity<Object> getAsset(@PathVariable("id") String assetId);
+	ResponseEntity<Object> getAsset(URI url, @PathVariable("id") String assetId,
+			@RequestHeader Map<String, String> requestHeader);
 
 	@PostMapping("${edc.managementpath.apiversion.asset:/v3}/assets")
-	public String createAsset(@RequestBody AssetEntryRequest requestBody);
-	
+	String createAsset(URI url, @RequestBody AssetEntryRequest requestBody,
+			@RequestHeader Map<String, String> requestHeader);
+
 	@PutMapping("${edc.managementpath.apiversion.asset:/v3}/assets")
-	public String updateAsset(@RequestBody AssetEntryRequest requestBody);
-	
+	String updateAsset(URI url, @RequestBody AssetEntryRequest requestBody,
+			@RequestHeader Map<String, String> requestHeader);
+
 	@PostMapping("${edc.managementpath.apiversion.asset:/v3}/assets/request")
-	public JsonNode getAssetByFilterExpression(@RequestBody ObjectNode requestBody);
-	
+	JsonNode getAssetByFilterExpression(URI url, @RequestBody ObjectNode requestBody,
+			@RequestHeader Map<String, String> requestHeader);
+
 	@DeleteMapping(path = "${edc.managementpath.apiversion.asset:/v3}/assets/{id}")
-	public ResponseEntity<Object> deleteAssets(@PathVariable("id") String assetsId);
-	
-	
-	//Policy
+	ResponseEntity<Object> deleteAssets(URI url, @PathVariable("id") String assetsId,
+			@RequestHeader Map<String, String> requestHeader);
+
+	// Policy
 	@GetMapping("${edc.managementpath.apiversion:/v3}/policydefinitions/{id}")
-	public JsonNode getPolicy(@PathVariable("id") String policyId);
-	
+	JsonNode getPolicy(URI url, @PathVariable("id") String policyId,
+			@RequestHeader Map<String, String> requestHeader);
+
 	@PostMapping("${edc.managementpath.apiversion:/v3}/policydefinitions")
-	public JsonNode createPolicy(@RequestBody JsonNode requestBody);
+	JsonNode createPolicy(URI url, @RequestBody JsonNode requestBody,
+			@RequestHeader Map<String, String> requestHeader);
 
 	@PutMapping("${edc.managementpath.apiversion:/v3}/policydefinitions/{id}")
-	public JsonNode updatePolicy(@PathVariable("id") String policyUUId, @RequestBody JsonNode requestBody);
+	JsonNode updatePolicy(URI url, @PathVariable("id") String policyUUId, @RequestBody JsonNode requestBody,
+			@RequestHeader Map<String, String> requestHeader);
 
 	@DeleteMapping(path = "${edc.managementpath.apiversion:/v3}/policydefinitions/{id}")
-	public ResponseEntity<Object> deletePolicyDefinitions(@PathVariable("id") String policydefinitionsId);
+	ResponseEntity<Object> deletePolicyDefinitions(URI url, @PathVariable("id") String policydefinitionsId,
+			@RequestHeader Map<String, String> requestHeader);
 
-	
-	//Contract Definition
+	// Contract Definition
 	@PostMapping("${edc.managementpath.apiversion:/v3}/contractdefinitions")
-	public String createContractDefination(@RequestBody ContractDefinitionRequest requestBody);
-	
-	@PutMapping("${edc.managementpath.apiversion:/v3}/contractdefinitions")
-	public JsonNode updateContractDefination(@RequestBody ContractDefinitionRequest requestBody);
-	
-	@GetMapping("${edc.managementpath.apiversion:/v3}/contractdefinitions/{id}")
-	public JsonNode getContractDefination(@PathVariable("id") String id);
+	String createContractDefination(URI url, @RequestBody ContractDefinitionRequest requestBody,
+			@RequestHeader Map<String, String> requestHeader);
 
-	@PostMapping("${edc.managementpath.apiversion.asset:/v3}/contractdefinitions/request")
-	public JsonNode getContractDefinitionsByFilterExpression(@RequestBody ObjectNode requestBody);
+	@PutMapping("${edc.managementpath.apiversion:/v3}/contractdefinitions")
+	JsonNode updateContractDefination(URI url, @RequestBody ContractDefinitionRequest requestBody,
+			@RequestHeader Map<String, String> requestHeader);
+
+	@GetMapping("${edc.managementpath.apiversion:/v3}/contractdefinitions/{id}")
+	JsonNode getContractDefination(URI url, @PathVariable("id") String id,
+			@RequestHeader Map<String, String> requestHeader);
+
+	@PostMapping("${edc.managementpath.apiversion:/v3}/contractdefinitions/request")
+	JsonNode getContractDefinitionsByFilterExpression(URI url, @RequestBody ObjectNode requestBody,
+			@RequestHeader Map<String, String> requestHeader);
 
 	@DeleteMapping(path = "${edc.managementpath.apiversion:/v3}/contractdefinitions/{id}")
-	public ResponseEntity<Object> deleteContractDefinition(@PathVariable("id") String contractDefinitionId);
+	ResponseEntity<Object> deleteContractDefinition(URI url, @PathVariable("id") String contractDefinitionId,
+			@RequestHeader Map<String, String> requestHeader);
 
-
-	//Business Partner Group
+	// Business Partner Group
 	@GetMapping("/business-partner-groups/{bpn}")
-	public JsonNode getBusinessPartnerGroups(@PathVariable("bpn") String bpn);
-	
+	JsonNode getBusinessPartnerGroups(URI url, @PathVariable("bpn") String bpn,
+			@RequestHeader Map<String, String> requestHeader);
+
 	@PutMapping("/business-partner-groups")
-	public void updateBusinessPartnerGroups(@RequestBody BusinessPartnerGroupRequest requestBody);
-	
+	void updateBusinessPartnerGroups(URI url, @RequestBody BusinessPartnerGroupRequest requestBody,
+			@RequestHeader Map<String, String> requestHeader);
+
 	@PostMapping("/business-partner-groups")
-	public void createBusinessPartnerGroups(@RequestBody BusinessPartnerGroupRequest requestBody);
-	
+	void createBusinessPartnerGroups(URI url, @RequestBody BusinessPartnerGroupRequest requestBody,
+			@RequestHeader Map<String, String> requestHeader);
+
 	@DeleteMapping("/business-partner-groups/{bpn}")
-	public void deleteBusinessPartnerGroups(@PathVariable("bpn") String bpn);
+	void deleteBusinessPartnerGroups(URI url, @PathVariable("bpn") String bpn,
+			@RequestHeader Map<String, String> requestHeader);
 
 }

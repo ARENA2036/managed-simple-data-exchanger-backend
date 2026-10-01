@@ -45,7 +45,7 @@ public class DeleteEDCFacilitator extends AbstractEDCStepsHelper {
 	public void findEDCOfferInformation(String shellId, String subModelId) {
 		String assetId = shellId + "-" + subModelId;
 		try {
-			JsonNode contractDefination = eDCFeignClientApi.getContractDefination(assetId);
+			JsonNode contractDefination = eDCFeignClientApi.getContractDefination(providerManagementUri(), assetId, getProviderAuthHeader());
 
 			deleteContractDefination(contractDefination.get("@id").asText());
 			deleteAccessPolicy(contractDefination.get("edc:accessPolicyId").asText());
@@ -60,7 +60,7 @@ public class DeleteEDCFacilitator extends AbstractEDCStepsHelper {
 	@SneakyThrows
 	public void deleteContractDefination(String contractDefinationId) {
 		try {
-			eDCFeignClientApi.deleteContractDefinition(contractDefinationId);
+			eDCFeignClientApi.deleteContractDefinition(providerManagementUri(), contractDefinationId, getProviderAuthHeader());
 		} catch (Exception e) {
 			parseExceptionMessage(e);
 		}
@@ -70,7 +70,7 @@ public class DeleteEDCFacilitator extends AbstractEDCStepsHelper {
 	@SneakyThrows
 	public void deleteAccessPolicy(String accessPolicyId) {
 		try {
-			eDCFeignClientApi.deletePolicyDefinitions(accessPolicyId);
+			eDCFeignClientApi.deletePolicyDefinitions(providerManagementUri(), accessPolicyId, getProviderAuthHeader());
 		} catch (Exception e) {
 			parseExceptionMessage(e);
 		}
@@ -81,7 +81,7 @@ public class DeleteEDCFacilitator extends AbstractEDCStepsHelper {
 	public void deleteUsagePolicy(String usagePolicyId) {
 		try {
 			if (!StringUtils.isBlank(usagePolicyId))
-				eDCFeignClientApi.deletePolicyDefinitions(usagePolicyId);
+				eDCFeignClientApi.deletePolicyDefinitions(providerManagementUri(), usagePolicyId, getProviderAuthHeader());
 		} catch (Exception e) {
 			parseExceptionMessage(e);
 		}
@@ -91,7 +91,7 @@ public class DeleteEDCFacilitator extends AbstractEDCStepsHelper {
 	@SneakyThrows
 	public void deleteAssets(String assetId) {
 		try {
-			eDCFeignClientApi.deleteAssets(assetId);
+			eDCFeignClientApi.deleteAssets(providerManagementUri(), assetId, getProviderAuthHeader());
 		} catch (Exception e) {
 			parseExceptionMessage(e);
 		}

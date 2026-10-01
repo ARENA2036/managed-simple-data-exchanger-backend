@@ -21,19 +21,10 @@
 package org.eclipse.tractusx.sde.edc.api;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.extern.slf4j.Slf4j;
-
-public class EDCDataProviderConfiguration {
-
-	@Bean(name = "edcDataProviderInterceptor")
-	public EDCDataProviderInterceptor appRequestInterceptor() {
-		return new EDCDataProviderInterceptor();
-	}
-}
 
 @Slf4j
 class EDCDataProviderInterceptor implements RequestInterceptor {

@@ -59,8 +59,9 @@ public class CatalogResponseBuilder extends AbstractEDCStepsHelper {
 
 		List<QueryDataOfferModel> queryOfferResponse = new ArrayList<>();
 
-		JsonNode contractOfferCatalog = contractOfferCatalogApiProxy.getContractOffersCatalog(
-				contractOfferRequestFactory.getContractOfferRequest(sproviderUrl, counterPartyId, limit, offset, filterExpression));
+		JsonNode contractOfferCatalog = contractOfferCatalogApiProxy.getContractOffersCatalog(consumerManagementUri(),
+				contractOfferRequestFactory.getContractOfferRequest(sproviderUrl, counterPartyId, limit, offset, filterExpression),
+				getAuthHeader());
 
 		JsonNode jOffer = getDataset(contractOfferCatalog);
 		if (jOffer == null) {
