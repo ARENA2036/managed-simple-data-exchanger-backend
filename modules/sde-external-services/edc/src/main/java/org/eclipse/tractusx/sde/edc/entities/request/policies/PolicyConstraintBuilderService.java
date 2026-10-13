@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.common.configuration.properties.EDCVersionConfigurationProperties;
 import org.eclipse.tractusx.sde.common.configuration.properties.SDEConfigurationProperties;
+import org.eclipse.tractusx.sde.common.dataspace.DataspaceProfileProperties;
 import org.eclipse.tractusx.sde.common.entities.Policies;
 import org.eclipse.tractusx.sde.common.entities.PolicyModel;
 import org.eclipse.tractusx.sde.common.mapper.JsonObjectMapper;
@@ -55,6 +56,8 @@ public class PolicyConstraintBuilderService {
     private final EDCVersionConfigurationProperties edcVersion;
 
     private final SDEConfigurationProperties sdeConfigurationProperties;
+
+    private final DataspaceProfileProperties dataspaceProfile;
 
     public JsonNode getAccessPolicy(String policyId, String assetId, PolicyModel policy) {
         return jsonobjectMapper.objectToJsonNode(
@@ -94,6 +97,10 @@ public class PolicyConstraintBuilderService {
                 )
         );
 
+        if (dataspaceProfile.isConstructX() && allConstraints.isEmpty()) {
+            return List.of();
+        }
+
         // Wrap in ActionRequest
         ActionRequest action = new ActionRequest();
         action.addProperty(edcVersion.getMinor() >= 11 ? "and" : "odrl:and", allConstraints);
@@ -128,14 +135,17 @@ public class PolicyConstraintBuilderService {
             "inForceDate"
     );
 
+    private static final Set<String> CONSTRUCTX_OPERANDS = Set.of("inForceDate");
+
     private void preparePolicyConstraint(List<ConstraintRequest> constraints, Policies policy, List<String> values) {
         if (values == null || values.isEmpty()) return;
 
         String key = extractTechnicalKey(policy);
 
         // Skip unsupported operands
-        if (!ALLOWED_OPERANDS.contains(key)) {
-            log.info("*** Skipping unsupported policy operand: ", key);
+        Set<String> allowedOperands = dataspaceProfile.isConstructX() ? CONSTRUCTX_OPERANDS : ALLOWED_OPERANDS;
+        if (!allowedOperands.contains(key)) {
+            log.info("*** Skipping policy operand not supported by {} connectors: {}", dataspaceProfile.profile(), key);
             return;
         }
 

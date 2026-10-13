@@ -29,6 +29,7 @@ import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.sde.common.configuration.properties.EDCVersionConfigurationProperties;
+import org.eclipse.tractusx.sde.common.dataspace.DataspaceProfileProperties;
 import org.eclipse.tractusx.sde.common.mapper.JsonObjectMapper;
 import org.eclipse.tractusx.sde.edc.constants.EDCAssetConfigurableConstant;
 import org.jspecify.annotations.NonNull;
@@ -50,6 +51,10 @@ public class PolicyRequestFactory {
     private final EDCAssetConfigurableConstant edcAssetConfigurableConstant;
     private final EDCVersionConfigurationProperties edcVersion;
 	private final JsonObjectMapper jsonObjectMapper;
+	private final DataspaceProfileProperties dataspaceProfile;
+	private static final List<Object> PLAIN_ODRL_CONTEXT = List.of(
+			"http://www.w3.org/ns/odrl.jsonld",
+			Map.of("@vocab", "https://w3id.org/edc/v0.0.1/ns/"));
 
 	public PolicyDefinitionRequest getPolicy(String policyId, String assetId, List<ActionRequest> action, String type) {
 
@@ -89,7 +94,7 @@ public class PolicyRequestFactory {
 
         PolicyDefinitionRequest policyDefinitionRequest = PolicyDefinitionRequest.builder()
                 .id(policyId)
-                .context(edcVersion.getMinor() >= 11 ? contextList : contextMap)
+                .context(policyContext(contextList, contextMap))
                 .policy(policyRequest)
                 .build();
 
@@ -148,7 +153,17 @@ public class PolicyRequestFactory {
 
 	}
 
+	private Object policyContext(Object contextList, Map<String, String> contextMap) {
+		if (dataspaceProfile.isConstructX()) {
+			return PLAIN_ODRL_CONTEXT;
+		}
+		return edcVersion.getMinor() >= 11 ? contextList : contextMap;
+	}
+
 	private @NonNull Object createActionByType(String type) {
+		if (dataspaceProfile.isConstructX()) {
+			return "use";
+		}
 		if (ACCESS_POLICY_TYPE.equals(type)) {
 			return edcVersion.getMinor() >= 11 ? "access" : Map.of("@id", "odrl:access");
 		}
