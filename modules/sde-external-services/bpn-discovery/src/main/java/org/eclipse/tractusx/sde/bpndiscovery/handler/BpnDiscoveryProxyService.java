@@ -27,6 +27,8 @@ import org.eclipse.tractusx.sde.bpndiscovery.model.request.BpnDiscoverySearchReq
 import org.eclipse.tractusx.sde.bpndiscovery.model.response.BpnDiscoveryBatchResponse;
 import org.eclipse.tractusx.sde.bpndiscovery.model.response.BpnDiscoveryResponse;
 import org.eclipse.tractusx.sde.bpndiscovery.model.response.BpnDiscoverySearchResponse;
+import org.eclipse.tractusx.sde.common.dataspace.ConstructXPartnerDirectory;
+import org.eclipse.tractusx.sde.common.dataspace.DataspaceProfileProperties;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -37,6 +39,8 @@ import lombok.SneakyThrows;
 public class BpnDiscoveryProxyService {
 	
 	private final IBpndiscoveryExternalServiceApi bpndiscoveryExternalServiceApi;
+	private final DataspaceProfileProperties dataspaceProfile;
+	private final ConstructXPartnerDirectory constructXPartners;
 
 	@SneakyThrows
 	public BpnDiscoveryResponse bpnDiscoveryData(BpnDiscoveryRequest bpnDiscoveryRequest) {
@@ -45,6 +49,13 @@ public class BpnDiscoveryProxyService {
 	
 	@SneakyThrows
 	public  BpnDiscoverySearchResponse bpnDiscoverySearchData(BpnDiscoverySearchRequest bpnDiscoverySearchRequest) {
+		if (dataspaceProfile.isConstructX()) {
+			return BpnDiscoverySearchResponse.builder()
+					.bpns(constructXPartners.partnerIds().stream()
+							.map(id -> BpnDiscoveryResponse.builder().value(id).build())
+							.toList())
+					.build();
+		}
 		return bpndiscoveryExternalServiceApi.bpnDiscoverySearchData(bpnDiscoverySearchRequest);
 	}
 	

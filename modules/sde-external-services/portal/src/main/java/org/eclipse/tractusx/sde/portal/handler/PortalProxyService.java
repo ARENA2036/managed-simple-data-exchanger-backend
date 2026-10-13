@@ -24,6 +24,8 @@ package org.eclipse.tractusx.sde.portal.handler;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.tractusx.sde.common.configuration.properties.DigitalTwinConfigurationProperties;
+import org.eclipse.tractusx.sde.common.dataspace.ConstructXPartnerDirectory;
+import org.eclipse.tractusx.sde.common.dataspace.DataspaceProfileProperties;
 import org.eclipse.tractusx.sde.portal.api.IPortalExternalServiceApi;
 import org.eclipse.tractusx.sde.portal.model.ConnectorInfo;
 import org.eclipse.tractusx.sde.portal.model.response.UnifiedBPNValidationStatusEnum;
@@ -44,11 +46,20 @@ public class PortalProxyService {
 	private final DigitalTwinConfigurationProperties properties;
 
 	private final IPortalExternalServiceApi portalExternalServiceApi;
+	private final DataspaceProfileProperties dataspaceProfile;
+	private final ConstructXPartnerDirectory constructXPartners;
 	@Value("${bpdm.provider.bpnl:BPNL00000003AYRE}")
 	private String providerBPNL;
 
 	@SneakyThrows
 	public List<ConnectorInfo> fetchConnectorInfo(List<String> bpns) {
+		if (dataspaceProfile.isConstructX()) {
+			// No Portal in Construct-X: partners and their DSP endpoints come from configuration
+			return bpns.stream()
+					.map(id -> ConnectorInfo.builder().bpn(id).connectorEndpoint(constructXPartners.dspUrlsOf(id)).build())
+					.filter(info -> !info.getConnectorEndpoint().isEmpty())
+					.toList();
+		}
 //		log.info("➡️ Calling portalExternalServiceApi.fetchConnectorInfo with: {}", bpns);
 		List<ConnectorInfo> response = portalExternalServiceApi.fetchConnectorInfo(bpns);
 
