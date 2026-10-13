@@ -1,0 +1,56 @@
+services:
+  sde-postgres:
+    image: postgres:16.4-alpine
+    container_name: sde-postgres
+    environment:
+      - POSTGRES_DB=sdedb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+    ports:
+      - "5433:5432"
+    networks: [con-x-test-network]
+
+  sde-dtr-postgres:
+    image: postgres:16.4-alpine
+    container_name: sde-dtr-postgres
+    environment:
+      - POSTGRES_DB=dtr
+      - POSTGRES_USER=dtr
+      - POSTGRES_PASSWORD=dtr
+    networks: [con-x-test-network]
+
+  # Digital Twin Registry without authentication and without granular access control.
+  # Verify on first start: GET http://sde-dtr:4243/api/v3/shell-descriptors must return 200 without a token.
+  sde-dtr:
+    image: tractusx/sldt-digital-twin-registry:latest
+    container_name: sde-dtr
+    hostname: sde-dtr
+    depends_on: [sde-dtr-postgres]
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - REGISTRY_AUTHENTICATION=false
+      - REGISTRY_USE_GRANULAR_ACCESS_CONTROL=false
+      - SERVER_PORT=4243
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://sde-dtr-postgres:5432/dtr
+      - SPRING_DATASOURCE_USERNAME=dtr
+      - SPRING_DATASOURCE_PASSWORD=dtr
+    ports:
+      - "4243:4243"
+    networks: [con-x-test-network]
+
+  # Submodel server: SDE POSTs each submodel to {hostname}/{assetId};
+  # the provider data plane GETs it from the same URL.
+  # Verify on first start: POST then GET http://sde-submodel:8090/data/test
+  sde-submodel:
+    image: tractusx/simple-data-backend:latest
+    container_name: sde-submodel
+    hostname: sde-submodel
+    environment:
+      - SERVER_PORT=8090
+    ports:
+      - "8090:8090"
+    networks: [con-x-test-network]
+
+networks:
+  con-x-test-network:
+    external: true

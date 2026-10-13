@@ -70,7 +70,14 @@ public class DigitalTwinsRegistryAccess {
 	}
 
 	public Map<String, String> authHeader() {
+		if (!isTokenUriConfigured()) {
+			return Map.of();
+		}
 		return Map.of("Authorization", getBearerToken());
+	}
+
+	private boolean isTokenUriConfigured() {
+		return tokenUri != null && !tokenUri.toString().isBlank() && !"default".equals(tokenUri.toString());
 	}
 
 	@SneakyThrows
