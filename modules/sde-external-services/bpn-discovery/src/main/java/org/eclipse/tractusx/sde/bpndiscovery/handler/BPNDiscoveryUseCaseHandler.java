@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.tractusx.sde.bpndiscovery.model.request.BpnDiscoveryRequest;
 import org.eclipse.tractusx.sde.common.constants.SubmoduleCommonColumnsConstant;
+import org.eclipse.tractusx.sde.common.dataspace.DataspaceProfileProperties;
 import org.eclipse.tractusx.sde.common.entities.PolicyModel;
 import org.eclipse.tractusx.sde.common.exception.ServiceException;
 import org.eclipse.tractusx.sde.common.submodel.executor.BPNDiscoveryUsecaseStep;
@@ -52,6 +53,8 @@ public class BPNDiscoveryUseCaseHandler extends Step implements BPNDiscoveryUsec
 
 	private final BpnDiscoveryProxyService bpnDiscoveryProxyService;
 
+	private final DataspaceProfileProperties dataspaceProfile;
+
 	public void run(Map<String, String> input) throws ServiceException {
 		try {
 			BpnDiscoveryRequest bpnDiscoveryRequest = new BpnDiscoveryRequest();
@@ -72,6 +75,10 @@ public class BPNDiscoveryUseCaseHandler extends Step implements BPNDiscoveryUsec
 	@SneakyThrows
 	@Override
 	public JsonNode run(Integer rowIndex, ObjectNode jsonObject, String processId, PolicyModel policy) {
+		if (dataspaceProfile.isConstructX()) {
+			log.debug("BPN Discovery skipped for processId={}, rowIndex={}: not available in Construct-X", processId, rowIndex);
+			return jsonObject;
+		}
 		if (StringUtils.isBlank(
 				JsonObjectUtility.getValueFromJsonObjectAsString(jsonObject, SubmoduleCommonColumnsConstant.UPDATED))) {
 			try {

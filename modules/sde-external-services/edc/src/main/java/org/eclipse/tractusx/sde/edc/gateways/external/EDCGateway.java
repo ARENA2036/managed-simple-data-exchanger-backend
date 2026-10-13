@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.tractusx.sde.common.dataspace.DataspaceProfileProperties;
 import org.eclipse.tractusx.sde.edc.api.EDCFeignClientApi;
 import org.eclipse.tractusx.sde.edc.entities.request.asset.AssetEntryRequest;
 import org.eclipse.tractusx.sde.edc.entities.request.businesspartnergroup.BusinessPartnerGroupRequest;
@@ -49,6 +50,8 @@ import lombok.extern.slf4j.Slf4j;
 public class EDCGateway extends AbstractEDCStepsHelper {
 
 	private final EDCFeignClientApi edcFeignClientApi;
+
+	private final DataspaceProfileProperties dataspaceProfile;
 	
 	public boolean assetExistsLookup(String id) {
 		try {
@@ -196,6 +199,9 @@ public class EDCGateway extends AbstractEDCStepsHelper {
 	}
 	
 	public void addBPNintoPCFBusinessPartnerGroup(String bpnNumber, String groupName) {
+		if (skipBusinessPartnerGroups(groupName)) {
+			return;
+		}
 		
 		try {
 			if (StringUtils.isNotBlank(bpnNumber)) {
@@ -214,7 +220,18 @@ public class EDCGateway extends AbstractEDCStepsHelper {
 		}
 	}
 
+	private boolean skipBusinessPartnerGroups(String groupName) {
+		if (dataspaceProfile.isConstructX()) {
+			log.info("Business partner group {} not maintained: Construct-X connectors have no business-partner-group API", groupName);
+			return true;
+		}
+		return false;
+	}
+
 	public void deleteBPNfromPCFBusinessPartnerGroup(String bpnNumber, String groupName) {
+		if (skipBusinessPartnerGroups(groupName)) {
+			return;
+		}
 		try {
 			if (StringUtils.isNotBlank(bpnNumber)) {
 				edcFeignClientApi.deleteBusinessPartnerGroups(providerManagementUri(), bpnNumber, getProviderAuthHeader());

@@ -21,6 +21,7 @@ package org.eclipse.tractusx.sde.policyhub.handler;
 
 import java.util.List;
 
+import org.eclipse.tractusx.sde.common.dataspace.DataspaceProfileProperties;
 import org.eclipse.tractusx.sde.policyhub.api.IPolicyHubExternalServiceApi;
 import org.eclipse.tractusx.sde.policyhub.model.request.PolicyContentRequest;
 import org.eclipse.tractusx.sde.policyhub.model.response.PolicyTypeResponse;
@@ -37,15 +38,23 @@ public class PolicyHubProxyService implements IPolicyHubProxyService {
 	
 	private final IPolicyHubExternalServiceApi policyHubExternalServiceApi;
 
+	private final DataspaceProfileProperties dataspaceProfile;
+
 	@Override
 	@SneakyThrows
 	public List<String> getPolicyAttributes() {
+		if (dataspaceProfile.isConstructX()) {
+			return List.of();
+		}
 		return policyHubExternalServiceApi.getPolicyAttributes();
 	}
 
 	@Override
 	@SneakyThrows
 	public List<PolicyTypeResponse> getPolicyTypes(String type, String useCase) {
+		if (dataspaceProfile.isConstructX()) {
+			return List.of();
+		}
 		return policyHubExternalServiceApi.getPolicyTypes(type, useCase);
 	}
 
@@ -53,13 +62,21 @@ public class PolicyHubProxyService implements IPolicyHubProxyService {
 	@SneakyThrows
 	public JsonNode getPolicyContent(String useCase, String type, String credential, String operatorId,
 			String value) {
+		failIfConstructX();
 		return policyHubExternalServiceApi.getPolicyContent(useCase, type, credential, operatorId, value);
 	}
 
 	@Override
 	@SneakyThrows
 	public JsonNode getPolicyContent(PolicyContentRequest policyContentRequest) {
+		failIfConstructX();
 		return policyHubExternalServiceApi.getPolicyContent(policyContentRequest);
 	}
 
+
+	private void failIfConstructX() {
+		if (dataspaceProfile.isConstructX()) {
+			throw new UnsupportedOperationException("Policy Hub templates are Catena-X specific and not available for Construct-X connectors");
+		}
+	}
 }
