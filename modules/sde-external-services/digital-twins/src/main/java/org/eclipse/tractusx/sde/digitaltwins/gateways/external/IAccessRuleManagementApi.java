@@ -19,6 +19,9 @@
  ********************************************************************************/
 package org.eclipse.tractusx.sde.digitaltwins.gateways.external;
 
+import java.net.URI;
+import java.util.Map;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,25 +33,30 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-@FeignClient(value = "IAccessRuleManagementApi", url = "${digital-twins.hostname:default}", configuration = DigitalTwinsFeignClientConfiguration.class)
+@FeignClient(value = "IAccessRuleManagementApi", url = "placeholder")
 public interface IAccessRuleManagementApi {
 
 	@GetMapping(path = "${digital-twins.registry.uri:/api/v3}/access-controls/rules")
-	public JsonNode getAccessControlsRules(@RequestHeader("Edc-Bpn") String edcBpn);
+	public JsonNode getAccessControlsRules(URI url, @RequestHeader("Edc-Bpn") String edcBpn,
+			@RequestHeader Map<String, String> requestHeader);
 
 	@PostMapping(path = "${digital-twins.registry.uri:/api/v3}/access-controls/rules")
-	public JsonNode createAccessControlsRule(@RequestHeader("Edc-Bpn") String edcBpn, @RequestBody JsonNode request);
+	public JsonNode createAccessControlsRule(URI url, @RequestHeader("Edc-Bpn") String edcBpn, @RequestBody JsonNode request,
+			@RequestHeader Map<String, String> requestHeader);
 
 	@GetMapping(path = "${digital-twins.registry.uri:/api/v3}/access-controls/rules/{ruleId}")
-	public JsonNode getAccessControlsRuleById(@PathVariable("ruleId") String ruleId,
-			@RequestHeader("Edc-Bpn") String edcBpn);
+	public JsonNode getAccessControlsRuleById(URI url, @PathVariable("ruleId") String ruleId,
+			@RequestHeader("Edc-Bpn") String edcBpn,
+			@RequestHeader Map<String, String> requestHeader);
 
 	@PutMapping(path = "${digital-twins.registry.uri:/api/v3}/access-controls/rules/{ruleId}")
-	public JsonNode updateAccessControlsRule(@PathVariable("ruleId") String ruleId,
-			@RequestHeader("Edc-Bpn") String edcBpn, @RequestBody JsonNode request);
+	public JsonNode updateAccessControlsRule(URI url, @PathVariable("ruleId") String ruleId,
+			@RequestHeader("Edc-Bpn") String edcBpn, @RequestBody JsonNode request,
+			@RequestHeader Map<String, String> requestHeader);
 
 	@DeleteMapping(path = "${digital-twins.registry.uri:/api/v3}/access-controls/rules/{ruleId}")
-	public void deleteAccessControlsRule(@PathVariable("ruleId") String ruleId,
-			@RequestHeader("Edc-Bpn") String edcBpn);
+	public void deleteAccessControlsRule(URI url, @PathVariable("ruleId") String ruleId,
+			@RequestHeader("Edc-Bpn") String edcBpn,
+			@RequestHeader Map<String, String> requestHeader);
 
 }

@@ -21,6 +21,8 @@
 package org.eclipse.tractusx.sde.submodelserver.handler;
 
 
+import java.net.URI;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +56,7 @@ public class SubmodelServerHandler extends Step {
         String assetId = assetEntryRequestFactory.createAssetId(shellId, subModelId);
 
         logDebug("%%% [SubmodelServer] start upload  AssetId: " + assetId + ", Submodel-Content: " + assetInfo);
-        submodelDatasourceClient.uploadAsset(assetId, submodelData);
+        submodelDatasourceClient.uploadAsset(URI.create(submodelDatasourceHostname), assetId, submodelData);
         logDebug("%%% [SubmodelServer] uploaded: AssetId: " + assetId );
         return assetInfo;
     }

@@ -29,17 +29,17 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.Map;
 
-@FeignClient(value = "SubmodelServerAPI", url = "${submodel.datasource.hostname}")
+@FeignClient(value = "SubmodelServerAPI", url = "placeholder")
 public interface SubmodelServerApi {
 
     @PostMapping(path = "/{assetId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<String> uploadAsset(
+    ResponseEntity<String> uploadAsset(URI url,
             @PathVariable String assetId,
             @RequestBody JsonNode requestBody
     );
 
     @PostMapping(path = "/{submodel}/{submodelUriPath}/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<String> uploadAsset(
+    ResponseEntity<String> uploadAsset(URI url,
             @PathVariable String submodel,
             @PathVariable String submodelUriPath,
             @PathVariable String uuid,
@@ -48,7 +48,7 @@ public interface SubmodelServerApi {
 
 
     @GetMapping(path = "/{assetId}")
-    ResponseEntity<String> downloadAsset(
+    ResponseEntity<String> downloadAsset(URI url,
             @PathVariable String assetId,
             @RequestHeader Map<String, String> header
     );

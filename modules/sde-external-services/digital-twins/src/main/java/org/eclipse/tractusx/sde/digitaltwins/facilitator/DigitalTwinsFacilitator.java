@@ -33,6 +33,7 @@ import org.eclipse.tractusx.sde.digitaltwins.entities.response.ShellDescriptorRe
 import org.eclipse.tractusx.sde.digitaltwins.entities.response.ShellLookupResponse;
 import org.eclipse.tractusx.sde.digitaltwins.entities.response.SubModelListResponse;
 import org.eclipse.tractusx.sde.digitaltwins.gateways.external.DigitalTwinsFeignClient;
+import org.eclipse.tractusx.sde.digitaltwins.gateways.external.DigitalTwinsRegistryAccess;
 import org.eclipse.tractusx.sde.digitaltwins.gateways.external.IAccessRuleManagementApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -62,6 +63,8 @@ public class DigitalTwinsFacilitator {
 	private final DigitalTwinsUtility digitalTwinsUtility;
 	
 	private final IAccessRuleManagementApi iAccessRuleManagementApi;
+
+	private final DigitalTwinsRegistryAccess registryAccess;
 	
 
 	@SneakyThrows
@@ -71,8 +74,8 @@ public class DigitalTwinsFacilitator {
 		try {
 			List<String> assetIds =  digitalTwinsUtility.encodeAssetIdsObject(request);
 			
-			ResponseEntity<ShellLookupResponse> response = digitalTwinsFeignClient.shellLookup(assetIds,
-					manufacturerId);
+			ResponseEntity<ShellLookupResponse> response = digitalTwinsFeignClient.shellLookup(registryAccess.registryUri(), assetIds,
+					manufacturerId, registryAccess.authHeader());
 
 			ShellLookupResponse body = response.getBody();
 			if (response.getStatusCode() == HttpStatus.OK && body != null) {
@@ -98,7 +101,7 @@ public class DigitalTwinsFacilitator {
 		String deleteResponse = "";
 		try {
 			ResponseEntity<Void> response = digitalTwinsFeignClient
-					.deleteShell(digitalTwinsUtility.encodeValueAsBase64Utf8(shellId));
+					.deleteShell(registryAccess.registryUri(), digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), registryAccess.authHeader());
 
 			if (response.getStatusCode() == HttpStatus.NO_CONTENT) {
 				deleteResponse = "Asset identifier" + shellId + "deleted successfully";
@@ -129,15 +132,15 @@ public class DigitalTwinsFacilitator {
 	public ShellDescriptorResponse getShellDetailsById(String shellId) {
 
 		ResponseEntity<ShellDescriptorResponse> shellDescriptorResponse = digitalTwinsFeignClient
-				.getShellDescriptorByShellId(digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), manufacturerId);
+				.getShellDescriptorByShellId(registryAccess.registryUri(), digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), manufacturerId, registryAccess.authHeader());
 		return shellDescriptorResponse.getBody();
 	}
 
 	@SneakyThrows
 	public void deleteSubmodelfromShellById(String shellId, String subModelId) {
 		try {
-			digitalTwinsFeignClient.deleteSubmodelfromShellById(digitalTwinsUtility.encodeValueAsBase64Utf8(shellId),
-					digitalTwinsUtility.encodeValueAsBase64Utf8(subModelId));
+			digitalTwinsFeignClient.deleteSubmodelfromShellById(registryAccess.registryUri(), digitalTwinsUtility.encodeValueAsBase64Utf8(shellId),
+					digitalTwinsUtility.encodeValueAsBase64Utf8(subModelId), registryAccess.authHeader());
 		} catch (Exception e) {
 			parseExceptionMessage(e);
 		}
@@ -146,7 +149,7 @@ public class DigitalTwinsFacilitator {
 	public ShellDescriptorResponse createShellDescriptor(ShellDescriptorRequest request) {
 		ShellDescriptorResponse responseBody;
 		ResponseEntity<ShellDescriptorResponse> registerSubmodel = digitalTwinsFeignClient
-				.createShellDescriptor(request);
+				.createShellDescriptor(registryAccess.registryUri(), request, registryAccess.authHeader());
 		if (registerSubmodel.getStatusCode() != HttpStatus.CREATED) {
 			responseBody = null;
 		} else {
@@ -156,26 +159,26 @@ public class DigitalTwinsFacilitator {
 	}
 	
 	public JsonNode createAccessControlsRule(String edcBpn, JsonNode request) {
-		return iAccessRuleManagementApi.createAccessControlsRule(edcBpn, request);
+		return iAccessRuleManagementApi.createAccessControlsRule(registryAccess.registryUri(), edcBpn, request, registryAccess.authHeader());
 	}
 	
 	public void updateAccessControlsRule(String ruleId, String edcBpn, JsonNode request) {
-		iAccessRuleManagementApi.updateAccessControlsRule(ruleId, edcBpn, request);
+		iAccessRuleManagementApi.updateAccessControlsRule(registryAccess.registryUri(), ruleId, edcBpn, request, registryAccess.authHeader());
 	}
 	
 	public JsonNode getAccessControlsRule(String ruleId, String edcBpn) {
-		return iAccessRuleManagementApi.getAccessControlsRuleById(ruleId, edcBpn);
+		return iAccessRuleManagementApi.getAccessControlsRuleById(registryAccess.registryUri(), ruleId, edcBpn, registryAccess.authHeader());
 	}
 	
 	public void deleteAccessControlsRule(String ruleId, String edcBpn) {
-		iAccessRuleManagementApi.deleteAccessControlsRule(ruleId, edcBpn);
+		iAccessRuleManagementApi.deleteAccessControlsRule(registryAccess.registryUri(), ruleId, edcBpn, registryAccess.authHeader());
 	}
 
 	public void updateShellDetails(String shellId, ShellDescriptorRequest aasDescriptorRequest,
 			CreateSubModelRequest createSubModelRequest) {
 
 		ResponseEntity<ShellDescriptorResponse> shellDescriptorByShellId = digitalTwinsFeignClient
-				.getShellDescriptorByShellId(digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), manufacturerId);
+				.getShellDescriptorByShellId(registryAccess.registryUri(), digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), manufacturerId, registryAccess.authHeader());
 		
 		if(shellDescriptorByShellId.getStatusCode().is2xxSuccessful()) {
 			ShellDescriptorResponse shellDescriptorResponse = shellDescriptorByShellId.getBody();
@@ -215,8 +218,8 @@ public class DigitalTwinsFacilitator {
 			log.debug(aasDescriptorRequest.toJsonString());
 			
 			ResponseEntity<Void> updateShellDescriptorByShellId = digitalTwinsFeignClient
-					.updateShellDescriptorByShellId(digitalTwinsUtility.encodeValueAsBase64Utf8(shellId),
-							manufacturerId, aasDescriptorRequest);
+					.updateShellDescriptorByShellId(registryAccess.registryUri(), digitalTwinsUtility.encodeValueAsBase64Utf8(shellId),
+							manufacturerId, aasDescriptorRequest, registryAccess.authHeader());
 			if (updateShellDescriptorByShellId.getStatusCode().is2xxSuccessful()) {
 				log.debug("Shell update successfully : " + aasDescriptorRequest.toJsonString());
 			} else {
@@ -231,14 +234,14 @@ public class DigitalTwinsFacilitator {
 	public void updateShellSpecificAssetIdentifiers(String shellId, List<Object> specificAssetIds) {
 
 		ResponseEntity<Object> deleteShellSpecificAttributes = digitalTwinsFeignClient
-				.deleteShellSpecificAttributes(digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), manufacturerId);
+				.deleteShellSpecificAttributes(registryAccess.registryUri(), digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), manufacturerId, registryAccess.authHeader());
 
 		if (!deleteShellSpecificAttributes.getStatusCode().is2xxSuccessful()) {
 			log.error("Error in shell SpecificAssetIdentifiers deletion: " + specificAssetIds.toString());
 		}
 
-		ResponseEntity<List<Object>> registerSubmodel = digitalTwinsFeignClient.createShellSpecificAttributes(
-				digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), manufacturerId, specificAssetIds);
+		ResponseEntity<List<Object>> registerSubmodel = digitalTwinsFeignClient.createShellSpecificAttributes(registryAccess.registryUri(),
+				digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), manufacturerId, specificAssetIds, registryAccess.authHeader());
 		if (registerSubmodel.getStatusCode() != HttpStatus.CREATED) {
 			log.error("Error in shell SpecificAssetIdentifiers deletion: " + registerSubmodel.toString());
 		}
@@ -251,7 +254,7 @@ public class DigitalTwinsFacilitator {
 		}
 
 		ResponseEntity<String> response = digitalTwinsFeignClient
-				.createSubModel(digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), request, manufacturerId);
+				.createSubModel(registryAccess.registryUri(), digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), request, manufacturerId, registryAccess.authHeader());
 		if (response.getStatusCode() != HttpStatus.CREATED) {
 			log.error("Unable to create submodel descriptor");
 		}
@@ -264,9 +267,9 @@ public class DigitalTwinsFacilitator {
 			request.setDescription(List.of());
 		}
 
-		ResponseEntity<String> response = digitalTwinsFeignClient.updateSubModel(
+		ResponseEntity<String> response = digitalTwinsFeignClient.updateSubModel(registryAccess.registryUri(),
 				digitalTwinsUtility.encodeValueAsBase64Utf8(shellId),
-				digitalTwinsUtility.encodeValueAsBase64Utf8(existingId), request, manufacturerId);
+				digitalTwinsUtility.encodeValueAsBase64Utf8(existingId), request, manufacturerId, registryAccess.authHeader());
 		if (response.getStatusCode() != HttpStatus.CREATED) {
 			log.error("Unable to create submodel descriptor");
 		}
@@ -276,7 +279,7 @@ public class DigitalTwinsFacilitator {
 	public SubModelListResponse getSubModels(String shellId) {
 
 		ResponseEntity<SubModelListResponse> response = digitalTwinsFeignClient
-				.getSubModels(digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), manufacturerId);
+				.getSubModels(registryAccess.registryUri(), digitalTwinsUtility.encodeValueAsBase64Utf8(shellId), manufacturerId, registryAccess.authHeader());
 		SubModelListResponse responseBody = null;
 		if (response.getStatusCode() == HttpStatus.OK) {
 			responseBody = response.getBody();

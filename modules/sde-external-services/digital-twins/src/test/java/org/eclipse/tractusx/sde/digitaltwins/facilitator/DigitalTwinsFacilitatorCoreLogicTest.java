@@ -27,7 +27,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.tractusx.sde.digitaltwins.entities.request.CreateSubModelRequest;
 import org.eclipse.tractusx.sde.digitaltwins.entities.request.ShellDescriptorRequest;
@@ -36,6 +38,7 @@ import org.eclipse.tractusx.sde.digitaltwins.entities.response.ShellDescriptorRe
 import org.eclipse.tractusx.sde.digitaltwins.entities.response.ShellLookupResponse;
 import org.eclipse.tractusx.sde.digitaltwins.entities.response.SubModelResponse;
 import org.eclipse.tractusx.sde.digitaltwins.gateways.external.DigitalTwinsFeignClient;
+import org.eclipse.tractusx.sde.digitaltwins.gateways.external.DigitalTwinsRegistryAccess;
 import org.eclipse.tractusx.sde.digitaltwins.gateways.external.IAccessRuleManagementApi;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -47,11 +50,14 @@ import org.springframework.test.util.ReflectionTestUtils;
  * Verifies the Digital Twin Registry facilitator without a live registry.
  *
  * <p>The facilitator wraps the Feign client, encodes shell identifiers, applies the manufacturer
- * header, and merges existing submodel descriptors when shell details are updated. These tests protect
+ * header, passes the registry URI and auth header on every call, and merges existing submodel descriptors when shell details are updated. These tests protect
  * the registry-facing contract at the facilitator boundary while keeping all network calls mocked at
  * the interface level.</p>
  */
 class DigitalTwinsFacilitatorCoreLogicTest {
+
+	private static final URI DTR = URI.create("http://dtr.example/semantics/registry");
+	private static final Map<String, String> AUTH = Map.of("Authorization", "Bearer test-token");
 
 	@Test
 	void shellLookupEncodesAssetIdsAndReturnsResultForOkResponse() throws Exception {
@@ -62,7 +68,7 @@ class DigitalTwinsFacilitatorCoreLogicTest {
 		response.setResult(List.of("shell-1"));
 		ShellLookupRequest request = new ShellLookupRequest();
 
-		when(client.shellLookup(List.of("encoded-asset-id"), "BPNL00000003CML1"))
+		when(client.shellLookup(DTR, List.of("encoded-asset-id"), "BPNL00000003CML1", AUTH))
 				.thenReturn(ResponseEntity.ok(response));
 
 		List<String> result = facilitator.shellLookup(request);
@@ -79,7 +85,7 @@ class DigitalTwinsFacilitatorCoreLogicTest {
 		ShellDescriptorResponse body = new ShellDescriptorResponse();
 		body.setId("shell-1");
 
-		when(client.createShellDescriptor(request)).thenReturn(ResponseEntity.status(HttpStatus.CREATED).body(body));
+		when(client.createShellDescriptor(DTR, request, AUTH)).thenReturn(ResponseEntity.status(HttpStatus.CREATED).body(body));
 
 		assertThat(facilitator.createShellDescriptor(request)).isSameAs(body);
 	}
@@ -99,15 +105,16 @@ class DigitalTwinsFacilitatorCoreLogicTest {
 				.build();
 		ShellDescriptorRequest updateRequest = ShellDescriptorRequest.builder().build();
 
-		when(client.getShellDescriptorByShellId("encoded-shell-1", "BPNL00000003CML1"))
+		when(client.getShellDescriptorByShellId(DTR, "encoded-shell-1", "BPNL00000003CML1", AUTH))
 				.thenReturn(ResponseEntity.ok(existingShell));
-		when(client.updateShellDescriptorByShellId(eq("encoded-shell-1"), eq("BPNL00000003CML1"), any()))
+		when(client.updateShellDescriptorByShellId(eq(DTR), eq("encoded-shell-1"), eq("BPNL00000003CML1"), any(), eq(AUTH)))
 				.thenReturn(ResponseEntity.noContent().build());
 
 		facilitator.updateShellDetails("shell-1", updateRequest, newSubmodel);
 
 		ArgumentCaptor<ShellDescriptorRequest> captor = ArgumentCaptor.forClass(ShellDescriptorRequest.class);
-		verify(client).updateShellDescriptorByShellId(eq("encoded-shell-1"), eq("BPNL00000003CML1"), captor.capture());
+		verify(client).updateShellDescriptorByShellId(eq(DTR), eq("encoded-shell-1"), eq("BPNL00000003CML1"), captor.capture(),
+				eq(AUTH));
 		ShellDescriptorRequest sent = captor.getValue();
 		assertThat(sent.getId()).isEqualTo("shell-1");
 		assertThat(sent.getIdShort()).isEqualTo("existingShortId");
@@ -123,7 +130,7 @@ class DigitalTwinsFacilitatorCoreLogicTest {
 
 		facilitator.deleteAccessControlsRule("rule-1", "BPNL00000003CML1");
 
-		verify(accessApi).deleteAccessControlsRule("rule-1", "BPNL00000003CML1");
+		verify(accessApi).deleteAccessControlsRule(DTR, "rule-1", "BPNL00000003CML1", AUTH);
 	}
 
 	private static DigitalTwinsFacilitator facilitator(DigitalTwinsFeignClient client, DigitalTwinsUtility utility) {
@@ -132,7 +139,10 @@ class DigitalTwinsFacilitatorCoreLogicTest {
 
 	private static DigitalTwinsFacilitator facilitator(DigitalTwinsFeignClient client, DigitalTwinsUtility utility,
 			IAccessRuleManagementApi accessRuleApi) {
-		DigitalTwinsFacilitator facilitator = new DigitalTwinsFacilitator(client, utility, accessRuleApi);
+		DigitalTwinsRegistryAccess registryAccess = mock(DigitalTwinsRegistryAccess.class);
+		when(registryAccess.registryUri()).thenReturn(DTR);
+		when(registryAccess.authHeader()).thenReturn(AUTH);
+		DigitalTwinsFacilitator facilitator = new DigitalTwinsFacilitator(client, utility, accessRuleApi, registryAccess);
 		ReflectionTestUtils.setField(facilitator, "manufacturerId", "BPNL00000003CML1");
 		return facilitator;
 	}

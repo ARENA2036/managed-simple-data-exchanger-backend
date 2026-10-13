@@ -23,6 +23,7 @@ package org.eclipse.tractusx.sde.digitaltwins.gateways.external;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.tractusx.sde.common.model.KeycloakJWTTokenResponse;
 import org.eclipse.tractusx.sde.digitaltwins.entities.request.CreateSubModelRequest;
@@ -43,7 +44,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(value = "DigitalTwinsFeignClient", url = "${digital-twins.hostname:default}", configuration = DigitalTwinsFeignClientConfiguration.class)
+@FeignClient(value = "DigitalTwinsFeignClient", url = "placeholder")
 public interface DigitalTwinsFeignClient {
 
 	@PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -55,46 +56,57 @@ public interface DigitalTwinsFeignClient {
 
 
 	@PostMapping(path = "${digital-twins.registry.uri:/api/v3}/shell-descriptors")
-	ResponseEntity<ShellDescriptorResponse> createShellDescriptor(@RequestBody ShellDescriptorRequest request);
+	ResponseEntity<ShellDescriptorResponse> createShellDescriptor(URI url, @RequestBody ShellDescriptorRequest request,
+			@RequestHeader Map<String, String> requestHeader);
 
 	@GetMapping(path = "${digital-twins.registry.uri:/api/v3}/shell-descriptors/{aasIdentifier}")
-	ResponseEntity<ShellDescriptorResponse> getShellDescriptorByShellId(@PathVariable("aasIdentifier") String shellId,
-			@RequestHeader("Edc-Bpn") String edcBpn);
+	ResponseEntity<ShellDescriptorResponse> getShellDescriptorByShellId(URI url, @PathVariable("aasIdentifier") String shellId,
+			@RequestHeader("Edc-Bpn") String edcBpn,
+			@RequestHeader Map<String, String> requestHeader);
 
 	@PutMapping(path = "${digital-twins.registry.uri:/api/v3}/shell-descriptors/{aasIdentifier}")
-	ResponseEntity<Void> updateShellDescriptorByShellId(@PathVariable("aasIdentifier") String shellId,
-			@RequestHeader("Edc-Bpn") String edcBpn, @RequestBody ShellDescriptorRequest request);
+	ResponseEntity<Void> updateShellDescriptorByShellId(URI url, @PathVariable("aasIdentifier") String shellId,
+			@RequestHeader("Edc-Bpn") String edcBpn, @RequestBody ShellDescriptorRequest request,
+			@RequestHeader Map<String, String> requestHeader);
 
 	@DeleteMapping(path = "${digital-twins.registry.uri:/api/v3}/shell-descriptors/{aasIdentifier}")
-	ResponseEntity<Void> deleteShell(@PathVariable("assetIds") String shellId);
+	ResponseEntity<Void> deleteShell(URI url, @PathVariable("assetIds") String shellId,
+			@RequestHeader Map<String, String> requestHeader);
 
 	@PostMapping(path = "${digital-twins.registry.uri:/api/v3}/shell-descriptors/{aasIdentifier}/submodel-descriptors")
-	ResponseEntity<String> createSubModel(@PathVariable("aasIdentifier") String shellId,
-			@RequestBody CreateSubModelRequest request, @RequestHeader("Edc-Bpn") String edcBpn);
+	ResponseEntity<String> createSubModel(URI url, @PathVariable("aasIdentifier") String shellId,
+			@RequestBody CreateSubModelRequest request, @RequestHeader("Edc-Bpn") String edcBpn,
+			@RequestHeader Map<String, String> requestHeader);
 	
 	@PutMapping(path = "${digital-twins.registry.uri:/api/v3}/shell-descriptors/{aasIdentifier}/submodel-descriptors/{submodelIdentifier}")
-	ResponseEntity<String> updateSubModel(@PathVariable("aasIdentifier") String shellId,
+	ResponseEntity<String> updateSubModel(URI url, @PathVariable("aasIdentifier") String shellId,
 			@PathVariable("submodelIdentifier") String submodelIdentifier, @RequestBody CreateSubModelRequest request,
-			@RequestHeader("Edc-Bpn") String edcBpn);
+			@RequestHeader("Edc-Bpn") String edcBpn,
+			@RequestHeader Map<String, String> requestHeader);
 
 	@GetMapping(path = "${digital-twins.registry.uri:/api/v3}/shell-descriptors/{aasIdentifier}/submodel-descriptors")
-	ResponseEntity<SubModelListResponse> getSubModels(@PathVariable("aasIdentifier") String shellId,
-			@RequestHeader("Edc-Bpn") String edcBpn);
+	ResponseEntity<SubModelListResponse> getSubModels(URI url, @PathVariable("aasIdentifier") String shellId,
+			@RequestHeader("Edc-Bpn") String edcBpn,
+			@RequestHeader Map<String, String> requestHeader);
 
 	@DeleteMapping(path = "${digital-twins.registry.uri:/api/v3}/shell-descriptors/{aasIdentifier}/submodel-descriptors/{submodelIdentifier}")
-	ResponseEntity<Object> deleteSubmodelfromShellById(@PathVariable("aasIdentifier") String shellId,
-			@PathVariable("submodelIdentifier") String submodelIdentifier);
+	ResponseEntity<Object> deleteSubmodelfromShellById(URI url, @PathVariable("aasIdentifier") String shellId,
+			@PathVariable("submodelIdentifier") String submodelIdentifier,
+			@RequestHeader Map<String, String> requestHeader);
 
 	@GetMapping(path = "${digital-twins.registry.lookup.uri:/api/v3}/lookup/shells")
-	ResponseEntity<ShellLookupResponse> shellLookup(@RequestParam("assetIds") List<String> assetIds,
-			@RequestHeader("Edc-Bpn") String edcBpn);
+	ResponseEntity<ShellLookupResponse> shellLookup(URI url, @RequestParam("assetIds") List<String> assetIds,
+			@RequestHeader("Edc-Bpn") String edcBpn,
+			@RequestHeader Map<String, String> requestHeader);
 	
 	@PostMapping(path = "${digital-twins.registry.lookup.uri:/api/v3}/lookup/shells/{shellId}")
-	ResponseEntity<List<Object>> createShellSpecificAttributes(@PathVariable("shellId") String shellId,
-			@RequestHeader("Edc-Bpn") String edcBpn, @RequestBody List<Object> specificAssetIds);
+	ResponseEntity<List<Object>> createShellSpecificAttributes(URI url, @PathVariable("shellId") String shellId,
+			@RequestHeader("Edc-Bpn") String edcBpn, @RequestBody List<Object> specificAssetIds,
+			@RequestHeader Map<String, String> requestHeader);
 
 	@DeleteMapping(path = "${digital-twins.registry.lookup.uri:/api/v3}/lookup/shells/{shellId}")
-	ResponseEntity<Object> deleteShellSpecificAttributes(@PathVariable("assetIds") String shellId,
-			@RequestHeader("Edc-Bpn") String edcBpn);
+	ResponseEntity<Object> deleteShellSpecificAttributes(URI url, @PathVariable("assetIds") String shellId,
+			@RequestHeader("Edc-Bpn") String edcBpn,
+			@RequestHeader Map<String, String> requestHeader);
 
 }
