@@ -22,6 +22,7 @@
 package org.eclipse.tractusx.sde.edc.model.contractoffers;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,6 +32,18 @@ import lombok.SneakyThrows;
 
 @Component
 public class ContractOfferRequestFactory {
+
+
+	@Value("${edc.counterparty.did.pattern:}")
+	private String counterPartyDidPattern;
+
+	static String toCounterPartyId(String counterPartyId, String didPattern) {
+		if (StringUtils.isBlank(counterPartyId) || StringUtils.isBlank(didPattern)
+				|| counterPartyId.startsWith("did:")) {
+			return counterPartyId;
+		}
+		return String.format(didPattern, counterPartyId.trim());
+	}
 
 
 	@SneakyThrows
@@ -59,7 +72,8 @@ public class ContractOfferRequestFactory {
 				 }
 				}
 				""";
-		String jsonString = String.format(formatSchema, providerUrl, counterPartyId, offset, limit,
+		String jsonString = String.format(formatSchema, providerUrl,
+				toCounterPartyId(counterPartyId, counterPartyDidPattern), offset, limit,
 				filterExpression);
 
 		return (ObjectNode) new ObjectMapper().readTree(jsonString);
