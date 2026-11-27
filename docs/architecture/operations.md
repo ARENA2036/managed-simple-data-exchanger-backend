@@ -52,8 +52,8 @@ File: `build/Dockerfile`
 
 Observations:
 
-- build stage uses `maven:3-eclipse-temurin-19-focal`
-- runtime stage uses `eclipse-temurin:19.0.2_7-jdk-focal`
+- build stage uses `maven:3-eclipse-temurin-21 AS build`
+- runtime stage uses `eclipse-temurin:21.0.13.1_2-jdk`
 - project POM declares Java 17
 - Maven build in the Dockerfile is commented out
 - runtime image copies `modules/sde-core/target/*.jar` from the build stage
@@ -62,7 +62,7 @@ Observations:
 
 Risks/uncertainties:
 
-- Java 19 in the Dockerfile conflicts with Java 17 in the Maven project and
+- Java 21 in the Dockerfile conflicts with Java 17 in the Maven project and
   many Spring Boot Java 17 deployment expectations.
 - Because the Maven build is commented out, the JAR must exist before the Docker
   build or the build pipeline must provide the target directory to the Docker

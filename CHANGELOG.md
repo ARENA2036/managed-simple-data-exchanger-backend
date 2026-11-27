@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+### Security
+- Updated the Maven build image to Java 21.
+- Updated the Docker runtime base image to `eclipse-temurin:21.0.13.1_2-jdk` to address Java security vulnerabilities.
+- Pinned the GitHub Actions Java version to `21.0.13.1+2`.
+
 ## [3.0.0] - 2026-07-22
 
 ### Added
