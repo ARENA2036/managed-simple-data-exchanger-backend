@@ -19,8 +19,7 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################################
 # our base build image
-FROM maven:3-eclipse-temurin-19-focal AS build
-
+FROM maven:3-eclipse-temurin-21 AS build
 # copy the project files
 COPY ../pom.xml ./pom.xml
 
@@ -34,7 +33,7 @@ COPY ../modules ./modules
 
 # our final base image
 
-FROM eclipse-temurin:19.0.2_7-jdk-focal
+FROM eclipse-temurin:21.0.13.1_2-jdk
 
 ARG USERNAME=sdeuser
 ARG USER_UID=1001

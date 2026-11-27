@@ -8,3 +8,4 @@ The following people have contributed to this repository:
 * Dominik Kübel, ARENA2036 e.V., https://github.com/DominikKuebel-ARENA2036
 * Saud Khan, ARENA2036 e.V., https://github.com/saudkhan116
 * Devaji Patil, ARENA2036 e.V., https://github.com/devajipatil
+* Owais Khan, ARENA2036 e.V., https://github.com/khanowaisarena

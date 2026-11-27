@@ -137,7 +137,7 @@ Recommendations:
 
 ### Java Versions Conflict
 
-The root POM declares Java 17, while the Dockerfile uses Java 19 images.
+The root POM declares Java 17, while the Dockerfile uses Java 21 images.
 
 Recommendation:
 
