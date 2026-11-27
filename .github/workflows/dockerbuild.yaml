@@ -66,10 +66,13 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up JDK 21
-        uses: actions/setup-java@99d3141d9ba96520552bfd7a9545bc1d74da9251 # v4.6.0
+        uses: actions/setup-java@9ce5b12cb90c06fc1b0e3343c3e65bb977578591 # v6.3.0
         with:
-          java-version: '21'
+          java-version: '21.0.13.1+2'
           distribution: 'temurin'
+
+      - name: Verify Java version
+        run: java -version
 
       - name: Build
         run: mvn -B package -DskipTests
